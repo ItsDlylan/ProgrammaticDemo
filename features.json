@@ -1,0 +1,874 @@
+{
+  "features": [
+    {
+      "id": "SETUP-001",
+      "category": "setup",
+      "description": "Project scaffolding with pyproject.toml",
+      "steps": [
+        "Create pyproject.toml with project metadata",
+        "Define Python 3.11+ requirement",
+        "Add core dependencies (typer, pydantic)",
+        "Configure package as 'programmatic_demo'",
+        "Verify pip install -e . succeeds"
+      ],
+      "files": ["pyproject.toml"],
+      "passes": false
+    },
+    {
+      "id": "SETUP-002",
+      "category": "setup",
+      "description": "Package structure with __init__ and __main__",
+      "steps": [
+        "Create src/programmatic_demo/ directory",
+        "Add __init__.py with version export",
+        "Add __main__.py for python -m invocation",
+        "Verify package imports correctly"
+      ],
+      "files": [
+        "src/programmatic_demo/__init__.py",
+        "src/programmatic_demo/__main__.py"
+      ],
+      "passes": false
+    },
+    {
+      "id": "SETUP-003",
+      "category": "setup",
+      "description": "macOS setup script installs Homebrew dependencies",
+      "steps": [
+        "Create scripts/setup_macos.sh",
+        "Add ffmpeg installation",
+        "Add tesseract installation",
+        "Add tmux installation",
+        "Add ghostty installation check",
+        "Add yabai installation",
+        "Make script executable",
+        "Verify script runs without errors"
+      ],
+      "files": ["scripts/setup_macos.sh"],
+      "passes": false
+    },
+    {
+      "id": "SETUP-004",
+      "category": "setup",
+      "description": "Dependency verification script checks all requirements",
+      "steps": [
+        "Create scripts/verify_dependencies.py",
+        "Check Python version >= 3.11",
+        "Check ffmpeg is installed",
+        "Check tesseract is installed",
+        "Check tmux is installed",
+        "Check required Python packages",
+        "Print clear pass/fail status for each",
+        "Exit with error code if any missing"
+      ],
+      "files": ["scripts/verify_dependencies.py"],
+      "passes": false
+    },
+    {
+      "id": "CLI-001",
+      "category": "cli",
+      "description": "Base CLI app with typer and version command",
+      "steps": [
+        "Create cli/main.py with typer app",
+        "Add --version flag showing package version",
+        "Add --help with usage information",
+        "Configure JSON output mode flag",
+        "Verify pdemo --version works"
+      ],
+      "files": ["src/programmatic_demo/cli/main.py"],
+      "passes": false
+    },
+    {
+      "id": "CLI-002",
+      "category": "cli",
+      "description": "CLI subcommand registration system",
+      "steps": [
+        "Add subcommand groups (record, terminal, keyboard, mouse, browser, observe)",
+        "Each group has its own typer sub-app",
+        "Verify pdemo record --help shows subcommands",
+        "Verify pdemo terminal --help shows subcommands"
+      ],
+      "files": ["src/programmatic_demo/cli/main.py"],
+      "passes": false
+    },
+    {
+      "id": "CLI-003",
+      "category": "cli",
+      "description": "JSON output wrapper for all CLI commands",
+      "steps": [
+        "Create utils/output.py with JSON formatter",
+        "All commands wrap results in standard JSON structure",
+        "Include success boolean, timestamp, action name",
+        "Include error details on failure",
+        "Verify output is valid JSON"
+      ],
+      "files": ["src/programmatic_demo/utils/output.py"],
+      "passes": false
+    },
+    {
+      "id": "REC-001",
+      "category": "recording",
+      "description": "Screen recording start command launches ffmpeg",
+      "steps": [
+        "Create recording/recorder.py with Recorder class",
+        "Implement start_recording(output_path, fps)",
+        "Use ffmpeg with AVFoundation for macOS",
+        "Store PID for later control",
+        "Verify ffmpeg process starts"
+      ],
+      "files": ["src/programmatic_demo/recording/recorder.py"],
+      "passes": false
+    },
+    {
+      "id": "REC-002",
+      "category": "recording",
+      "description": "Screen recording stop command terminates ffmpeg cleanly",
+      "steps": [
+        "Implement stop_recording() in recorder.py",
+        "Send SIGINT to ffmpeg for clean shutdown",
+        "Wait for process to finish",
+        "Verify output file is created",
+        "Return file path and duration"
+      ],
+      "files": ["src/programmatic_demo/recording/recorder.py"],
+      "passes": false
+    },
+    {
+      "id": "REC-003",
+      "category": "recording",
+      "description": "Recording status command shows current state",
+      "steps": [
+        "Implement get_status() in recorder.py",
+        "Return whether recording is active",
+        "Return current duration if active",
+        "Return output file path",
+        "Return PID of ffmpeg process"
+      ],
+      "files": ["src/programmatic_demo/recording/recorder.py"],
+      "passes": false
+    },
+    {
+      "id": "REC-004",
+      "category": "recording",
+      "description": "CLI record subcommands wire to recorder module",
+      "steps": [
+        "Create cli/recording.py",
+        "Add 'pdemo record start' command",
+        "Add 'pdemo record stop' command",
+        "Add 'pdemo record status' command",
+        "Wire commands to recorder module",
+        "Output results as JSON"
+      ],
+      "files": ["src/programmatic_demo/cli/recording.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-001",
+      "category": "terminal",
+      "description": "Terminal launch creates new tmux session",
+      "steps": [
+        "Create actuators/terminal.py with Terminal class",
+        "Implement launch(name) to create tmux session",
+        "Session name defaults to 'pdemo-{timestamp}'",
+        "Verify session is created with tmux ls",
+        "Return session name in result"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-002",
+      "category": "terminal",
+      "description": "Terminal send-keys types command into tmux",
+      "steps": [
+        "Implement send_command(command) in terminal.py",
+        "Use tmux send-keys to type command",
+        "Do not automatically press Enter",
+        "Verify command appears in terminal",
+        "Return success status"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-003",
+      "category": "terminal",
+      "description": "Terminal exec runs command and waits for completion",
+      "steps": [
+        "Implement exec_command(command, timeout) in terminal.py",
+        "Send command and press Enter",
+        "Wait for shell prompt to return",
+        "Capture stdout/stderr from tmux pane",
+        "Detect command exit code if possible",
+        "Timeout after specified seconds"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-004",
+      "category": "terminal",
+      "description": "Terminal read captures current pane content",
+      "steps": [
+        "Implement read_output(lines) in terminal.py",
+        "Use tmux capture-pane to get content",
+        "Return last N lines of output",
+        "Strip ANSI escape codes",
+        "Return as string"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-005",
+      "category": "terminal",
+      "description": "Terminal wait-for polls until text appears",
+      "steps": [
+        "Implement wait_for_text(text, timeout) in terminal.py",
+        "Poll terminal output at regular intervals",
+        "Return success when text is found",
+        "Timeout and return failure if not found",
+        "Return matched line in result"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-006",
+      "category": "terminal",
+      "description": "Terminal clear clears the tmux pane",
+      "steps": [
+        "Implement clear() in terminal.py",
+        "Send clear command or Ctrl+L",
+        "Verify pane is cleared",
+        "Return success status"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "TERM-007",
+      "category": "terminal",
+      "description": "CLI terminal subcommands wire to terminal module",
+      "steps": [
+        "Create cli/terminal.py",
+        "Add 'pdemo terminal launch' command",
+        "Add 'pdemo terminal exec' command",
+        "Add 'pdemo terminal send' command",
+        "Add 'pdemo terminal read' command",
+        "Add 'pdemo terminal wait-for' command",
+        "Add 'pdemo terminal clear' command",
+        "Output results as JSON"
+      ],
+      "files": ["src/programmatic_demo/cli/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "KEY-001",
+      "category": "keyboard",
+      "description": "Keyboard type sends text with human-like delays",
+      "steps": [
+        "Create actuators/keyboard.py with Keyboard class",
+        "Implement type_text(text, delay_ms) using pyautogui",
+        "Add variable delay between keystrokes",
+        "Delay should vary +/-30% for realism",
+        "Verify text is typed correctly"
+      ],
+      "files": ["src/programmatic_demo/actuators/keyboard.py"],
+      "passes": false
+    },
+    {
+      "id": "KEY-002",
+      "category": "keyboard",
+      "description": "Keyboard press sends single key",
+      "steps": [
+        "Implement press_key(key) in keyboard.py",
+        "Support special keys (enter, tab, escape, etc.)",
+        "Support arrow keys",
+        "Support function keys",
+        "Return success status"
+      ],
+      "files": ["src/programmatic_demo/actuators/keyboard.py"],
+      "passes": false
+    },
+    {
+      "id": "KEY-003",
+      "category": "keyboard",
+      "description": "Keyboard hotkey sends key combination",
+      "steps": [
+        "Implement hotkey(keys) in keyboard.py",
+        "Parse key string like 'cmd+shift+p'",
+        "Hold modifiers while pressing final key",
+        "Support cmd, ctrl, alt, shift modifiers",
+        "Return success status"
+      ],
+      "files": ["src/programmatic_demo/actuators/keyboard.py"],
+      "passes": false
+    },
+    {
+      "id": "KEY-004",
+      "category": "keyboard",
+      "description": "CLI keyboard subcommands wire to keyboard module",
+      "steps": [
+        "Create cli/keyboard.py",
+        "Add 'pdemo keyboard type' command",
+        "Add 'pdemo keyboard press' command",
+        "Add 'pdemo keyboard hotkey' command",
+        "Output results as JSON"
+      ],
+      "files": ["src/programmatic_demo/cli/keyboard.py"],
+      "passes": false
+    },
+    {
+      "id": "MOUSE-001",
+      "category": "mouse",
+      "description": "Mouse move smoothly to coordinates with bezier curve",
+      "steps": [
+        "Create actuators/mouse.py with Mouse class",
+        "Implement move_to(x, y, duration) using pyautogui",
+        "Use bezier curve interpolation for natural movement",
+        "Add small random jitter to path",
+        "Verify cursor reaches destination"
+      ],
+      "files": ["src/programmatic_demo/actuators/mouse.py"],
+      "passes": false
+    },
+    {
+      "id": "MOUSE-002",
+      "category": "mouse",
+      "description": "Mouse click at current position",
+      "steps": [
+        "Implement click(button, clicks) in mouse.py",
+        "Support left, right, middle buttons",
+        "Support single, double, triple click",
+        "Add brief pause before click for realism",
+        "Return click position"
+      ],
+      "files": ["src/programmatic_demo/actuators/mouse.py"],
+      "passes": false
+    },
+    {
+      "id": "MOUSE-003",
+      "category": "mouse",
+      "description": "Mouse click at specific coordinates",
+      "steps": [
+        "Implement click_at(x, y, button) in mouse.py",
+        "Move to position first with smooth motion",
+        "Hover briefly (50-150ms) before clicking",
+        "Then click",
+        "Return final position"
+      ],
+      "files": ["src/programmatic_demo/actuators/mouse.py"],
+      "passes": false
+    },
+    {
+      "id": "MOUSE-004",
+      "category": "mouse",
+      "description": "Mouse scroll in direction",
+      "steps": [
+        "Implement scroll(direction, amount) in mouse.py",
+        "Support up, down, left, right directions",
+        "Amount is number of scroll units",
+        "Add slight delay between scroll increments",
+        "Return success status"
+      ],
+      "files": ["src/programmatic_demo/actuators/mouse.py"],
+      "passes": false
+    },
+    {
+      "id": "MOUSE-005",
+      "category": "mouse",
+      "description": "Mouse drag from point to point",
+      "steps": [
+        "Implement drag(from_pos, to_pos, duration) in mouse.py",
+        "Move to start position",
+        "Press and hold mouse button",
+        "Move smoothly to end position",
+        "Release mouse button",
+        "Return start and end positions"
+      ],
+      "files": ["src/programmatic_demo/actuators/mouse.py"],
+      "passes": false
+    },
+    {
+      "id": "MOUSE-006",
+      "category": "mouse",
+      "description": "CLI mouse subcommands wire to mouse module",
+      "steps": [
+        "Create cli/mouse.py",
+        "Add 'pdemo mouse move' command",
+        "Add 'pdemo mouse click' command",
+        "Add 'pdemo mouse double-click' command",
+        "Add 'pdemo mouse scroll' command",
+        "Add 'pdemo mouse drag' command",
+        "Output results as JSON"
+      ],
+      "files": ["src/programmatic_demo/cli/mouse.py"],
+      "passes": false
+    },
+    {
+      "id": "SCREEN-001",
+      "category": "perception",
+      "description": "Screenshot captures full screen",
+      "steps": [
+        "Create sensors/screen.py with Screen class",
+        "Implement capture_full() using mss",
+        "Handle Retina display scaling",
+        "Return PIL Image object",
+        "Verify image dimensions match screen"
+      ],
+      "files": ["src/programmatic_demo/sensors/screen.py"],
+      "passes": false
+    },
+    {
+      "id": "SCREEN-002",
+      "category": "perception",
+      "description": "Screenshot saves to file path",
+      "steps": [
+        "Implement save_screenshot(path) in screen.py",
+        "Support PNG and JPG formats",
+        "Create parent directories if needed",
+        "Return file path on success",
+        "Return file size in result"
+      ],
+      "files": ["src/programmatic_demo/sensors/screen.py"],
+      "passes": false
+    },
+    {
+      "id": "SCREEN-003",
+      "category": "perception",
+      "description": "Screenshot converts to base64",
+      "steps": [
+        "Implement to_base64(image) in screen.py",
+        "Convert PIL Image to base64 string",
+        "Use PNG format for base64",
+        "Return base64 string",
+        "Verify decode produces valid image"
+      ],
+      "files": ["src/programmatic_demo/sensors/screen.py"],
+      "passes": false
+    },
+    {
+      "id": "SCREEN-004",
+      "category": "perception",
+      "description": "Screenshot captures specific region",
+      "steps": [
+        "Implement capture_region(x, y, width, height) in screen.py",
+        "Capture only specified rectangle",
+        "Handle coordinates outside screen bounds",
+        "Return cropped image",
+        "Verify dimensions match request"
+      ],
+      "files": ["src/programmatic_demo/sensors/screen.py"],
+      "passes": false
+    },
+    {
+      "id": "OCR-001",
+      "category": "perception",
+      "description": "OCR extracts text from screenshot",
+      "steps": [
+        "Create sensors/ocr.py with OCR class",
+        "Implement extract_text(image) using pytesseract",
+        "Pre-process image for better recognition",
+        "Return extracted text as string",
+        "Handle images with no text gracefully"
+      ],
+      "files": ["src/programmatic_demo/sensors/ocr.py"],
+      "passes": false
+    },
+    {
+      "id": "OCR-002",
+      "category": "perception",
+      "description": "OCR returns text with bounding boxes",
+      "steps": [
+        "Implement extract_elements(image) in ocr.py",
+        "Return list of text elements with positions",
+        "Each element has text, x, y, width, height",
+        "Filter low-confidence results",
+        "Sort by position (top-to-bottom, left-to-right)"
+      ],
+      "files": ["src/programmatic_demo/sensors/ocr.py"],
+      "passes": false
+    },
+    {
+      "id": "OCR-003",
+      "category": "perception",
+      "description": "OCR finds text location on screen",
+      "steps": [
+        "Implement find_text(image, text) in ocr.py",
+        "Search for text in OCR results",
+        "Return center coordinates if found",
+        "Support partial matching option",
+        "Return None if text not found"
+      ],
+      "files": ["src/programmatic_demo/sensors/ocr.py"],
+      "passes": false
+    },
+    {
+      "id": "STATE-001",
+      "category": "perception",
+      "description": "Full observation collects all sensor data",
+      "steps": [
+        "Create sensors/state.py with Observer class",
+        "Implement get_full_observation()",
+        "Collect screenshot (path and base64)",
+        "Collect OCR text",
+        "Collect terminal output if active",
+        "Collect active window info",
+        "Add timestamp"
+      ],
+      "files": ["src/programmatic_demo/sensors/state.py"],
+      "passes": false
+    },
+    {
+      "id": "STATE-002",
+      "category": "perception",
+      "description": "Observation returns active window info",
+      "steps": [
+        "Implement get_active_window() in state.py",
+        "Get window title",
+        "Get application name",
+        "Get window bounds (x, y, width, height)",
+        "Use yabai or AppKit for macOS"
+      ],
+      "files": ["src/programmatic_demo/sensors/state.py"],
+      "passes": false
+    },
+    {
+      "id": "STATE-003",
+      "category": "perception",
+      "description": "CLI observe subcommands wire to sensor modules",
+      "steps": [
+        "Create cli/perception.py",
+        "Add 'pdemo observe screenshot' command",
+        "Add 'pdemo observe ocr' command",
+        "Add 'pdemo observe window' command",
+        "Add 'pdemo observe full' command",
+        "Output results as JSON"
+      ],
+      "files": ["src/programmatic_demo/cli/perception.py"],
+      "passes": false
+    },
+    {
+      "id": "WINDOW-001",
+      "category": "window",
+      "description": "Window list returns all open windows",
+      "steps": [
+        "Create actuators/window.py with Window class",
+        "Implement get_windows() using yabai",
+        "Return list of window objects",
+        "Each window has id, title, app, bounds",
+        "Handle yabai not running gracefully"
+      ],
+      "files": ["src/programmatic_demo/actuators/window.py"],
+      "passes": false
+    },
+    {
+      "id": "WINDOW-002",
+      "category": "window",
+      "description": "Window focus brings window to front",
+      "steps": [
+        "Implement focus_window(app_or_title) in window.py",
+        "Find window by app name or title substring",
+        "Use yabai to focus window",
+        "Verify window is now focused",
+        "Return window info"
+      ],
+      "files": ["src/programmatic_demo/actuators/window.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-001",
+      "category": "browser",
+      "description": "Browser launch opens Chromium with Playwright",
+      "steps": [
+        "Create actuators/browser.py with Browser class",
+        "Implement launch(url) using Playwright",
+        "Use headful mode (visible browser)",
+        "Navigate to URL if provided",
+        "Store browser and page references",
+        "Return browser state"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-002",
+      "category": "browser",
+      "description": "Browser navigate goes to URL",
+      "steps": [
+        "Implement navigate(url) in browser.py",
+        "Navigate to specified URL",
+        "Wait for page load complete",
+        "Return new page URL and title",
+        "Handle navigation errors"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-003",
+      "category": "browser",
+      "description": "Browser click clicks element by selector",
+      "steps": [
+        "Implement click(selector) in browser.py",
+        "Find element by CSS selector",
+        "Wait for element to be visible",
+        "Click element",
+        "Return element info"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-004",
+      "category": "browser",
+      "description": "Browser fill enters text into input",
+      "steps": [
+        "Implement fill(selector, value) in browser.py",
+        "Find input element by selector",
+        "Clear existing value",
+        "Type new value with delays",
+        "Return element info"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-005",
+      "category": "browser",
+      "description": "Browser wait waits for element to appear",
+      "steps": [
+        "Implement wait_for(selector, timeout) in browser.py",
+        "Wait for element to exist in DOM",
+        "Wait for element to be visible",
+        "Timeout after specified seconds",
+        "Return element info or error"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-006",
+      "category": "browser",
+      "description": "Browser state returns current page info",
+      "steps": [
+        "Implement get_state() in browser.py",
+        "Return current URL",
+        "Return page title",
+        "Return viewport size",
+        "Return list of iframes if any"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-007",
+      "category": "browser",
+      "description": "Browser screenshot captures page",
+      "steps": [
+        "Implement screenshot(path) in browser.py",
+        "Capture full page or viewport",
+        "Save to specified path",
+        "Return file path and size"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-008",
+      "category": "browser",
+      "description": "Browser close shuts down browser",
+      "steps": [
+        "Implement close() in browser.py",
+        "Close browser context",
+        "Stop Playwright",
+        "Clean up resources",
+        "Return success status"
+      ],
+      "files": ["src/programmatic_demo/actuators/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "BROWSER-009",
+      "category": "browser",
+      "description": "CLI browser subcommands wire to browser module",
+      "steps": [
+        "Create cli/browser.py",
+        "Add 'pdemo browser launch' command",
+        "Add 'pdemo browser navigate' command",
+        "Add 'pdemo browser click' command",
+        "Add 'pdemo browser fill' command",
+        "Add 'pdemo browser wait' command",
+        "Add 'pdemo browser state' command",
+        "Add 'pdemo browser screenshot' command",
+        "Add 'pdemo browser close' command",
+        "Output results as JSON"
+      ],
+      "files": ["src/programmatic_demo/cli/browser.py"],
+      "passes": false
+    },
+    {
+      "id": "UTIL-001",
+      "category": "utility",
+      "description": "Timing utilities provide human-like delays",
+      "steps": [
+        "Create utils/timing.py",
+        "Implement random_delay(min_ms, max_ms)",
+        "Implement typing_delay() for inter-key timing",
+        "Implement hover_pause() for pre-click delay",
+        "Add jitter to all delays for realism"
+      ],
+      "files": ["src/programmatic_demo/utils/timing.py"],
+      "passes": false
+    },
+    {
+      "id": "UTIL-002",
+      "category": "utility",
+      "description": "Config module manages settings",
+      "steps": [
+        "Create utils/config.py",
+        "Load config from ~/.pdemo/config.json if exists",
+        "Define default values for all settings",
+        "Support environment variable overrides",
+        "Validate config on load"
+      ],
+      "files": ["src/programmatic_demo/utils/config.py"],
+      "passes": false
+    },
+    {
+      "id": "ERR-001",
+      "category": "error-handling",
+      "description": "CLI commands return structured errors",
+      "steps": [
+        "Define standard error response format",
+        "Include error type, message, recoverable flag",
+        "Include suggestion for recovery",
+        "Wrap all CLI commands in try/catch",
+        "Return JSON errors, never crash"
+      ],
+      "files": ["src/programmatic_demo/utils/output.py"],
+      "passes": false
+    },
+    {
+      "id": "ERR-002",
+      "category": "error-handling",
+      "description": "Terminal commands detect command failures",
+      "steps": [
+        "Detect non-zero exit codes",
+        "Detect common error patterns in output",
+        "Include exit code in response",
+        "Set success=false on failure",
+        "Include stderr in error details"
+      ],
+      "files": ["src/programmatic_demo/actuators/terminal.py"],
+      "passes": false
+    },
+    {
+      "id": "ERR-003",
+      "category": "error-handling",
+      "description": "Timeout handling for all wait operations",
+      "steps": [
+        "All wait operations accept timeout parameter",
+        "Return timeout error on expiration",
+        "Include elapsed time in error",
+        "Mark timeout errors as recoverable",
+        "Suggest increased timeout in error"
+      ],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py",
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "passes": false
+    },
+    {
+      "id": "INT-001",
+      "category": "integration",
+      "description": "End-to-end terminal demo works",
+      "steps": [
+        "Start screen recording",
+        "Launch terminal",
+        "Type 'echo Hello World'",
+        "Press enter",
+        "Wait for output to contain 'Hello World'",
+        "Get full observation",
+        "Stop recording",
+        "Verify video file exists and has content"
+      ],
+      "files": [],
+      "passes": false
+    },
+    {
+      "id": "INT-002",
+      "category": "integration",
+      "description": "End-to-end browser demo works",
+      "steps": [
+        "Start screen recording",
+        "Launch browser to example.com",
+        "Get full observation",
+        "Verify OCR contains 'Example Domain'",
+        "Click a link element",
+        "Wait for navigation",
+        "Stop recording",
+        "Verify video file exists"
+      ],
+      "files": [],
+      "passes": false
+    },
+    {
+      "id": "INT-003",
+      "category": "integration",
+      "description": "Mouse movement is visually smooth",
+      "steps": [
+        "Start screen recording",
+        "Move mouse from corner to corner",
+        "Verify movement takes expected duration",
+        "Review recording shows smooth curve",
+        "No teleporting or jumps"
+      ],
+      "files": [],
+      "passes": false
+    },
+    {
+      "id": "INT-004",
+      "category": "integration",
+      "description": "Observation correctly identifies on-screen text",
+      "steps": [
+        "Open terminal with known text visible",
+        "Run pdemo observe full",
+        "Verify ocr_text contains expected text",
+        "Verify terminal_output matches",
+        "Verify active_window is correct"
+      ],
+      "files": [],
+      "passes": false
+    }
+  ],
+  "metadata": {
+    "total_features": 52,
+    "categories": {
+      "setup": 4,
+      "cli": 3,
+      "recording": 4,
+      "terminal": 7,
+      "keyboard": 4,
+      "mouse": 6,
+      "perception": 11,
+      "window": 2,
+      "browser": 9,
+      "utility": 2,
+      "error-handling": 3,
+      "integration": 4
+    },
+    "dependency_layers": {
+      "layer_1": ["SETUP-001", "SETUP-002", "SETUP-003", "SETUP-004"],
+      "layer_2": ["CLI-001", "CLI-002", "CLI-003", "UTIL-001", "UTIL-002", "ERR-001"],
+      "layer_3": ["REC-001", "REC-002", "REC-003", "REC-004", "SCREEN-001", "SCREEN-002", "SCREEN-003", "SCREEN-004"],
+      "layer_4": ["KEY-001", "KEY-002", "KEY-003", "KEY-004", "TERM-001", "TERM-002", "TERM-003", "TERM-004", "TERM-005", "TERM-006", "TERM-007", "ERR-002", "ERR-003"],
+      "layer_5": ["OCR-001", "OCR-002", "OCR-003", "STATE-001", "STATE-002", "STATE-003"],
+      "layer_6": ["MOUSE-001", "MOUSE-002", "MOUSE-003", "MOUSE-004", "MOUSE-005", "MOUSE-006", "WINDOW-001", "WINDOW-002"],
+      "layer_7": ["BROWSER-001", "BROWSER-002", "BROWSER-003", "BROWSER-004", "BROWSER-005", "BROWSER-006", "BROWSER-007", "BROWSER-008", "BROWSER-009"],
+      "layer_8": ["INT-001", "INT-002", "INT-003", "INT-004"]
+    }
+  }
+}
