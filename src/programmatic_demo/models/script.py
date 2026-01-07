@@ -79,6 +79,26 @@ class WaitCondition:
             result["timeout_seconds"] = self.timeout_seconds
         return result
 
+    def validate(self, prefix: str = "") -> list[str]:
+        """Validate WaitCondition fields.
+
+        Returns:
+            List of validation error messages.
+        """
+        errors: list[str] = []
+        loc = f"{prefix}wait_for" if prefix else "wait_for"
+
+        if not isinstance(self.type, WaitType):
+            errors.append(f"{loc}.type: must be a valid WaitType")
+
+        if self.type in (WaitType.TEXT, WaitType.ELEMENT) and not self.value:
+            errors.append(f"{loc}.value: required when type is {self.type.value}")
+
+        if self.timeout_seconds <= 0:
+            errors.append(f"{loc}.timeout_seconds: must be positive")
+
+        return errors
+
 
 @dataclass
 class Target:
@@ -115,6 +135,29 @@ class Target:
         if self.coords is not None:
             result["coords"] = list(self.coords)
         return result
+
+    def validate(self, prefix: str = "") -> list[str]:
+        """Validate Target fields.
+
+        Returns:
+            List of validation error messages.
+        """
+        errors: list[str] = []
+        loc = f"{prefix}target" if prefix else "target"
+
+        if not isinstance(self.type, TargetType):
+            errors.append(f"{loc}.type: must be a valid TargetType")
+
+        if self.type == TargetType.SELECTOR and not self.selector:
+            errors.append(f"{loc}.selector: required when type is selector")
+
+        if self.type == TargetType.COORDINATES and not self.coords:
+            errors.append(f"{loc}.coords: required when type is coordinates")
+
+        if self.type == TargetType.TEXT and not self.description:
+            errors.append(f"{loc}.description: required when type is text")
+
+        return errors
 
 
 @dataclass
@@ -160,6 +203,36 @@ class Step:
         if self.params is not None:
             result["params"] = self.params
         return result
+
+    def validate(self, prefix: str = "") -> list[str]:
+        """Validate Step fields.
+
+        Returns:
+            List of validation error messages.
+        """
+        errors: list[str] = []
+        loc = f"{prefix}." if prefix else ""
+
+        if not isinstance(self.action, ActionType):
+            errors.append(f"{loc}action: must be a valid ActionType")
+
+        # Actions that require a target
+        target_required_actions = {
+            ActionType.CLICK,
+            ActionType.TYPE,
+            ActionType.SCROLL,
+            ActionType.DRAG,
+        }
+        if self.action in target_required_actions and self.target is None:
+            errors.append(f"{loc}target: required for {self.action.value} action")
+
+        if self.target is not None:
+            errors.extend(self.target.validate(loc))
+
+        if self.wait_for is not None:
+            errors.extend(self.wait_for.validate(loc))
+
+        return errors
 
 
 class FailureStrategy(Enum):
@@ -207,6 +280,28 @@ class Scene:
             result["on_failure"] = self.on_failure.value
         return result
 
+    def validate(self, prefix: str = "") -> list[str]:
+        """Validate Scene fields.
+
+        Returns:
+            List of validation error messages.
+        """
+        errors: list[str] = []
+        loc = f"{prefix}." if prefix else ""
+
+        if not self.name:
+            errors.append(f"{loc}name: required")
+
+        if not isinstance(self.on_failure, FailureStrategy):
+            errors.append(f"{loc}on_failure: must be a valid FailureStrategy")
+
+        if self.steps:
+            for i, step in enumerate(self.steps):
+                step_prefix = f"{loc}steps[{i}]"
+                errors.extend(step.validate(step_prefix))
+
+        return errors
+
 
 @dataclass
 class Script:
@@ -247,6 +342,26 @@ class Script:
         if self.metadata is not None:
             result["metadata"] = self.metadata
         return result
+
+    def validate(self) -> list[str]:
+        """Validate Script and all nested structures.
+
+        Checks all required fields are present and enum values are valid.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+        """
+        errors: list[str] = []
+
+        if not self.name:
+            errors.append("name: required")
+
+        if self.scenes:
+            for i, scene in enumerate(self.scenes):
+                scene_prefix = f"scenes[{i}]"
+                errors.extend(scene.validate(scene_prefix))
+
+        return errors
 
     @classmethod
     def from_yaml(cls, source: str | Path) -> "Script":

@@ -1089,7 +1089,7 @@
       ],
       "files": ["src/programmatic_demo/models/script.py"],
       "depends_on": ["SCRIPT-007"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-013",
