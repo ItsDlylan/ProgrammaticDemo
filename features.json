@@ -1169,7 +1169,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/resolver.py"],
       "depends_on": ["NLP-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-004",
