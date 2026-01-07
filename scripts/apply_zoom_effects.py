@@ -375,53 +375,71 @@ def generate_zoom_keyframes(
     """
     keyframes = []
 
-    # Pre-zoom offset (start zoom slightly before click)
-    pre_offset = 0.1
-    zoom_start = click_time - pre_offset
+    # IMPORTANT: Be fully zoomed IN by the time of the click
+    # Zoom-in happens BEFORE the click, hold starts AT the click
+    zoom_start = click_time - zoom_in_duration
 
-    # Smooth the mouse path if available
+    # Smooth the mouse path if available (larger window handles teleport jumps)
     smoothed_path = None
     if follow_mouse and mouse_path:
-        smoothed_path = smooth_mouse_path(mouse_path, window_size=5)
+        smoothed_path = smooth_mouse_path(mouse_path, window_size=15)
 
     def get_pan_center(frame_time: float, zoom: float) -> tuple:
-        """Get pan center position, following mouse if enabled."""
+        """Get mouse position (0-1 normalized) to center the view on."""
         if not follow_mouse or not smoothed_path:
             return (center_x, center_y)
 
         # Get interpolated mouse position at this time
         mouse_x, mouse_y = interpolate_mouse_position(smoothed_path, frame_time)
 
-        # Calculate pan offset to keep cursor centered
-        pan_x, pan_y = calculate_pan_offset(
-            mouse_x, mouse_y, zoom, viewport_width, viewport_height
-        )
-        return (pan_x, pan_y)
+        # Return normalized mouse position (0-1)
+        # The zoom segment will center the view on this position
+        return (mouse_x / viewport_width, mouse_y / viewport_height)
 
-    # Phase 1: Zoom in
-    zoom_in_frames = int(zoom_in_duration * fps)
-    for i in range(zoom_in_frames):
-        t = i / zoom_in_frames
+    # Phase 1: Zoom in (use zoom_in_frames + 1 to include endpoint)
+    zoom_in_frames = max(1, int(zoom_in_duration * fps))
+    for i in range(zoom_in_frames + 1):
+        t = i / zoom_in_frames if zoom_in_frames > 0 else 1.0
         frame_time = zoom_start + t * zoom_in_duration
         zoom = interpolate_zoom(t, 1.0, zoom_factor, ease_out_cubic)
-        pan_x, pan_y = get_pan_center(frame_time, zoom)
-        keyframes.append(ZoomKeyframe(frame_time, zoom, pan_x, pan_y))
+        # During zoom-in, center on the CLICK position (center_x, center_y)
+        # This ensures we zoom to where the action happens
+        keyframes.append(ZoomKeyframe(frame_time, zoom, center_x, center_y))
 
     # Phase 2: Hold at max zoom (follow mouse during hold)
-    hold_frames = int(hold_duration * fps)
+    # We blend from click position to mouse position over the first ~0.2s of hold
+    # to avoid a jarring jump when switching from click-centered to mouse-centered
+    hold_frames = max(1, int(hold_duration * fps))
     hold_start = zoom_start + zoom_in_duration
+    blend_duration = min(0.2, hold_duration * 0.4)  # Blend over first 40% of hold or 0.2s
+
     for i in range(hold_frames):
         frame_time = hold_start + i / fps
-        pan_x, pan_y = get_pan_center(frame_time, zoom_factor)
+        # Get the mouse position at this time
+        mouse_pan_x, mouse_pan_y = get_pan_center(frame_time, zoom_factor)
+
+        # Calculate blend factor (0 = click position, 1 = mouse position)
+        time_in_hold = frame_time - hold_start
+        if time_in_hold < blend_duration and blend_duration > 0:
+            blend = time_in_hold / blend_duration
+            # Use smoothstep for smooth transition
+            blend = blend * blend * (3 - 2 * blend)
+            pan_x = center_x + blend * (mouse_pan_x - center_x)
+            pan_y = center_y + blend * (mouse_pan_y - center_y)
+        else:
+            # After blend period, fully follow mouse
+            pan_x, pan_y = mouse_pan_x, mouse_pan_y
+
         keyframes.append(ZoomKeyframe(frame_time, zoom_factor, pan_x, pan_y))
 
-    # Phase 3: Zoom out
-    zoom_out_frames = int(zoom_out_duration * fps)
+    # Phase 3: Zoom out (use zoom_out_frames + 1 to include endpoint)
+    zoom_out_frames = max(1, int(zoom_out_duration * fps))
     zoom_out_start = hold_start + hold_duration
-    for i in range(zoom_out_frames):
-        t = i / zoom_out_frames
+    for i in range(zoom_out_frames + 1):
+        t = i / zoom_out_frames if zoom_out_frames > 0 else 1.0
         frame_time = zoom_out_start + t * zoom_out_duration
         zoom = interpolate_zoom(t, zoom_factor, 1.0, ease_in_cubic)
+        # During zoom-out, follow mouse back to normal view
         pan_x, pan_y = get_pan_center(frame_time, zoom)
         keyframes.append(ZoomKeyframe(frame_time, zoom, pan_x, pan_y))
 
@@ -436,39 +454,36 @@ def create_animated_zoom_segment(
     height: int,
     fps: float,
 ) -> bool:
-    """Create a segment with animated zoom using multiple micro-segments."""
+    """Create a segment with animated zoom - mouse centered in frame."""
     if not keyframes:
         return False
 
     temp_dir = Path(tempfile.mkdtemp())
     segments = []
 
-    # Group keyframes into small chunks (every 3-5 frames) for smoother animation
-    chunk_size = 3  # Process 3 frames at a time
-
-    for i in range(0, len(keyframes), chunk_size):
-        chunk = keyframes[i:i + chunk_size]
-        if not chunk:
-            continue
-
-        # Use middle keyframe's parameters for this chunk
-        mid_kf = chunk[len(chunk) // 2]
-        start_time = chunk[0].time
-        end_time = chunk[-1].time + (1 / fps)  # Add one frame duration
+    # Process each keyframe individually for smooth mouse following
+    for i, kf in enumerate(keyframes):
+        start_time = kf.time
+        end_time = keyframes[i + 1].time if i + 1 < len(keyframes) else kf.time + (1 / fps)
         duration = end_time - start_time
 
         if duration <= 0:
             continue
 
-        # Calculate crop parameters for this chunk's zoom level
-        crop_w = int(width / mid_kf.zoom)
-        crop_h = int(height / mid_kf.zoom)
+        # Calculate crop dimensions based on zoom
+        crop_w = int(width / kf.zoom)
+        crop_h = int(height / kf.zoom)
 
-        # Center on the click point
-        crop_x = int((width - crop_w) * mid_kf.center_x)
-        crop_y = int((height - crop_h) * mid_kf.center_y)
+        # center_x and center_y are the MOUSE POSITION (0-1 normalized)
+        # We want to CENTER the view on the mouse
+        mouse_x = kf.center_x * width
+        mouse_y = kf.center_y * height
 
-        # Clamp to valid range
+        # Calculate crop position to center on mouse
+        crop_x = int(mouse_x - crop_w / 2)
+        crop_y = int(mouse_y - crop_h / 2)
+
+        # Clamp to valid range (can't go off-screen)
         crop_x = max(0, min(crop_x, width - crop_w))
         crop_y = max(0, min(crop_y, height - crop_h))
 
@@ -476,7 +491,7 @@ def create_animated_zoom_segment(
         crop_w = crop_w - (crop_w % 2)
         crop_h = crop_h - (crop_h % 2)
 
-        seg_file = temp_dir / f"chunk_{i:04d}.mp4"
+        seg_file = temp_dir / f"frame_{i:04d}.mp4"
         cmd = [
             "ffmpeg", "-y",
             "-ss", str(start_time),
@@ -493,7 +508,7 @@ def create_animated_zoom_segment(
     if not segments:
         return False
 
-    # Concatenate all chunks
+    # Concatenate all segments
     concat_file = temp_dir / "concat.txt"
     with open(concat_file, "w") as f:
         for seg in segments:
@@ -559,21 +574,66 @@ def extract_frames(
 
 
 def process_single_frame(args: tuple) -> bool:
-    """Process a single frame with zoom/crop transformation.
+    """Process a single frame with zoom/crop transformation and cursor overlay.
 
     Args:
-        args: Tuple of (frame_path, output_path, crop_x, crop_y, crop_w, crop_h, width, height)
+        args: Tuple of (frame_path, output_path, crop_x, crop_y, crop_w, crop_h, width, height, mouse_x, mouse_y)
+              mouse_x, mouse_y are optional (can be None)
 
     Returns:
         True if successful
     """
-    frame_path, output_path, crop_x, crop_y, crop_w, crop_h, width, height = args
+    # Support both old (8-arg) and new (10-arg) format
+    if len(args) == 8:
+        frame_path, output_path, crop_x, crop_y, crop_w, crop_h, width, height = args
+        mouse_x, mouse_y = None, None
+    else:
+        frame_path, output_path, crop_x, crop_y, crop_w, crop_h, width, height, mouse_x, mouse_y = args
+
+    # Build filter chain
+    filters = [f"crop={crop_w}:{crop_h}:{crop_x}:{crop_y}", f"scale={width}:{height}"]
+
+    # Add cursor overlay if mouse position provided
+    if mouse_x is not None and mouse_y is not None:
+        # Calculate cursor position in the output frame
+        # 1. Position in cropped frame
+        cursor_in_crop_x = mouse_x - crop_x
+        cursor_in_crop_y = mouse_y - crop_y
+
+        # 2. Scale to output dimensions
+        scale_x = width / crop_w
+        scale_y = height / crop_h
+        final_cursor_x = int(cursor_in_crop_x * scale_x)
+        final_cursor_y = int(cursor_in_crop_y * scale_y)
+
+        # Only draw if cursor is within visible area
+        if 0 <= final_cursor_x < width and 0 <= final_cursor_y < height:
+            # Draw cursor using FFmpeg drawbox (simple but visible)
+            # Cursor: small filled circle with outline
+            cursor_size = 12
+            # Red circle for cursor
+            filters.append(
+                f"drawbox=x={final_cursor_x-cursor_size}:y={final_cursor_y-cursor_size}:"
+                f"w={cursor_size*2}:h={cursor_size*2}:color=red@0.7:t=fill"
+            )
+            # White outline
+            filters.append(
+                f"drawbox=x={final_cursor_x-cursor_size-2}:y={final_cursor_y-cursor_size-2}:"
+                f"w={cursor_size*2+4}:h={cursor_size*2+4}:color=white:t=2"
+            )
+            # Black pointer shape (arrow-like)
+            filters.append(
+                f"drawbox=x={final_cursor_x-2}:y={final_cursor_y-2}:w=4:h=20:color=black:t=fill"
+            )
+            filters.append(
+                f"drawbox=x={final_cursor_x-2}:y={final_cursor_y-2}:w=14:h=4:color=black:t=fill"
+            )
 
     cmd = [
         "ffmpeg", "-y",
         "-i", str(frame_path),
-        "-vf", f"crop={crop_w}:{crop_h}:{crop_x}:{crop_y},scale={width}:{height}",
-        "-q:v", "2",  # High quality JPEG
+        "-vf", ",".join(filters),
+        "-q:v", "2",  # High quality
         str(output_path)
     ]
 
@@ -637,24 +697,20 @@ def calculate_frame_transform(
     """
     frame_time = frame_num / fps
 
-    # Find the keyframe or interpolate between keyframes
+    # Default: no zoom (full frame)
     zoom = 1.0
     center_x = 0.5
     center_y = 0.5
 
+    # Find if this frame falls within any keyframe range
+    # Keyframes are sorted by time, but may have gaps between zoom segments
     if keyframes:
-        # Check if before first keyframe
-        if frame_time <= keyframes[0].time:
-            zoom = keyframes[0].zoom
-            center_x = keyframes[0].center_x
-            center_y = keyframes[0].center_y
-        # Check if after last keyframe
-        elif frame_time >= keyframes[-1].time:
-            zoom = keyframes[-1].zoom
-            center_x = keyframes[-1].center_x
-            center_y = keyframes[-1].center_y
-        else:
-            # Interpolate between keyframes
+        # Check if frame_time falls within the keyframe range
+        first_kf_time = keyframes[0].time
+        last_kf_time = keyframes[-1].time
+
+        if first_kf_time <= frame_time <= last_kf_time:
+            # Frame is within keyframe range - find exact position
             for i in range(len(keyframes) - 1):
                 kf1 = keyframes[i]
                 kf2 = keyframes[i + 1]
@@ -670,16 +726,20 @@ def calculate_frame_transform(
                         center_x = kf1.center_x
                         center_y = kf1.center_y
                     break
+        # else: frame is outside keyframe range, keep zoom=1.0 (no zoom)
 
     # Calculate crop dimensions
     crop_w = int(width / zoom)
     crop_h = int(height / zoom)
 
-    # Calculate crop position centered on the click point
-    crop_x = int((width - crop_w) * center_x)
-    crop_y = int((height - crop_h) * center_y)
+    # center_x/center_y are MOUSE POSITION (0-1 normalized)
+    # Center the crop ON the mouse position
+    mouse_x = center_x * width
+    mouse_y = center_y * height
+    crop_x = int(mouse_x - crop_w / 2)
+    crop_y = int(mouse_y - crop_h / 2)
 
-    # Clamp to valid range
+    # Clamp to valid range (can't go off-screen)
     crop_x = max(0, min(crop_x, width - crop_w))
     crop_y = max(0, min(crop_y, height - crop_h))
 
@@ -699,6 +759,7 @@ def render_zoom_frame_by_frame(
     fps: float,
     parallel: bool = True,
     max_workers: int = 4,
+    mouse_path: Optional[List[dict]] = None,
 ) -> bool:
     """Render zoom effect frame-by-frame for precise control.
 
@@ -714,6 +775,7 @@ def render_zoom_frame_by_frame(
         fps: Video frame rate
         parallel: Use parallel processing
         max_workers: Number of parallel workers
+        mouse_path: Optional mouse positions for cursor overlay
 
     Returns:
         True if successful
@@ -744,10 +806,18 @@ def render_zoom_frame_by_frame(
             i - 1, fps, keyframes, width, height
         )
 
+        # Get mouse position for this frame (for cursor overlay)
+        frame_time = (i - 1) / fps
+        mouse_x, mouse_y = None, None
+        if mouse_path:
+            mx, my = interpolate_mouse_position(mouse_path, frame_time)
+            mouse_x, mouse_y = int(mx), int(my)
+
         frame_args.append((
             frame_path, output_path,
             crop_x, crop_y, crop_w, crop_h,
-            width, height
+            width, height,
+            mouse_x, mouse_y
         ))
 
     # Process frames
@@ -888,6 +958,11 @@ def apply_zoom_at_clicks(
         follow_mouse: Enable mouse-following pan during zoom (ZOOM-003)
         frame_by_frame: Use frame-by-frame rendering for precise control (ZOOM-006)
     """
+    # Force frame-by-frame for mouse following - segment approach is too choppy
+    if follow_mouse and mouse_path and not frame_by_frame:
+        print("  → Using frame-by-frame rendering for smooth mouse following")
+        frame_by_frame = True
+
     width = viewport["width"]
     height = viewport["height"]
 
@@ -915,11 +990,6 @@ def apply_zoom_at_clicks(
     total_duration = info["duration"]
     fps = info["fps"]
 
-    # Create temp directory for segments
-    temp_dir = Path(tempfile.mkdtemp())
-    segments = []
-    concat_file = temp_dir / "concat.txt"
-
     # Calculate zoom timing parameters
     if animated:
         # Animated: zoom_in (30%), hold (40%), zoom_out (30%)
@@ -932,14 +1002,61 @@ def apply_zoom_at_clicks(
         hold_dur = zoom_duration
         zoom_out_dur = 0
 
-    # Build timeline with zoomed segments
+    # FRAME-BY-FRAME: Process entire video in one pass with all keyframes
+    if frame_by_frame:
+        # Generate ALL keyframes for ALL clicks
+        all_keyframes = []
+        for click in clicks:
+            click_time = click["timestamp"]
+            px = click["x"] / width
+            py = click["y"] / height
+
+            keyframes = generate_zoom_keyframes(
+                click_time=click_time,
+                center_x=px,
+                center_y=py,
+                zoom_factor=zoom_factor,
+                zoom_in_duration=zoom_in_dur,
+                hold_duration=hold_dur,
+                zoom_out_duration=zoom_out_dur,
+                fps=fps,
+                mouse_path=mouse_path,
+                viewport_width=width,
+                viewport_height=height,
+                follow_mouse=follow_mouse,
+            )
+            all_keyframes.extend(keyframes)
+            print(f"  Generated {len(keyframes)} keyframes for: {click['label']}")
+
+        # Sort keyframes by time
+        all_keyframes.sort(key=lambda kf: kf.time)
+        print(f"  Total keyframes: {len(all_keyframes)}")
+
+        # Process entire video with all keyframes (pass mouse_path for cursor overlay)
+        success = render_zoom_frame_by_frame(
+            input_video, output_video, all_keyframes, width, height, fps,
+            mouse_path=mouse_path
+        )
+
+        if success:
+            size_mb = Path(output_video).stat().st_size / (1024 * 1024)
+            print(f"✓ Output: {output_video} ({size_mb:.1f} MB)")
+            return True
+        else:
+            print(f"✗ Frame-by-frame rendering failed")
+            return False
+
+    # SEGMENT-BASED: Original approach for non-frame-by-frame
+    temp_dir = Path(tempfile.mkdtemp())
+    segments = []
+    concat_file = temp_dir / "concat.txt"
+
     current_time = 0
     segment_idx = 0
 
     for click in clicks:
         click_time = click["timestamp"]
-        pre_offset = 0.1
-        zoom_start = click_time - pre_offset
+        zoom_start = click_time - zoom_in_dur
         zoom_end = zoom_start + zoom_in_dur + hold_dur + zoom_out_dur
 
         # Segment before zoom (normal)
@@ -964,7 +1081,6 @@ def apply_zoom_at_clicks(
         actual_end = min(zoom_end, total_duration)
 
         if animated:
-            # Generate keyframes for smooth animation with optional mouse following
             keyframes = generate_zoom_keyframes(
                 click_time=click_time,
                 center_x=px,
@@ -980,28 +1096,17 @@ def apply_zoom_at_clicks(
                 follow_mouse=follow_mouse,
             )
 
-            # Create zoom segment using chosen method
             seg_file = temp_dir / f"seg_{segment_idx:03d}_zoom_animated.mp4"
-
-            if frame_by_frame:
-                # ZOOM-006: Frame-by-frame rendering for precise control
-                print(f"  → Frame-by-frame rendering: {click['label']}...")
-                success = render_zoom_frame_by_frame(
-                    input_video, str(seg_file), keyframes, width, height, fps
-                )
-            else:
-                # Default: segment-based animated zoom
-                success = create_animated_zoom_segment(
-                    input_video, str(seg_file), keyframes, width, height, fps
-                )
+            success = create_animated_zoom_segment(
+                input_video, str(seg_file), keyframes, width, height, fps
+            )
 
             if success and seg_file.exists() and seg_file.stat().st_size > 0:
                 segments.append(seg_file)
-                method = "frame-by-frame" if frame_by_frame else "animated"
-                print(f"  ✓ {method.capitalize()} zoom: {click['label']} ({zoom_start:.2f}s - {actual_end:.2f}s)")
+                print(f"  ✓ Animated zoom: {click['label']} ({zoom_start:.2f}s - {actual_end:.2f}s)")
                 segment_idx += 1
         else:
-            # Hard cut zoom (original behavior)
+            # Hard cut zoom
             seg_file = temp_dir / f"seg_{segment_idx:03d}_zoom.mp4"
             crop_w = int(width / zoom_factor)
             crop_h = int(height / zoom_factor)
@@ -1207,12 +1312,30 @@ def create_zoom_versions(
 
 
 if __name__ == "__main__":
-    recordings_dir = Path("./recordings")
-    recording_dirs = sorted(recordings_dir.glob("stripe_demo_*"), reverse=True)
+    import sys
 
-    if recording_dirs:
-        latest = recording_dirs[0]
-        print(f"Using latest recording: {latest}")
-        create_zoom_versions(str(latest))
+    recordings_dir = Path("./recordings")
+
+    # Check for command line argument
+    if len(sys.argv) > 1:
+        latest = Path(sys.argv[1])
     else:
-        print("No recordings found!")
+        # Find most recent recording directory (any *_demo_* pattern)
+        recording_dirs = sorted(
+            [d for d in recordings_dir.iterdir() if d.is_dir() and "_demo_" in d.name or "_test_" in d.name],
+            key=lambda x: x.stat().st_mtime,
+            reverse=True
+        )
+        if recording_dirs:
+            latest = recording_dirs[0]
+        else:
+            print("No recordings found!")
+            sys.exit(1)
+
+    print(f"Using recording: {latest}")
+    # Enable mouse-following pan for smooth Screen Studio-style zoom
+    create_zoom_versions(
+        str(latest),
+        animated=True,
+        follow_mouse=True,  # Pan follows the cursor during zoom
+    )
