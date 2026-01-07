@@ -5,12 +5,16 @@ descriptions to screen coordinates using OCR and visual analysis.
 """
 
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 from typing import Any
 
 from PIL import Image
 
 from programmatic_demo.sensors.ocr import OCR, get_ocr
 from programmatic_demo.sensors.screen import Screen, get_screen
+
+# Default similarity threshold for fuzzy matching
+DEFAULT_FUZZY_THRESHOLD = 0.7
 
 
 @dataclass
@@ -76,6 +80,58 @@ class TargetResolver:
             confidence=1.0,
             element_text=text,
         )
+
+    def fuzzy_match(
+        self,
+        text: str,
+        image: Image.Image,
+        threshold: float = DEFAULT_FUZZY_THRESHOLD,
+    ) -> ResolvedTarget | None:
+        """Find best fuzzy match for text on screen.
+
+        Args:
+            text: Text to search for.
+            image: Screenshot image to search in.
+            threshold: Minimum similarity ratio (0.0 to 1.0, default 0.7).
+
+        Returns:
+            ResolvedTarget with best match above threshold, or None if not found.
+        """
+        elements = self._ocr.extract_elements(image)
+
+        if not elements:
+            return None
+
+        text_lower = text.lower()
+        best_match: dict[str, Any] | None = None
+        best_ratio = 0.0
+
+        for element in elements:
+            element_text = element["text"].lower()
+            ratio = SequenceMatcher(None, text_lower, element_text).ratio()
+
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = element
+
+        # Return best match if above threshold
+        if best_match is not None and best_ratio >= threshold:
+            center_x = best_match["x"] + best_match["width"] // 2
+            center_y = best_match["y"] + best_match["height"] // 2
+
+            return ResolvedTarget(
+                coords=(center_x, center_y),
+                confidence=best_ratio,
+                element_text=best_match["text"],
+                bounds=(
+                    best_match["x"],
+                    best_match["y"],
+                    best_match["width"],
+                    best_match["height"],
+                ),
+            )
+
+        return None
 
     def resolve(
         self,
