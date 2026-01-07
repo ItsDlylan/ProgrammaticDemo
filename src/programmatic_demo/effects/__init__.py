@@ -5,8 +5,31 @@ This package provides visual effects that can be applied to demos:
 - Zoom and focus effects
 - Annotations and callouts
 - Transitions between scenes
+- Easing functions for smooth animations
 """
 
+from programmatic_demo.effects.easing import (
+    EasingFunction,
+    EasingPreset,
+    EASING_REGISTRY,
+    SMOOTH_PRESET,
+    SNAPPY_PRESET,
+    ZOOM_PRESET,
+    ease_in_cubic,
+    ease_in_expo,
+    ease_in_out_cubic,
+    ease_in_out_expo,
+    ease_in_out_quad,
+    ease_in_quad,
+    ease_out_cubic,
+    ease_out_expo,
+    ease_out_quad,
+    get_easing,
+    linear,
+    list_easings,
+    smootherstep,
+    smoothstep,
+)
 from programmatic_demo.effects.callout import (
     Callout,
     CalloutConfig,
@@ -49,12 +72,36 @@ from programmatic_demo.effects.zoom_effect import (
 )
 
 __all__ = [
+    # Easing functions
+    "EASING_REGISTRY",
+    "EasingFunction",
+    "EasingPreset",
+    "SMOOTH_PRESET",
+    "SNAPPY_PRESET",
+    "ZOOM_PRESET",
+    "ease_in_cubic",
+    "ease_in_expo",
+    "ease_in_out_cubic",
+    "ease_in_out_expo",
+    "ease_in_out_quad",
+    "ease_in_quad",
+    "ease_out_cubic",
+    "ease_out_expo",
+    "ease_out_quad",
+    "get_easing",
+    "linear",
+    "list_easings",
+    "smootherstep",
+    "smoothstep",
+    # Callout
     "Callout",
     "CalloutConfig",
     "CalloutEffect",
     "CalloutPosition",
+    # Click
     "ClickEffect",
     "ClickEffectConfig",
+    # Compositor
     "Compositor",
     "Effect",
     "EffectConfig",
@@ -62,16 +109,20 @@ __all__ = [
     "EffectType",
     "EventQueue",
     "EventQueueItem",
+    # Highlight
     "Highlight",
     "HighlightConfig",
     "HighlightRegion",
+    # Mouse
     "MouseEvent",
     "MouseTracker",
     "RippleFrame",
+    # Zoom
     "ZoomEffect",
     "ZoomEffectConfig",
     "ZoomFrame",
     "ZoomPreset",
+    # Factory functions
     "create_callout",
     "create_click_effect",
     "create_dramatic_zoom",

@@ -2,71 +2,80 @@
 
 ## Session Summary
 
-This session completed the final 4 features from `features.json`, bringing the project from 221/225 (98%) to **225/225 (100%) completion**!
+This session implemented all 6 ZOOM features (ZOOM-001 through ZOOM-006), bringing the project to **231/234 features complete**.
 
 ## Completed Features
 
-### VISUAL-009: Demo recorder with automatic framing and animation detection
-Created `src/programmatic_demo/visual/smart_recorder.py` with:
-- `SmartDemoRecorder` class wrapping existing recorder
-- `AsyncSmartDemoRecorder` async version
-- `RecordingConfig` for configuration options
-- `WaypointOverride` for manual adjustments
-- `RecordingProgress` and `RecordingResult` dataclasses
-- Auto-detection of page sections on navigation
-- Auto-calculation of waypoints with optimal framing
-- Animation waiting before recording each section
-- Self-correction of scroll positions using verification loop
-- Support for manual override of specific waypoints
+### ZOOM-001: Continuous mouse position tracking during recording
+Updated `scripts/stripe_landing_demo.py`:
+- Added `mouse_path` list to track positions at ~30fps
+- Created `_track_mouse_position()` async background task
+- Tracking starts when recording begins, stops when recording ends
+- Mouse positions exported to `events.json` as `mouse_path` array
 
-### VISUAL-010: Preview generated waypoints before recording for approval/tweaks
-Created `src/programmatic_demo/visual/preview_mode.py` with:
-- `WaypointPreviewer` and `AsyncWaypointPreviewer` classes
-- `PreviewConfig` for preview configuration
-- `WaypointPreview` and `PreviewReport` dataclasses
-- Interactive adjustment support with callbacks
-- Screenshot capture at each waypoint
-- JSON and HTML report export
-- `preview_waypoints()` convenience function
-- `approve_all_waypoints()` for auto-approval workflow
+### ZOOM-002: Smooth animated zoom filter with FFmpeg
+Updated `scripts/apply_zoom_effects.py`:
+- Added `ZoomKeyframe` dataclass for keyframe animation
+- Added `generate_zoom_keyframes()` for smooth zoom animation
+- Added `create_animated_zoom_segment()` using micro-segments
+- Zoom phases: zoom-in (30%), hold (40%), zoom-out (30%)
+- Uses cubic easing for smooth transitions
 
-### VISUAL-CLI: CLI commands for visual verification and smart recording
-Created `src/programmatic_demo/cli/visual.py` with commands:
-- `pdemo visual detect-sections` - Detect page sections
-- `pdemo visual generate-waypoints` - Generate scroll waypoints
-- `pdemo visual preview` - Preview waypoints with screenshots
-- `pdemo visual verify-framing` - Verify element/section framing
-- `pdemo visual smart-record` - Execute smart demo recording
-- `pdemo visual sections` - List supported section types
-- All commands support `--json` output mode
+### ZOOM-003: Mouse-following pan during zoomed segments
+Updated `scripts/apply_zoom_effects.py`:
+- Added `interpolate_mouse_position()` for time-based position lookup
+- Added `smooth_mouse_path()` with moving average (5-frame window)
+- Added `calculate_pan_offset()` to keep cursor centered
+- Handles edge cases at viewport boundaries
+- `follow_mouse=True` parameter to enable
 
-### INT-014: Test full smart demo recording workflow
-Created `tests/integration/test_smart_recording.py` with 45 tests:
-- Tests for RecordingConfig, WaypointOverride, RecordingProgress
-- Tests for SmartDemoRecorder initialization and methods
-- Tests for PreviewConfig, WaypointPreview, PreviewReport
-- Tests for WaypointPreviewer methods and report export
-- Tests for full recording workflow with mocked components
-- Tests for CLI module imports and command registration
-- Tests for edge cases and error handling
+### ZOOM-004: Intelligent zoom trigger detection
+Updated `scripts/apply_zoom_effects.py`:
+- Added `ZoomTriggerConfig` dataclass for configuration
+- Added `calculate_mouse_velocity()` for velocity analysis
+- Added `analyze_mouse_velocity()` for full path analysis
+- Added `should_trigger_zoom()` and `filter_zoom_triggers()`
+- Skips zoom during fast movements or scrolling
+- `smart_triggers=True` parameter to enable
+
+### ZOOM-005: Easing functions for natural zoom animation
+Created `src/programmatic_demo/effects/easing.py`:
+- Comprehensive easing library with 30+ functions
+- Quadratic, cubic, quartic, quintic, exponential, sine, circular
+- Back, elastic, bounce easing families
+- `smoothstep` and `smootherstep` for interpolation
+- `get_easing(name)` registry lookup
+- `EasingPreset` with ZOOM_PRESET, SMOOTH_PRESET, SNAPPY_PRESET
+- Updated `src/programmatic_demo/effects/__init__.py` with exports
+
+### ZOOM-006: Frame-by-frame zoom rendering for precise control
+Updated `scripts/apply_zoom_effects.py`:
+- Added `extract_frames()` to extract video frames with ffmpeg
+- Added `process_single_frame()` for per-frame crop/scale
+- Added `reassemble_frames()` to rebuild video
+- Added `calculate_frame_transform()` for keyframe interpolation
+- Added `render_zoom_frame_by_frame()` with parallel processing
+- `frame_by_frame=True` parameter to enable
 
 ## Project Completion Status
 
-**225/225 features complete (100%)**
+**231/234 features complete (98%)**
 
-All features implemented and tested:
-- 328 integration tests passing
-- All visual/smart recording features working
-- CLI commands registered and functional
+All ZOOM features implemented and integrated:
+- Smooth animated zoom with easing functions
+- Mouse position tracking at ~30fps
+- Intelligent zoom triggers based on velocity
+- Mouse-following pan during zoom
+- Frame-by-frame rendering fallback
 
 ## Files Modified This Session
-- `src/programmatic_demo/visual/smart_recorder.py` (NEW - VISUAL-009)
-- `src/programmatic_demo/visual/preview_mode.py` (NEW - VISUAL-010)
-- `src/programmatic_demo/cli/visual.py` (NEW - VISUAL-CLI)
-- `src/programmatic_demo/visual/__init__.py` (updated exports)
-- `src/programmatic_demo/cli/main.py` (registered visual CLI)
-- `tests/integration/test_smart_recording.py` (NEW - INT-014)
-- `features.json` (updated passes for 4 features)
+
+- `scripts/stripe_landing_demo.py` (ZOOM-001)
+- `scripts/apply_zoom_effects.py` (ZOOM-002, ZOOM-003, ZOOM-004, ZOOM-006)
+- `src/programmatic_demo/effects/easing.py` (NEW - ZOOM-005)
+- `src/programmatic_demo/effects/__init__.py` (updated exports)
+- `features.json` (updated passes for 6 features)
+- `CLAUDE.md` (replaced "Pending Zoom" with "Smooth Zoom System" docs)
 
 ## Commands to Verify
 
@@ -74,18 +83,43 @@ All features implemented and tested:
 # Check current progress
 cat features.json | python3 -c "import json,sys; d=json.load(sys.stdin); t=len(d['features']); p=sum(1 for f in d['features'] if f['passes']); print(f'{p}/{t} features complete ({100*p//t}%)')"
 
-# Run all integration tests
-source .venv/bin/activate && PYTHONPATH=src pytest tests/integration/ -v
+# Test the zoom system
+source .venv/bin/activate && python -c "from programmatic_demo.effects import get_easing, ease_out_expo; print('Easing OK:', ease_out_expo(0.5))"
+```
 
-# Test the new CLI commands
-source .venv/bin/activate && python -m programmatic_demo.cli.main visual --help
+## Usage Examples
+
+```python
+# Record with mouse tracking
+python scripts/stripe_landing_demo.py
+
+# Apply smooth animated zoom
+python scripts/apply_zoom_effects.py
+
+# Programmatic usage
+from scripts.apply_zoom_effects import create_zoom_versions, ZoomTriggerConfig
+
+# Full-featured zoom
+create_zoom_versions(
+    "./recordings/stripe_demo_XXXXXX/",
+    animated=True,
+    smart_triggers=True,
+    follow_mouse=True,
+    trigger_config=ZoomTriggerConfig(velocity_threshold=50)
+)
+
+# Frame-by-frame for precise control
+create_zoom_versions(
+    "./recordings/stripe_demo_XXXXXX/",
+    frame_by_frame=True,
+    follow_mouse=True
+)
 ```
 
 ## Notes for Future Development
 
-The project is now feature-complete at 100%. Potential future work could include:
-1. Real-world testing with actual browser automation
-2. Performance optimization for large pages
-3. Additional framing rules for specialized content types
-4. Enhanced preview mode with real-time adjustments
-5. Documentation and usage examples
+The zoom system is now feature-complete. Remaining work could include:
+1. Real-world testing with actual browser recordings
+2. Performance optimization for large videos
+3. Additional easing presets for specific use cases
+4. CLI integration for zoom options

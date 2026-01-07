@@ -4146,10 +4146,133 @@
         "VISUAL-009"
       ],
       "passes": true
+    },
+    {
+      "id": "ZOOM-001",
+      "category": "zoom",
+      "description": "Continuous mouse position tracking during recording",
+      "steps": [
+        "Add mouse_path array to StripeLandingDemo class",
+        "Create async track_mouse_position() background task",
+        "Track mouse position at ~30fps (every 33ms)",
+        "Store positions as {t: timestamp, x: coord, y: coord}",
+        "Start tracking task when recording begins",
+        "Stop tracking task when recording ends",
+        "Export mouse_path array to events.json alongside click events"
+      ],
+      "files": [
+        "scripts/stripe_landing_demo.py"
+      ],
+      "depends_on": [],
+      "passes": true
+    },
+    {
+      "id": "ZOOM-002",
+      "category": "zoom",
+      "description": "Smooth animated zoom filter with FFmpeg",
+      "steps": [
+        "Replace hard-cut zoom with animated zoom transitions",
+        "Use FFmpeg zoompan filter with time-based expressions",
+        "Animate zoom level from 1.0 to target over 300-500ms",
+        "Implement zoom-in animation at click start",
+        "Implement zoom-out animation at click end",
+        "Ensure smooth interpolation without jarring cuts"
+      ],
+      "files": [
+        "scripts/apply_zoom_effects.py"
+      ],
+      "depends_on": [
+        "ZOOM-001"
+      ],
+      "passes": true
+    },
+    {
+      "id": "ZOOM-003",
+      "category": "zoom",
+      "description": "Mouse-following pan during zoomed segments",
+      "steps": [
+        "Read mouse_path from events.json",
+        "Interpolate mouse position for each video frame",
+        "Calculate pan offset to keep cursor centered in viewport",
+        "Smooth the path to avoid jitter (moving average or bezier)",
+        "Update crop position frame-by-frame based on mouse position",
+        "Handle edge cases where cursor approaches viewport boundaries"
+      ],
+      "files": [
+        "scripts/apply_zoom_effects.py"
+      ],
+      "depends_on": [
+        "ZOOM-001",
+        "ZOOM-002"
+      ],
+      "passes": true
+    },
+    {
+      "id": "ZOOM-004",
+      "category": "zoom",
+      "description": "Intelligent zoom trigger detection",
+      "steps": [
+        "Analyze mouse velocity from mouse_path data",
+        "Only trigger zoom when mouse slows down or stops",
+        "Zoom when clicking interactive elements",
+        "Skip zoom during fast mouse movements",
+        "Skip zoom during scrolling events",
+        "Make zoom triggers configurable (click, hover, slow-down)"
+      ],
+      "files": [
+        "scripts/apply_zoom_effects.py"
+      ],
+      "depends_on": [
+        "ZOOM-001"
+      ],
+      "passes": true
+    },
+    {
+      "id": "ZOOM-005",
+      "category": "zoom",
+      "description": "Easing functions for natural zoom animation",
+      "steps": [
+        "Create src/programmatic_demo/effects/easing.py module",
+        "Implement ease_in_out_cubic for smooth start/end",
+        "Implement ease_out_expo for zoom-in (fast start, slow end)",
+        "Implement ease_in_expo for zoom-out (slow start, fast end)",
+        "Apply easing to zoom level interpolation",
+        "Apply easing to pan position interpolation"
+      ],
+      "files": [
+        "src/programmatic_demo/effects/easing.py",
+        "scripts/apply_zoom_effects.py"
+      ],
+      "depends_on": [
+        "ZOOM-002"
+      ],
+      "passes": true
+    },
+    {
+      "id": "ZOOM-006",
+      "category": "zoom",
+      "description": "Frame-by-frame zoom rendering for precise control",
+      "steps": [
+        "Extract all frames from video using ffmpeg",
+        "For each frame calculate zoom level based on timestamp",
+        "For each frame calculate pan position from mouse_path",
+        "Apply crop+scale transform with interpolated values per frame",
+        "Reassemble processed frames into final video",
+        "Optimize for performance (parallel processing)",
+        "Fallback when FFmpeg expressions are insufficient"
+      ],
+      "files": [
+        "scripts/apply_zoom_effects.py"
+      ],
+      "depends_on": [
+        "ZOOM-003",
+        "ZOOM-005"
+      ],
+      "passes": true
     }
   ],
   "metadata": {
-    "total_features": 228,
+    "total_features": 234,
     "categories": {
       "setup": 5,
       "utility": 3,
@@ -4169,7 +4292,8 @@
       "postprocess": 24,
       "templates": 14,
       "visual": 12,
-      "integration": 14
+      "integration": 14,
+      "zoom": 6
     },
     "parallelization_guide": {
       "description": "Features with same depends_on can run in parallel",
@@ -4191,7 +4315,8 @@
         "POST-001, POST-003, POST-008, POST-013, POST-017 can run in parallel",
         "TMPL-001, TMPL-003 can run in parallel (all depend on TMPL-SKEL)",
         "VISUAL-002, VISUAL-004 can run in parallel (both depend only on VISUAL-SKEL)",
-        "VISUAL-001, VISUAL-002 can run in parallel after VISUAL-SKEL"
+        "VISUAL-001, VISUAL-002 can run in parallel after VISUAL-SKEL",
+        "ZOOM-002, ZOOM-004 can run in parallel (both depend only on ZOOM-001)"
       ]
     }
   }
