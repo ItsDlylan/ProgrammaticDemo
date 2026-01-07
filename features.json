@@ -1131,7 +1131,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/__init__.py", "src/programmatic_demo/nlp/parser.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-001",
@@ -1143,7 +1143,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/parser.py"],
       "depends_on": ["NLP-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-002",
@@ -1156,7 +1156,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/parser.py"],
       "depends_on": ["NLP-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-003",
