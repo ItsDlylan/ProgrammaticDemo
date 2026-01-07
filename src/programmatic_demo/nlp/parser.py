@@ -284,3 +284,43 @@ def parse_scroll(text: str) -> ActionIntent | None:
         )
 
     return None
+
+
+def parse_navigate(text: str) -> ActionIntent | None:
+    """Parse a navigate action from natural language text.
+
+    Handles phrases like:
+    - "go to https://example.com"
+    - "navigate to the dashboard"
+    - "open Settings"
+    - "visit google.com"
+
+    Args:
+        text: Natural language description of a navigate action.
+
+    Returns:
+        ActionIntent with action_type="navigate" and target_description
+        containing URL or destination name, or None if not parsed.
+    """
+    pattern = ACTION_PATTERNS["navigate"]
+    match = pattern.search(text.strip())
+
+    if match:
+        destination = match.group(1).strip()
+
+        # Determine if it looks like a URL
+        is_url = (
+            destination.startswith("http://")
+            or destination.startswith("https://")
+            or "." in destination
+            and " " not in destination
+        )
+
+        return ActionIntent(
+            action_type="navigate",
+            target_description=destination,
+            params={"type": "url" if is_url else "app"},
+            confidence=1.0,
+        )
+
+    return None
