@@ -1,0 +1,16 @@
+Scene: {scene_name}
+Goal: {goal}
+Expected state: {expected_state}
+
+{observation}
+
+Evaluate progress toward the scene goal.
+
+Respond with a JSON object:
+{{
+  "progress_percent": 0-100,
+  "current_state": "description of current state",
+  "goal_achieved": true|false,
+  "confidence": 0.0-1.0,
+  "next_step": "description of next step needed" | null
+}}

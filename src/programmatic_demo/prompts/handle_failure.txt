@@ -1,0 +1,23 @@
+An action failed during the demo.
+
+Scene: {scene_name}
+Goal: {goal}
+
+Failed action:
+{action}
+
+Error:
+{error}
+
+{observation}
+
+Analyze the failure and decide on a recovery strategy.
+
+Respond with a JSON object:
+{{
+  "analysis": "what went wrong",
+  "recoverable": true|false,
+  "recovery_action": {{...}} | null,
+  "should_retry": true|false,
+  "alternative_approach": "description" | null
+}}

@@ -1,0 +1,25 @@
+Current scene: {scene_name}
+Goal: {goal}
+Current step: {current_step}
+
+{observation}
+
+Based on the current observation, determine the next action to take.
+
+Respond with a JSON action:
+{{
+  "action": "click|type|press|scroll|wait|navigate|terminal",
+  "target": {{
+    "type": "screen|element|coordinates",
+    "description": "description of target"
+  }},
+  "params": {{
+    "action-specific parameters"
+  }},
+  "wait_for": {{
+    "type": "text|element|timeout",
+    "value": "what to wait for"
+  }}
+}}
+
+Or respond with {{"done": true}} if the current step is complete.

@@ -1,0 +1,16 @@
+Plan the following demo scene:
+
+{scene_description}
+
+Based on the scene requirements, create a step-by-step plan.
+Each step should be a clear, executable action.
+
+Respond with a JSON object:
+{{
+  "scene_name": "name of the scene",
+  "goal": "narrative goal of the scene",
+  "steps": ["step 1 description", "step 2 description", ...],
+  "expected_state": {{
+    "key indicators that the scene completed successfully"
+  }}
+}}
