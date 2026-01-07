@@ -46,15 +46,15 @@ class Browser:
             # Start Playwright
             self._playwright = sync_playwright().start()
 
-            # Launch Chromium in headful mode
+            # Launch Chromium in headful mode, fullscreen
             self._browser = self._playwright.chromium.launch(
                 headless=False,
-                args=["--start-maximized"],
+                args=["--start-maximized", "--start-fullscreen"],
             )
 
-            # Create context and page
+            # Create context with no fixed viewport so it uses full screen size
             self._context = self._browser.new_context(
-                viewport={"width": 1920, "height": 1080},
+                no_viewport=True,
             )
             self._page = self._context.new_page()
 
