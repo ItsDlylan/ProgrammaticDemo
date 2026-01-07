@@ -11,6 +11,7 @@ from programmatic_demo.agents.claude_client import ClaudeClient
 from programmatic_demo.agents.director import (
     Director,
     compress_screenshot,
+    detect_success,
     observation_to_prompt,
     summarize_context,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "ClaudeClient",
     "Director",
     "compress_screenshot",
+    "detect_success",
     "observation_to_prompt",
     "summarize_context",
 ]

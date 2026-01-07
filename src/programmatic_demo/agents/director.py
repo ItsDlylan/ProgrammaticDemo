@@ -168,6 +168,75 @@ def observation_to_prompt(observation: dict[str, Any]) -> str:
     return "\n\n".join(parts)
 
 
+def detect_success(
+    observation: dict[str, Any],
+    expected: dict[str, Any],
+) -> bool:
+    """Detect if an observation matches expected success criteria.
+
+    Args:
+        observation: Current observation dict.
+        expected: Expected state criteria. Supports:
+            - text: Text that should appear in OCR
+            - texts: List of texts that should all appear
+            - terminal: Text that should appear in terminal output
+            - window_title: Expected window title
+            - not_text: Text that should NOT appear
+            - any_text: List of texts where at least one should appear
+
+    Returns:
+        True if observation matches expected criteria.
+
+    Example:
+        >>> detect_success(obs, {"text": "Success", "not_text": "Error"})
+    """
+    ocr_text = observation.get("ocr_text", "") or ""
+    terminal = observation.get("terminal_output", "") or ""
+    window = observation.get("window", {}) or {}
+    window_title = window.get("title", "") or ""
+
+    # Combine text sources for searching
+    all_text = f"{ocr_text}\n{terminal}\n{window_title}".lower()
+
+    # Check required text
+    if "text" in expected:
+        if expected["text"].lower() not in all_text:
+            return False
+
+    # Check multiple required texts
+    if "texts" in expected:
+        for text in expected["texts"]:
+            if text.lower() not in all_text:
+                return False
+
+    # Check terminal-specific text
+    if "terminal" in expected:
+        if expected["terminal"].lower() not in terminal.lower():
+            return False
+
+    # Check window title
+    if "window_title" in expected:
+        if expected["window_title"].lower() not in window_title.lower():
+            return False
+
+    # Check text that should NOT appear
+    if "not_text" in expected:
+        if expected["not_text"].lower() in all_text:
+            return False
+
+    # Check any_text (at least one must match)
+    if "any_text" in expected:
+        found = False
+        for text in expected["any_text"]:
+            if text.lower() in all_text:
+                found = True
+                break
+        if not found:
+            return False
+
+    return True
+
+
 @dataclass
 class ScenePlan:
     """A plan for executing a demo scene.
