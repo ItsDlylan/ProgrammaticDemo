@@ -123,9 +123,9 @@ class Terminal:
             return error_response("exec_failed", f"Failed to execute: {stderr}", recoverable=True)
 
         # Wait for shell prompt to return (basic detection)
-        # This polls for common prompt patterns like $, %, >, or #
+        # This polls for common prompt patterns like $, %, >, #, or zsh arrow
         start_time = time.time()
-        prompt_patterns = ["$ ", "% ", "> ", "# "]
+        prompt_patterns = ["$ ", "% ", "> ", "# ", "➜", "❯"]
         last_output = ""
 
         while time.time() - start_time < timeout:

@@ -13,7 +13,7 @@
       ],
       "files": ["pyproject.toml"],
       "depends_on": [],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SETUP-002",
@@ -26,7 +26,7 @@
       ],
       "files": ["src/programmatic_demo/__init__.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SETUP-003",
@@ -39,7 +39,7 @@
       ],
       "files": ["src/programmatic_demo/__main__.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SETUP-004",
@@ -55,7 +55,7 @@
       ],
       "files": ["scripts/setup_macos.sh"],
       "depends_on": [],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SETUP-005",
@@ -70,7 +70,7 @@
       ],
       "files": ["scripts/verify_dependencies.py"],
       "depends_on": [],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -86,7 +86,7 @@
       ],
       "files": ["src/programmatic_demo/utils/__init__.py", "src/programmatic_demo/utils/output.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "UTIL-002",
@@ -100,7 +100,7 @@
       ],
       "files": ["src/programmatic_demo/utils/timing.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "UTIL-003",
@@ -114,7 +114,7 @@
       ],
       "files": ["src/programmatic_demo/utils/config.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -129,7 +129,7 @@
       ],
       "files": ["src/programmatic_demo/cli/__init__.py", "src/programmatic_demo/cli/main.py"],
       "depends_on": ["SETUP-002", "UTIL-001"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -144,7 +144,7 @@
       ],
       "files": ["src/programmatic_demo/recording/__init__.py", "src/programmatic_demo/recording/recorder.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "REC-001",
@@ -159,7 +159,7 @@
       ],
       "files": ["src/programmatic_demo/recording/recorder.py"],
       "depends_on": ["REC-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "REC-002",
@@ -174,7 +174,7 @@
       ],
       "files": ["src/programmatic_demo/recording/recorder.py"],
       "depends_on": ["REC-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "REC-003",
@@ -187,7 +187,7 @@
       ],
       "files": ["src/programmatic_demo/recording/recorder.py"],
       "depends_on": ["REC-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "REC-CLI",
@@ -202,7 +202,7 @@
       ],
       "files": ["src/programmatic_demo/cli/recording.py"],
       "depends_on": ["CLI-001", "REC-001", "REC-002", "REC-003"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -217,7 +217,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/__init__.py", "src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-001",
@@ -232,7 +232,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-002",
@@ -246,7 +246,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-003",
@@ -260,7 +260,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["TERM-SKEL", "TERM-004"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-004",
@@ -274,7 +274,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-005",
@@ -288,7 +288,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["TERM-SKEL", "TERM-004"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-006",
@@ -301,7 +301,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/terminal.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TERM-CLI",
@@ -316,7 +316,7 @@
       ],
       "files": ["src/programmatic_demo/cli/terminal.py"],
       "depends_on": ["CLI-001", "TERM-001", "TERM-002", "TERM-003", "TERM-004", "TERM-005", "TERM-006"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -330,7 +330,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/keyboard.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "KEY-001",
@@ -345,7 +345,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/keyboard.py"],
       "depends_on": ["KEY-SKEL", "UTIL-002"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "KEY-002",
@@ -359,7 +359,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/keyboard.py"],
       "depends_on": ["KEY-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "KEY-003",
@@ -374,7 +374,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/keyboard.py"],
       "depends_on": ["KEY-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "KEY-CLI",
@@ -389,7 +389,7 @@
       ],
       "files": ["src/programmatic_demo/cli/keyboard.py"],
       "depends_on": ["CLI-001", "KEY-001", "KEY-002", "KEY-003"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -403,7 +403,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/mouse.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "MOUSE-001",
@@ -419,7 +419,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/mouse.py"],
       "depends_on": ["MOUSE-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "MOUSE-002",
@@ -433,7 +433,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/mouse.py"],
       "depends_on": ["MOUSE-SKEL", "UTIL-002"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "MOUSE-003",
@@ -447,7 +447,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/mouse.py"],
       "depends_on": ["MOUSE-001", "MOUSE-002"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "MOUSE-004",
@@ -461,7 +461,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/mouse.py"],
       "depends_on": ["MOUSE-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "MOUSE-005",
@@ -477,7 +477,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/mouse.py"],
       "depends_on": ["MOUSE-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "MOUSE-CLI",
@@ -492,7 +492,7 @@
       ],
       "files": ["src/programmatic_demo/cli/mouse.py"],
       "depends_on": ["CLI-001", "MOUSE-001", "MOUSE-002", "MOUSE-003", "MOUSE-004", "MOUSE-005"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -507,7 +507,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/__init__.py", "src/programmatic_demo/sensors/screen.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCREEN-001",
@@ -522,7 +522,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/screen.py"],
       "depends_on": ["SCREEN-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCREEN-002",
@@ -536,7 +536,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/screen.py"],
       "depends_on": ["SCREEN-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCREEN-003",
@@ -550,7 +550,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/screen.py"],
       "depends_on": ["SCREEN-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCREEN-004",
@@ -564,7 +564,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/screen.py"],
       "depends_on": ["SCREEN-SKEL"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -578,7 +578,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/ocr.py"],
       "depends_on": ["SCREEN-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "OCR-001",
@@ -591,7 +591,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/ocr.py"],
       "depends_on": ["OCR-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "OCR-002",
@@ -606,7 +606,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/ocr.py"],
       "depends_on": ["OCR-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "OCR-003",
@@ -620,7 +620,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/ocr.py"],
       "depends_on": ["OCR-002"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -634,7 +634,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/state.py"],
       "depends_on": ["SCREEN-SKEL", "OCR-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "STATE-001",
@@ -648,7 +648,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/state.py"],
       "depends_on": ["STATE-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "STATE-002",
@@ -665,7 +665,7 @@
       ],
       "files": ["src/programmatic_demo/sensors/state.py"],
       "depends_on": ["STATE-001", "SCREEN-001", "SCREEN-003", "SCREEN-004", "OCR-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "STATE-CLI",
@@ -680,7 +680,7 @@
       ],
       "files": ["src/programmatic_demo/cli/perception.py"],
       "depends_on": ["CLI-001", "STATE-002"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -694,7 +694,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/window.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "WINDOW-001",
@@ -708,7 +708,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/window.py"],
       "depends_on": ["WINDOW-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "WINDOW-002",
@@ -722,7 +722,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/window.py"],
       "depends_on": ["WINDOW-001"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -736,7 +736,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["TERM-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-001",
@@ -752,7 +752,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-SKEL"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-002",
@@ -766,7 +766,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-003",
@@ -779,7 +779,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-004",
@@ -792,7 +792,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-005",
@@ -805,7 +805,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-006",
@@ -817,7 +817,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-007",
@@ -830,7 +830,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-008",
@@ -844,7 +844,7 @@
       ],
       "files": ["src/programmatic_demo/actuators/browser.py"],
       "depends_on": ["BROWSER-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BROWSER-CLI",
@@ -859,7 +859,7 @@
       ],
       "files": ["src/programmatic_demo/cli/browser.py"],
       "depends_on": ["CLI-001", "BROWSER-001", "BROWSER-002", "BROWSER-003", "BROWSER-004", "BROWSER-005", "BROWSER-006", "BROWSER-007", "BROWSER-008"],
-      "passes": false
+      "passes": true
     },
 
     {
@@ -877,7 +877,7 @@
       ],
       "files": [],
       "depends_on": ["REC-CLI", "TERM-CLI", "KEY-CLI"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-002",
@@ -892,7 +892,7 @@
       ],
       "files": [],
       "depends_on": ["REC-CLI", "MOUSE-CLI"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-003",
@@ -908,7 +908,7 @@
       ],
       "files": [],
       "depends_on": ["REC-CLI", "BROWSER-CLI", "STATE-CLI"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-004",
@@ -925,7 +925,7 @@
       ],
       "files": [],
       "depends_on": ["TERM-CLI", "KEY-CLI", "STATE-CLI"],
-      "passes": false
+      "passes": true
     }
   ],
   "metadata": {

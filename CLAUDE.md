@@ -63,3 +63,32 @@ Observations include screenshot (base64), OCR text, terminal output, active wind
 - **Human-like interactions** - visible mouse movement, realistic typing delays, hover pauses
 - **Scene isolation** - scenes must be independently retryable without full demo restart
 - **Clarity over speed** - smooth pacing, no rushed transitions
+
+## Development Workflow
+
+### Task Management with features.json
+
+All features are tracked in `features.json`. When working on this project:
+
+1. **One task at a time** - Only work on ONE feature from `features.json` at a time. Complete it fully before moving to the next.
+
+2. **Update passes immediately** - When a feature is complete and tested, update its `passes` field to `true` in `features.json` before moving on.
+
+3. **Check dependencies** - Before starting a feature, verify all features in its `depends_on` array have `passes: true`.
+
+4. **Test before marking complete** - A feature is only complete when it's been tested and works. Don't mark `passes: true` until verified.
+
+### Example workflow:
+```bash
+# 1. Pick a feature with all dependencies satisfied
+# 2. Implement the feature
+# 3. Test the feature
+# 4. Update features.json: "passes": true
+# 5. Move to next feature
+```
+
+### Current Progress
+Run this to see completion status:
+```bash
+cat features.json | python3 -c "import json,sys; d=json.load(sys.stdin); t=len(d['features']); p=sum(1 for f in d['features'] if f['passes']); print(f'{p}/{t} features complete ({100*p//t}%)')"
+```
