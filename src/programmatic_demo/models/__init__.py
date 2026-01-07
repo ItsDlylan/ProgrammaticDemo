@@ -1,6 +1,25 @@
 """Data models for demo scripts, scenes, steps, and actions."""
 
-# Imports will be added as classes are implemented in subsequent features
-# (SCRIPT-001 through SCRIPT-007)
+from programmatic_demo.models.script import (
+    ActionType,
+    FailureStrategy,
+    Scene,
+    Script,
+    Step,
+    Target,
+    TargetType,
+    WaitCondition,
+    WaitType,
+)
 
-__all__: list[str] = []
+__all__: list[str] = [
+    "ActionType",
+    "TargetType",
+    "WaitType",
+    "WaitCondition",
+    "Target",
+    "Step",
+    "FailureStrategy",
+    "Scene",
+    "Script",
+]
