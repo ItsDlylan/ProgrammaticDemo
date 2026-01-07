@@ -44,4 +44,7 @@ class Template:
     variables: list[TemplateVariable] = field(default_factory=list)
 
 
-__all__ = ["Template", "TemplateVariable"]
+# Import registry after Template is defined to avoid circular imports
+from programmatic_demo.templates.registry import TemplateRegistry, get_registry
+
+__all__ = ["Template", "TemplateRegistry", "TemplateVariable", "get_registry"]

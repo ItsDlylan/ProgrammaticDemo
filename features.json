@@ -3500,7 +3500,7 @@
       "depends_on": [
         "TMPL-SKEL"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-004",
