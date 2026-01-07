@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "programmatic-demo"
+version = "0.1.0"
+description = "Agent-driven system for autonomous screen-recorded product demos"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Dylan Schwindt" }
+]
+keywords = ["automation", "demo", "screen-recording", "ai"]
+
+dependencies = [
+    "typer>=0.9.0",
+    "pydantic>=2.0.0",
+    "pyautogui>=0.9.54",
+    "playwright>=1.40.0",
+    "pillow>=10.0.0",
+    "mss>=9.0.0",
+    "pytesseract>=0.3.10",
+    "opencv-python>=4.8.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+pdemo = "programmatic_demo.cli.main:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/programmatic_demo"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
