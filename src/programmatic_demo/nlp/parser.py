@@ -91,3 +91,39 @@ def parse_click(text: str) -> ActionIntent | None:
         )
 
     return None
+
+
+def parse_type(text: str) -> ActionIntent | None:
+    """Parse a type action from natural language text.
+
+    Handles phrases like:
+    - "type X"
+    - "type 'X'"
+    - "enter X in Y"
+    - "enter X into the Y field"
+    - "write X"
+    - "input X"
+
+    Args:
+        text: Natural language description of a type action.
+
+    Returns:
+        ActionIntent with action_type="type", params containing "text" to type
+        and optional target_description for the field, or None if not parsed.
+    """
+    pattern = ACTION_PATTERNS["type"]
+    match = pattern.search(text.strip())
+
+    if match:
+        type_text = match.group(1).strip()
+        target = match.group(2)
+        target = target.strip() if target else None
+
+        return ActionIntent(
+            action_type="type",
+            target_description=target,
+            params={"text": type_text},
+            confidence=1.0,
+        )
+
+    return None
