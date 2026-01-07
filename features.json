@@ -3825,10 +3825,331 @@
         "TMPL-CLI"
       ],
       "passes": false
+    },
+    {
+      "id": "VISUAL-SKEL",
+      "category": "visual",
+      "description": "Create visual verification module structure",
+      "steps": [
+        "Create src/programmatic_demo/visual/ directory",
+        "Create __init__.py with module exports",
+        "Create base verifier protocol/interface",
+        "Add module to package imports"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/__init__.py",
+        "src/programmatic_demo/visual/base.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
+      "passes": true
+    },
+    {
+      "id": "VISUAL-001",
+      "category": "visual",
+      "description": "Get bounding boxes of page elements via DOM/accessibility tree",
+      "steps": [
+        "Create element_bounds.py module",
+        "Implement get_element_bounds(selector) using Playwright",
+        "Implement get_section_bounds(section_name) for semantic sections",
+        "Support both CSS selectors and accessibility labels",
+        "Return {top, left, width, height, center_y} for elements",
+        "Add caching for repeated queries"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/element_bounds.py"
+      ],
+      "depends_on": [
+        "VISUAL-SKEL",
+        "BROWSER-001"
+      ],
+      "passes": true
+    },
+    {
+      "id": "VISUAL-002",
+      "category": "visual",
+      "description": "Define and apply framing rules for different content types",
+      "steps": [
+        "Create framing_rules.py module",
+        "Define FramingRule dataclass with type, padding, alignment",
+        "Implement rule types: HEADER_AT_TOP, CONTENT_CENTERED, FULLY_VISIBLE, CTA_VISIBLE",
+        "Create calculate_optimal_scroll(element_bounds, viewport, rule) function",
+        "Support custom padding values per rule",
+        "Add rule presets for common section types"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/framing_rules.py"
+      ],
+      "depends_on": [
+        "VISUAL-SKEL"
+      ],
+      "passes": true
+    },
+    {
+      "id": "VISUAL-003",
+      "category": "visual",
+      "description": "Analyze screenshots using DOM bounds and vision model for framing verification",
+      "steps": [
+        "Create framing_analyzer.py module",
+        "Implement DOM-based checks: is_element_visible, is_element_centered, is_element_cut_off",
+        "Implement vision_verify_framing(screenshot, section_description) using Claude API",
+        "Vision model prompt for framing validation",
+        "Combine DOM + Vision results for comprehensive verification",
+        "Implement get_framing_issues(screenshot, expected_elements) returning list of issues with confidence",
+        "Support configurable tolerance for centered calculations",
+        "Cache vision model results to reduce API calls on retries"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/framing_analyzer.py"
+      ],
+      "depends_on": [
+        "VISUAL-001",
+        "SCREEN-001"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-004",
+      "category": "visual",
+      "description": "Detect when page animations have completed using frame differencing",
+      "steps": [
+        "Create animation_detector.py module",
+        "Implement frame_diff(screenshot1, screenshot2) returning pixel change percentage",
+        "Implement wait_for_animation_complete(take_screenshot_fn, threshold=0.03, timeout=5.0)",
+        "Default threshold: <3% pixel change (balanced - allows cursor blink)",
+        "Default check interval: 100ms between frames",
+        "Require 3 consecutive stable frames before declaring complete",
+        "Return early if no change detected for N consecutive frames",
+        "Support region-specific animation detection (ignore certain areas)"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/animation_detector.py"
+      ],
+      "depends_on": [
+        "VISUAL-SKEL",
+        "SCREEN-001"
+      ],
+      "passes": true
+    },
+    {
+      "id": "VISUAL-005",
+      "category": "visual",
+      "description": "Automatically adjust scroll position until framing is correct",
+      "steps": [
+        "Create auto_scroll.py module",
+        "Implement scroll_to_frame(element, framing_rule, max_iterations)",
+        "Use framing_analyzer to check each iteration",
+        "Calculate adjustment from framing issues",
+        "Support configurable max iterations (default: 5)",
+        "Return final position and iterations taken",
+        "Log each adjustment for debugging"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/auto_scroll.py"
+      ],
+      "depends_on": [
+        "VISUAL-002",
+        "VISUAL-003",
+        "BROWSER-001"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-006",
+      "category": "visual",
+      "description": "Identify page sections semantically from DOM structure",
+      "steps": [
+        "Create section_detector.py module",
+        "Implement find_sections(page) returning list of {name, bounds, type}",
+        "Detect section types: hero, features, pricing, faq, cta, footer",
+        "Use heading tags, landmark roles, and common class patterns",
+        "Support custom section markers via data attributes",
+        "Return sections in document order with scroll positions"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/section_detector.py"
+      ],
+      "depends_on": [
+        "VISUAL-001",
+        "BROWSER-001"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-007",
+      "category": "visual",
+      "description": "Automatically generate scroll waypoints from page structure",
+      "steps": [
+        "Create waypoint_generator.py module",
+        "Implement generate_waypoints(page, framing_rules) returning waypoint list",
+        "Use section_detector to find all sections",
+        "Apply framing_rules to calculate optimal scroll position per section",
+        "Estimate pause duration based on section content size",
+        "Support manual waypoint overrides",
+        "Output format compatible with existing demo scripts"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/waypoint_generator.py"
+      ],
+      "depends_on": [
+        "VISUAL-002",
+        "VISUAL-006"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-008",
+      "category": "visual",
+      "description": "Integrate visual verification into Observer agent",
+      "steps": [
+        "Update sensors/state.py Observer class",
+        "Add verify_framing(expected_elements, framing_rules) method",
+        "Add wait_for_stable_frame(timeout) method using animation detection",
+        "Add get_framing_report() returning structured verification results",
+        "Integrate with existing get_observation() flow",
+        "Add visual verification to observation dict output"
+      ],
+      "files": [
+        "src/programmatic_demo/sensors/state.py",
+        "src/programmatic_demo/visual/__init__.py"
+      ],
+      "depends_on": [
+        "VISUAL-003",
+        "VISUAL-004",
+        "STATE-001"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-009",
+      "category": "visual",
+      "description": "Demo recorder with automatic framing and animation detection",
+      "steps": [
+        "Create visual/smart_recorder.py module",
+        "Implement SmartDemoRecorder class wrapping existing recorder",
+        "Auto-detect page sections on navigation",
+        "Auto-calculate waypoints with optimal framing",
+        "Wait for animations before recording each section",
+        "Self-correct scroll positions using verification loop",
+        "Support manual override for specific waypoints"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/smart_recorder.py"
+      ],
+      "depends_on": [
+        "VISUAL-005",
+        "VISUAL-007",
+        "VISUAL-008",
+        "REC-001"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-010",
+      "category": "visual",
+      "description": "Preview generated waypoints before recording for approval/tweaks",
+      "steps": [
+        "Create preview_mode.py module",
+        "Implement preview_waypoints(page, waypoints) showing each position",
+        "Display: section name, scroll position, framing rule, estimated pause",
+        "Allow interactive adjustment: arrow keys to fine-tune position",
+        "Save adjustments back to waypoint list",
+        "Generate preview screenshots at each waypoint",
+        "Output preview report (JSON or visual HTML)",
+        "Support approve all or adjust and continue workflow"
+      ],
+      "files": [
+        "src/programmatic_demo/visual/preview_mode.py"
+      ],
+      "depends_on": [
+        "VISUAL-007",
+        "BROWSER-001"
+      ],
+      "passes": false
+    },
+    {
+      "id": "VISUAL-CLI",
+      "category": "visual",
+      "description": "CLI commands for visual verification and smart recording",
+      "steps": [
+        "Create cli/visual.py module",
+        "Add pdemo visual detect-sections command",
+        "Add pdemo visual generate-waypoints command",
+        "Add pdemo visual preview command for preview mode",
+        "Add pdemo visual verify-framing command",
+        "Add pdemo visual smart-record command with --preview flag",
+        "Add JSON output mode for all commands",
+        "Register visual command group in main CLI"
+      ],
+      "files": [
+        "src/programmatic_demo/cli/visual.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "VISUAL-009",
+        "VISUAL-010"
+      ],
+      "passes": false
+    },
+    {
+      "id": "INT-012",
+      "category": "integration",
+      "description": "Test: automatic section detection on sample pages",
+      "steps": [
+        "Create test page with known sections",
+        "Run section detector",
+        "Verify all sections found with correct bounds",
+        "Test edge cases: overlapping sections, dynamic content"
+      ],
+      "files": [
+        "tests/integration/test_visual_detection.py"
+      ],
+      "depends_on": [
+        "VISUAL-006"
+      ],
+      "passes": false
+    },
+    {
+      "id": "INT-013",
+      "category": "integration",
+      "description": "Test: auto-scroll correction achieves correct framing",
+      "steps": [
+        "Navigate to test page",
+        "Request framing for specific section",
+        "Verify auto-scroll corrects to optimal position",
+        "Test with different framing rules"
+      ],
+      "files": [
+        "tests/integration/test_auto_framing.py"
+      ],
+      "depends_on": [
+        "VISUAL-005"
+      ],
+      "passes": false
+    },
+    {
+      "id": "INT-014",
+      "category": "integration",
+      "description": "Test: full smart demo recording workflow",
+      "steps": [
+        "Run smart recorder on TCG landing page",
+        "Verify all sections properly framed without manual intervention",
+        "Verify animation waits work correctly",
+        "Compare output quality to manual recording"
+      ],
+      "files": [
+        "tests/integration/test_smart_recording.py"
+      ],
+      "depends_on": [
+        "VISUAL-009"
+      ],
+      "passes": false
     }
   ],
   "metadata": {
-    "total_features": 213,
+    "total_features": 228,
     "categories": {
       "setup": 5,
       "utility": 3,
@@ -3847,7 +4168,8 @@
       "effects": 26,
       "postprocess": 24,
       "templates": 14,
-      "integration": 11
+      "visual": 12,
+      "integration": 14
     },
     "parallelization_guide": {
       "description": "Features with same depends_on can run in parallel",
@@ -3867,7 +4189,9 @@
         "ORCH-001, ORCH-002, ORCH-005 can run in parallel (all depend on ORCH-SKEL)",
         "EFFECTS-001, EFFECTS-004, EFFECTS-009, EFFECTS-013, EFFECTS-017, EFFECTS-020 can run in parallel",
         "POST-001, POST-003, POST-008, POST-013, POST-017 can run in parallel",
-        "TMPL-001, TMPL-003 can run in parallel (all depend on TMPL-SKEL)"
+        "TMPL-001, TMPL-003 can run in parallel (all depend on TMPL-SKEL)",
+        "VISUAL-002, VISUAL-004 can run in parallel (both depend only on VISUAL-SKEL)",
+        "VISUAL-001, VISUAL-002 can run in parallel after VISUAL-SKEL"
       ]
     }
   }

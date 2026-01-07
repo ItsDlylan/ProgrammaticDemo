@@ -1,0 +1,91 @@
+"""Visual verification module for auto-framing and screenshot analysis.
+
+This module provides tools for:
+- Element bounds detection via DOM/accessibility tree
+- Framing rules for different content types
+- Screenshot analysis for framing verification
+- Animation completion detection
+- Auto-scroll correction loops
+- Semantic section detection
+- Dynamic waypoint generation
+"""
+
+from programmatic_demo.visual.base import (
+    AnimationDetector,
+    DEFAULT_FRAMING_RULES,
+    ElementBounds,
+    ElementBoundsProvider,
+    FramingAlignment,
+    FramingAnalyzer,
+    FramingIssue,
+    FramingRule,
+    Section,
+    SectionDetector,
+    Viewport,
+    Waypoint,
+    WaypointGenerator,
+)
+from programmatic_demo.visual.framing_rules import (
+    CONTENT_CENTERED,
+    CTA_VISIBLE,
+    FULLY_VISIBLE,
+    HEADER_AT_TOP,
+    HEADER_WITH_PADDING,
+    calculate_optimal_scroll,
+    create_custom_rule,
+    get_rule_for_section_type,
+    get_scroll_adjustment,
+    is_element_properly_framed,
+)
+from programmatic_demo.visual.element_bounds import (
+    AsyncElementBoundsDetector,
+    ElementBoundsDetector,
+)
+from programmatic_demo.visual.animation_detector import (
+    AnimationWatcher,
+    frame_diff,
+    frame_diff_region,
+    wait_for_animation_complete,
+    wait_for_animation_complete_sync,
+)
+
+__all__ = [
+    # Enums
+    "FramingAlignment",
+    # Data classes
+    "ElementBounds",
+    "Viewport",
+    "FramingRule",
+    "FramingIssue",
+    "Section",
+    "Waypoint",
+    # Protocols
+    "ElementBoundsProvider",
+    "FramingAnalyzer",
+    "AnimationDetector",
+    "SectionDetector",
+    "WaypointGenerator",
+    # Constants
+    "DEFAULT_FRAMING_RULES",
+    # Framing rules functions
+    "calculate_optimal_scroll",
+    "is_element_properly_framed",
+    "get_scroll_adjustment",
+    "get_rule_for_section_type",
+    "create_custom_rule",
+    # Preset rules
+    "HEADER_AT_TOP",
+    "HEADER_WITH_PADDING",
+    "CONTENT_CENTERED",
+    "FULLY_VISIBLE",
+    "CTA_VISIBLE",
+    # Element bounds detectors
+    "ElementBoundsDetector",
+    "AsyncElementBoundsDetector",
+    # Animation detection
+    "frame_diff",
+    "frame_diff_region",
+    "wait_for_animation_complete",
+    "wait_for_animation_complete_sync",
+    "AnimationWatcher",
+]
