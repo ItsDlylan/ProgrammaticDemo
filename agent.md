@@ -2,64 +2,64 @@
 
 ## Session Summary
 
-This session completed 18 features from `features.json`, bringing the project from 65/210 (31%) to 83/210 (39%) completion.
+This session completed 12 NLP features from `features.json`, bringing the project from 83/210 (39%) to 95/210 (45%) completion.
 
 ## Completed Features
 
-### Script Data Models (SCRIPT-SKEL through SCRIPT-013, SCRIPT-CLI)
-- **SCRIPT-SKEL**: Created `src/programmatic_demo/models/` package skeleton
-- **SCRIPT-001**: `ActionType` enum (click, type, press, scroll, wait, navigate, terminal, hotkey, drag)
-- **SCRIPT-002**: `TargetType` enum (screen, selector, coordinates, text, window)
-- **SCRIPT-003**: `WaitCondition` dataclass with `WaitType` enum
-- **SCRIPT-004**: `Target` dataclass
-- **SCRIPT-005**: `Step` dataclass
-- **SCRIPT-006**: `Scene` dataclass with `FailureStrategy` enum
-- **SCRIPT-007**: `Script` dataclass
-- **SCRIPT-008**: `Script.from_dict()` - recursive parsing with enum conversion
-- **SCRIPT-009**: `Script.from_yaml()` - YAML file/string parsing
-- **SCRIPT-010**: `Script.from_json()` - JSON file/string parsing
-- **SCRIPT-011**: `Script.to_dict()` - recursive serialization
-- **SCRIPT-012**: `Script.validate()` - field validation on all dataclasses
-- **SCRIPT-013**: `validate_dependencies()` - duplicate scene name detection
-- **SCRIPT-CLI**: CLI commands (`pdemo script validate/show/export`)
+### NLP Target Resolution (NLP-004 through NLP-007)
+- **NLP-004**: `resolve_by_text()` and `resolve()` methods using OCR.find_text()
+- **NLP-005**: `fuzzy_match()` using difflib.SequenceMatcher with 0.7 threshold
+- **NLP-006**: `infer_element_type()` with ElementType enum (button, field, input, link, menu, tab)
+- **NLP-007**: `parse_position_hint()` and `filter_by_position()` with PositionHint enum
 
-### NLP Package (NLP-SKEL through NLP-003)
-- **NLP-SKEL**: Created `src/programmatic_demo/nlp/` package skeleton
-- **NLP-001**: `ActionIntent` dataclass (action_type, target_description, params, confidence)
-- **NLP-002**: `ACTION_PATTERNS` regex dict for parsing action keywords
-- **NLP-003**: `TargetResolver` class skeleton with `ResolvedTarget` dataclass
+### NLP Action Parsers (NLP-008 through NLP-013)
+- **NLP-008**: `parse_click()` - click, tap, press button, select
+- **NLP-009**: `parse_type()` - type X, enter X in Y, write X
+- **NLP-010**: `parse_key()` - press Enter, hit Tab, with KEY_ALIASES mapping
+- **NLP-011**: `parse_wait()` - wait N seconds, wait for X, until X appears
+- **NLP-012**: `parse_scroll()` - scroll up/down/left/right, scroll to target
+- **NLP-013**: `parse_navigate()` - go to URL, open app, navigate to X
+
+### NLP Main Entry Points (NLP-014 through NLP-015)
+- **NLP-014**: `parse_action()` - unified parser that tries all action parsers
+- **NLP-015**: `resolve_and_execute()` - resolves targets and dispatches to actuators
 
 ## Next Feature to Work On
 
-**NLP-004**: Implement text-based target finding (OCR lookup)
+**NLP-CLI**: Create CLI pdemo action parse/resolve/execute commands
 
-Location in features.json: Line ~1174
+Location in features.json: Line ~1332
 
 ```json
 {
-  "id": "NLP-004",
+  "id": "NLP-CLI",
   "category": "nlp",
-  "description": "Implement text-based target finding (OCR lookup)",
+  "description": "Create CLI pdemo action parse/resolve/execute commands",
   "steps": [
-    "Implement resolve() method in TargetResolver",
-    "Use OCR.find_text() to locate text targets",
-    "Return center coordinates of matched text"
+    "Create src/programmatic_demo/cli/action.py",
+    "Add parse command - parse natural language to ActionIntent",
+    "Add resolve command - find target coordinates",
+    "Add execute command - parse, resolve, and execute",
+    "Register in main.py"
   ],
-  "files": ["src/programmatic_demo/nlp/resolver.py"],
-  "depends_on": ["NLP-003", "OCR-003"],
+  "files": ["src/programmatic_demo/cli/action.py", "src/programmatic_demo/cli/main.py"],
+  "depends_on": ["CLI-001", "NLP-014", "NLP-015"],
   "passes": false
 }
 ```
 
-## Key Files Modified/Created
+## Key Files Modified
 
-- `src/programmatic_demo/models/__init__.py`
-- `src/programmatic_demo/models/script.py` - All script dataclasses and methods
-- `src/programmatic_demo/cli/script.py` - Script CLI commands
-- `src/programmatic_demo/cli/main.py` - Registered script CLI
-- `src/programmatic_demo/nlp/__init__.py`
-- `src/programmatic_demo/nlp/parser.py` - ActionIntent and ACTION_PATTERNS
-- `src/programmatic_demo/nlp/resolver.py` - TargetResolver skeleton
+- `src/programmatic_demo/nlp/resolver.py` - Full implementation of TargetResolver with:
+  - `resolve_by_text()`, `fuzzy_match()`, `resolve()`
+  - `infer_element_type()`, `parse_position_hint()`, `filter_by_position()`
+  - ElementType, PositionHint enums
+
+- `src/programmatic_demo/nlp/parser.py` - Full implementation of action parsing with:
+  - `parse_click()`, `parse_type()`, `parse_key()`, `parse_wait()`, `parse_scroll()`, `parse_navigate()`
+  - `parse_action()` - unified entry point
+  - `resolve_and_execute()` - action dispatch to actuators
+  - KEY_ALIASES mapping
 
 ## Commands to Continue
 
@@ -67,14 +67,14 @@ Location in features.json: Line ~1174
 # Check current progress
 cat features.json | python3 -c "import json,sys; d=json.load(sys.stdin); t=len(d['features']); p=sum(1 for f in d['features'] if f['passes']); print(f'{p}/{t} features complete ({100*p//t}%)')"
 
-# Run tests to verify
-python -c "from programmatic_demo.models import Script; print('Script model OK')"
-python -c "from programmatic_demo.nlp import ActionIntent, TargetResolver; print('NLP OK')"
+# Verify NLP module
+python -c "from programmatic_demo.nlp.parser import parse_action, resolve_and_execute; print('Parser OK')"
+python -c "from programmatic_demo.nlp.resolver import TargetResolver, ElementType, PositionHint; print('Resolver OK')"
 ```
 
 ## Notes for Next Agent
 
 1. Follow the CLAUDE.md workflow - one feature at a time, update `passes: true` when complete
-2. The script data models are fully functional with serialization, parsing, and validation
-3. NLP package has basic structure but `TargetResolver.resolve()` is a stub - NLP-004 implements it
-4. All dependencies for NLP-004 are satisfied (NLP-003 and OCR-003 both pass)
+2. All NLP parsing and resolution is now complete
+3. NLP-CLI is next - create CLI commands that expose the NLP functionality
+4. All dependencies for NLP-CLI are satisfied (CLI-001, NLP-014, NLP-015 all pass)
