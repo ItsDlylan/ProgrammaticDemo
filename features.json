@@ -1036,7 +1036,7 @@
       ],
       "files": ["src/programmatic_demo/models/script.py"],
       "depends_on": ["SCRIPT-007"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-009",
@@ -1049,7 +1049,7 @@
       ],
       "files": ["src/programmatic_demo/models/script.py"],
       "depends_on": ["SCRIPT-008"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-010",
@@ -1062,7 +1062,7 @@
       ],
       "files": ["src/programmatic_demo/models/script.py"],
       "depends_on": ["SCRIPT-008"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-011",
@@ -1075,7 +1075,7 @@
       ],
       "files": ["src/programmatic_demo/models/script.py"],
       "depends_on": ["SCRIPT-007"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-012",
