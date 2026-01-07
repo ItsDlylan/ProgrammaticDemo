@@ -11,7 +11,9 @@
         "Configure package as 'programmatic_demo' with src layout",
         "Add [project.scripts] entry for pdemo CLI"
       ],
-      "files": ["pyproject.toml"],
+      "files": [
+        "pyproject.toml"
+      ],
       "depends_on": [],
       "passes": true
     },
@@ -24,8 +26,12 @@
         "Add __version__ = '0.1.0'",
         "Add module docstring"
       ],
-      "files": ["src/programmatic_demo/__init__.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/__init__.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -37,8 +43,12 @@
         "Import and call cli main function",
         "Enable python -m programmatic_demo invocation"
       ],
-      "files": ["src/programmatic_demo/__main__.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/__main__.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -53,7 +63,9 @@
         "Add Python venv creation and pip install",
         "Make script executable"
       ],
-      "files": ["scripts/setup_macos.sh"],
+      "files": [
+        "scripts/setup_macos.sh"
+      ],
       "depends_on": [],
       "passes": true
     },
@@ -68,11 +80,12 @@
         "Check Python packages importable",
         "Print pass/fail for each, exit 1 if any fail"
       ],
-      "files": ["scripts/verify_dependencies.py"],
+      "files": [
+        "scripts/verify_dependencies.py"
+      ],
       "depends_on": [],
       "passes": true
     },
-
     {
       "id": "UTIL-001",
       "category": "utility",
@@ -84,8 +97,13 @@
         "Add error_response(error_type, message, recoverable, suggestion) function",
         "Both return dict with timestamp, can be json.dumps'd"
       ],
-      "files": ["src/programmatic_demo/utils/__init__.py", "src/programmatic_demo/utils/output.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/utils/__init__.py",
+        "src/programmatic_demo/utils/output.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -98,8 +116,12 @@
         "Add typing_delay(base_ms=50) - returns jittered delay for typing",
         "Add hover_pause() - returns 50-150ms delay"
       ],
-      "files": ["src/programmatic_demo/utils/timing.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/utils/timing.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -112,11 +134,14 @@
         "Add load_config() that reads ~/.pdemo/config.json if exists",
         "Support PDEMO_ environment variable overrides"
       ],
-      "files": ["src/programmatic_demo/utils/config.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/utils/config.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
-
     {
       "id": "CLI-001",
       "category": "cli",
@@ -127,11 +152,16 @@
         "Create typer app with --version and --json flags",
         "Add placeholder subcommand groups (record, terminal, keyboard, mouse, browser, observe)"
       ],
-      "files": ["src/programmatic_demo/cli/__init__.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["SETUP-002", "UTIL-001"],
+      "files": [
+        "src/programmatic_demo/cli/__init__.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "SETUP-002",
+        "UTIL-001"
+      ],
       "passes": true
     },
-
     {
       "id": "REC-SKEL",
       "category": "recording",
@@ -142,8 +172,13 @@
         "Add Recorder class with method stubs: start(), stop(), get_status()",
         "Add instance variables: _process, _output_path, _start_time"
       ],
-      "files": ["src/programmatic_demo/recording/__init__.py", "src/programmatic_demo/recording/recorder.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/recording/__init__.py",
+        "src/programmatic_demo/recording/recorder.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -157,8 +192,12 @@
         "Store start_time for duration tracking",
         "Return success dict with pid and output_path"
       ],
-      "files": ["src/programmatic_demo/recording/recorder.py"],
-      "depends_on": ["REC-SKEL"],
+      "files": [
+        "src/programmatic_demo/recording/recorder.py"
+      ],
+      "depends_on": [
+        "REC-SKEL"
+      ],
       "passes": true
     },
     {
@@ -172,8 +211,12 @@
         "Calculate duration from start_time",
         "Return success dict with file_path, duration"
       ],
-      "files": ["src/programmatic_demo/recording/recorder.py"],
-      "depends_on": ["REC-SKEL"],
+      "files": [
+        "src/programmatic_demo/recording/recorder.py"
+      ],
+      "depends_on": [
+        "REC-SKEL"
+      ],
       "passes": true
     },
     {
@@ -185,8 +228,12 @@
         "Check if process is running",
         "Return dict with active, duration, output_path, pid"
       ],
-      "files": ["src/programmatic_demo/recording/recorder.py"],
-      "depends_on": ["REC-SKEL"],
+      "files": [
+        "src/programmatic_demo/recording/recorder.py"
+      ],
+      "depends_on": [
+        "REC-SKEL"
+      ],
       "passes": true
     },
     {
@@ -200,11 +247,17 @@
         "Output JSON responses",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/recording.py"],
-      "depends_on": ["CLI-001", "REC-001", "REC-002", "REC-003"],
+      "files": [
+        "src/programmatic_demo/cli/recording.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "REC-001",
+        "REC-002",
+        "REC-003"
+      ],
       "passes": true
     },
-
     {
       "id": "TERM-SKEL",
       "category": "terminal",
@@ -215,8 +268,13 @@
         "Add Terminal class with stubs: launch(), send(), exec(), read(), wait_for(), clear()",
         "Add instance variable: _session_name"
       ],
-      "files": ["src/programmatic_demo/actuators/__init__.py", "src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/actuators/__init__.py",
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -230,8 +288,12 @@
         "Verify session created with tmux has-session",
         "Store session name, return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -244,8 +306,12 @@
         "Do NOT send Enter key",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -258,8 +324,13 @@
         "Poll read() until shell prompt returns or timeout",
         "Return success dict with output"
       ],
-      "files": ["src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["TERM-SKEL", "TERM-004"],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL",
+        "TERM-004"
+      ],
       "passes": true
     },
     {
@@ -272,8 +343,12 @@
         "Strip ANSI escape codes with regex",
         "Return last N lines as string"
       ],
-      "files": ["src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -286,8 +361,13 @@
         "Return success when text found in output",
         "Return error dict on timeout"
       ],
-      "files": ["src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["TERM-SKEL", "TERM-004"],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL",
+        "TERM-004"
+      ],
       "passes": true
     },
     {
@@ -299,8 +379,12 @@
         "Send clear command or Ctrl+L via tmux",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/terminal.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/terminal.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -314,11 +398,20 @@
         "Output JSON responses",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/terminal.py"],
-      "depends_on": ["CLI-001", "TERM-001", "TERM-002", "TERM-003", "TERM-004", "TERM-005", "TERM-006"],
+      "files": [
+        "src/programmatic_demo/cli/terminal.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "TERM-001",
+        "TERM-002",
+        "TERM-003",
+        "TERM-004",
+        "TERM-005",
+        "TERM-006"
+      ],
       "passes": true
     },
-
     {
       "id": "KEY-SKEL",
       "category": "keyboard",
@@ -328,8 +421,12 @@
         "Add Keyboard class with stubs: type_text(), press(), hotkey()",
         "Import pyautogui"
       ],
-      "files": ["src/programmatic_demo/actuators/keyboard.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/keyboard.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -340,11 +437,16 @@
         "Implement type_text(text, delay_ms=50) in keyboard.py",
         "Loop through characters",
         "Use pyautogui.write() or press() for each char",
-        "Add jittered delay between chars (±30%)",
+        "Add jittered delay between chars (\u00b130%)",
         "Return success dict with text and duration"
       ],
-      "files": ["src/programmatic_demo/actuators/keyboard.py"],
-      "depends_on": ["KEY-SKEL", "UTIL-002"],
+      "files": [
+        "src/programmatic_demo/actuators/keyboard.py"
+      ],
+      "depends_on": [
+        "KEY-SKEL",
+        "UTIL-002"
+      ],
       "passes": true
     },
     {
@@ -357,8 +459,12 @@
         "Use pyautogui.press()",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/keyboard.py"],
-      "depends_on": ["KEY-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/keyboard.py"
+      ],
+      "depends_on": [
+        "KEY-SKEL"
+      ],
       "passes": true
     },
     {
@@ -372,8 +478,12 @@
         "Use pyautogui.hotkey()",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/keyboard.py"],
-      "depends_on": ["KEY-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/keyboard.py"
+      ],
+      "depends_on": [
+        "KEY-SKEL"
+      ],
       "passes": true
     },
     {
@@ -387,11 +497,17 @@
         "Output JSON responses",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/keyboard.py"],
-      "depends_on": ["CLI-001", "KEY-001", "KEY-002", "KEY-003"],
+      "files": [
+        "src/programmatic_demo/cli/keyboard.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "KEY-001",
+        "KEY-002",
+        "KEY-003"
+      ],
       "passes": true
     },
-
     {
       "id": "MOUSE-SKEL",
       "category": "mouse",
@@ -401,8 +517,12 @@
         "Add Mouse class with stubs: move_to(), click(), click_at(), scroll(), drag()",
         "Import pyautogui"
       ],
-      "files": ["src/programmatic_demo/actuators/mouse.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/mouse.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -417,8 +537,12 @@
         "Move through points with small delays",
         "Add slight random jitter to path"
       ],
-      "files": ["src/programmatic_demo/actuators/mouse.py"],
-      "depends_on": ["MOUSE-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/mouse.py"
+      ],
+      "depends_on": [
+        "MOUSE-SKEL"
+      ],
       "passes": true
     },
     {
@@ -431,8 +555,13 @@
         "Use pyautogui.click()",
         "Return success dict with position"
       ],
-      "files": ["src/programmatic_demo/actuators/mouse.py"],
-      "depends_on": ["MOUSE-SKEL", "UTIL-002"],
+      "files": [
+        "src/programmatic_demo/actuators/mouse.py"
+      ],
+      "depends_on": [
+        "MOUSE-SKEL",
+        "UTIL-002"
+      ],
       "passes": true
     },
     {
@@ -445,8 +574,13 @@
         "Call click(button)",
         "Return success dict with position"
       ],
-      "files": ["src/programmatic_demo/actuators/mouse.py"],
-      "depends_on": ["MOUSE-001", "MOUSE-002"],
+      "files": [
+        "src/programmatic_demo/actuators/mouse.py"
+      ],
+      "depends_on": [
+        "MOUSE-001",
+        "MOUSE-002"
+      ],
       "passes": true
     },
     {
@@ -459,8 +593,12 @@
         "Use pyautogui.scroll() in loop with small delays",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/mouse.py"],
-      "depends_on": ["MOUSE-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/mouse.py"
+      ],
+      "depends_on": [
+        "MOUSE-SKEL"
+      ],
       "passes": true
     },
     {
@@ -475,8 +613,12 @@
         "Release mouse button",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/mouse.py"],
-      "depends_on": ["MOUSE-001"],
+      "files": [
+        "src/programmatic_demo/actuators/mouse.py"
+      ],
+      "depends_on": [
+        "MOUSE-001"
+      ],
       "passes": true
     },
     {
@@ -490,11 +632,19 @@
         "Output JSON responses",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/mouse.py"],
-      "depends_on": ["CLI-001", "MOUSE-001", "MOUSE-002", "MOUSE-003", "MOUSE-004", "MOUSE-005"],
+      "files": [
+        "src/programmatic_demo/cli/mouse.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "MOUSE-001",
+        "MOUSE-002",
+        "MOUSE-003",
+        "MOUSE-004",
+        "MOUSE-005"
+      ],
       "passes": true
     },
-
     {
       "id": "SCREEN-SKEL",
       "category": "perception",
@@ -505,8 +655,13 @@
         "Add Screen class with stubs: capture(), capture_region(), save(), to_base64()",
         "Import mss, PIL"
       ],
-      "files": ["src/programmatic_demo/sensors/__init__.py", "src/programmatic_demo/sensors/screen.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/sensors/__init__.py",
+        "src/programmatic_demo/sensors/screen.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -520,8 +675,12 @@
         "Handle Retina scaling (divide dimensions by 2 if needed)",
         "Return PIL Image"
       ],
-      "files": ["src/programmatic_demo/sensors/screen.py"],
-      "depends_on": ["SCREEN-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/screen.py"
+      ],
+      "depends_on": [
+        "SCREEN-SKEL"
+      ],
       "passes": true
     },
     {
@@ -534,8 +693,12 @@
         "Convert to PIL Image",
         "Return cropped image"
       ],
-      "files": ["src/programmatic_demo/sensors/screen.py"],
-      "depends_on": ["SCREEN-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/screen.py"
+      ],
+      "depends_on": [
+        "SCREEN-SKEL"
+      ],
       "passes": true
     },
     {
@@ -548,8 +711,12 @@
         "Save as PNG or JPG based on extension",
         "Return dict with path and file size"
       ],
-      "files": ["src/programmatic_demo/sensors/screen.py"],
-      "depends_on": ["SCREEN-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/screen.py"
+      ],
+      "depends_on": [
+        "SCREEN-SKEL"
+      ],
       "passes": true
     },
     {
@@ -562,11 +729,14 @@
         "Encode to base64 string",
         "Return base64 string"
       ],
-      "files": ["src/programmatic_demo/sensors/screen.py"],
-      "depends_on": ["SCREEN-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/screen.py"
+      ],
+      "depends_on": [
+        "SCREEN-SKEL"
+      ],
       "passes": true
     },
-
     {
       "id": "OCR-SKEL",
       "category": "perception",
@@ -576,8 +746,12 @@
         "Add OCR class with stubs: extract_text(), extract_elements(), find_text()",
         "Import pytesseract"
       ],
-      "files": ["src/programmatic_demo/sensors/ocr.py"],
-      "depends_on": ["SCREEN-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/ocr.py"
+      ],
+      "depends_on": [
+        "SCREEN-SKEL"
+      ],
       "passes": true
     },
     {
@@ -589,8 +763,12 @@
         "Use pytesseract.image_to_string()",
         "Return extracted text as string"
       ],
-      "files": ["src/programmatic_demo/sensors/ocr.py"],
-      "depends_on": ["OCR-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/ocr.py"
+      ],
+      "depends_on": [
+        "OCR-SKEL"
+      ],
       "passes": true
     },
     {
@@ -604,8 +782,12 @@
         "Filter low confidence (<50) results",
         "Sort top-to-bottom, left-to-right"
       ],
-      "files": ["src/programmatic_demo/sensors/ocr.py"],
-      "depends_on": ["OCR-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/ocr.py"
+      ],
+      "depends_on": [
+        "OCR-SKEL"
+      ],
       "passes": true
     },
     {
@@ -618,11 +800,14 @@
         "Search for matching text (exact or partial)",
         "Return center coordinates {x, y} or None"
       ],
-      "files": ["src/programmatic_demo/sensors/ocr.py"],
-      "depends_on": ["OCR-002"],
+      "files": [
+        "src/programmatic_demo/sensors/ocr.py"
+      ],
+      "depends_on": [
+        "OCR-002"
+      ],
       "passes": true
     },
-
     {
       "id": "STATE-SKEL",
       "category": "perception",
@@ -632,8 +817,13 @@
         "Add Observer class with stubs: get_observation(), get_window_info()",
         "Add references to Screen, OCR, Terminal instances"
       ],
-      "files": ["src/programmatic_demo/sensors/state.py"],
-      "depends_on": ["SCREEN-SKEL", "OCR-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/state.py"
+      ],
+      "depends_on": [
+        "SCREEN-SKEL",
+        "OCR-SKEL"
+      ],
       "passes": true
     },
     {
@@ -646,8 +836,12 @@
         "Parse JSON response",
         "Return {title, app, bounds: {x, y, width, height}}"
       ],
-      "files": ["src/programmatic_demo/sensors/state.py"],
-      "depends_on": ["STATE-SKEL"],
+      "files": [
+        "src/programmatic_demo/sensors/state.py"
+      ],
+      "depends_on": [
+        "STATE-SKEL"
+      ],
       "passes": true
     },
     {
@@ -663,8 +857,16 @@
         "Get window info",
         "Return full observation dict with timestamp"
       ],
-      "files": ["src/programmatic_demo/sensors/state.py"],
-      "depends_on": ["STATE-001", "SCREEN-001", "SCREEN-003", "SCREEN-004", "OCR-001"],
+      "files": [
+        "src/programmatic_demo/sensors/state.py"
+      ],
+      "depends_on": [
+        "STATE-001",
+        "SCREEN-001",
+        "SCREEN-003",
+        "SCREEN-004",
+        "OCR-001"
+      ],
       "passes": true
     },
     {
@@ -678,11 +880,15 @@
         "Output JSON responses",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/perception.py"],
-      "depends_on": ["CLI-001", "STATE-002"],
+      "files": [
+        "src/programmatic_demo/cli/perception.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "STATE-002"
+      ],
       "passes": true
     },
-
     {
       "id": "WINDOW-SKEL",
       "category": "window",
@@ -692,8 +898,12 @@
         "Add Window class with stubs: get_windows(), focus()",
         "Will use yabai for implementation"
       ],
-      "files": ["src/programmatic_demo/actuators/window.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/window.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -706,8 +916,12 @@
         "Parse JSON response",
         "Return list of {id, title, app, bounds}"
       ],
-      "files": ["src/programmatic_demo/actuators/window.py"],
-      "depends_on": ["WINDOW-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/window.py"
+      ],
+      "depends_on": [
+        "WINDOW-SKEL"
+      ],
       "passes": true
     },
     {
@@ -720,11 +934,14 @@
         "Run yabai -m window --focus {id}",
         "Return window info dict"
       ],
-      "files": ["src/programmatic_demo/actuators/window.py"],
-      "depends_on": ["WINDOW-001"],
+      "files": [
+        "src/programmatic_demo/actuators/window.py"
+      ],
+      "depends_on": [
+        "WINDOW-001"
+      ],
       "passes": true
     },
-
     {
       "id": "BROWSER-SKEL",
       "category": "browser",
@@ -734,8 +951,12 @@
         "Add Browser class with stubs: launch(), navigate(), click(), fill(), wait_for(), get_state(), screenshot(), close()",
         "Import playwright.sync_api"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["TERM-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "TERM-SKEL"
+      ],
       "passes": true
     },
     {
@@ -750,8 +971,12 @@
         "Navigate to url if provided",
         "Store browser, context, page references"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-SKEL"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-SKEL"
+      ],
       "passes": true
     },
     {
@@ -764,8 +989,12 @@
         "Wait for load state",
         "Return {url, title}"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -777,8 +1006,12 @@
         "Use page.click(selector)",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -790,8 +1023,12 @@
         "Use page.fill(selector, value)",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -803,8 +1040,12 @@
         "Use page.wait_for_selector(selector, timeout=timeout*1000)",
         "Return success or timeout error"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -815,8 +1056,12 @@
         "Implement get_state() in browser.py",
         "Return {url: page.url, title: page.title(), viewport: page.viewport_size}"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -828,8 +1073,12 @@
         "Use page.screenshot(path=path)",
         "Return {path, size}"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -842,8 +1091,12 @@
         "Stop playwright",
         "Return success dict"
       ],
-      "files": ["src/programmatic_demo/actuators/browser.py"],
-      "depends_on": ["BROWSER-001"],
+      "files": [
+        "src/programmatic_demo/actuators/browser.py"
+      ],
+      "depends_on": [
+        "BROWSER-001"
+      ],
       "passes": true
     },
     {
@@ -857,11 +1110,22 @@
         "Output JSON responses",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/browser.py"],
-      "depends_on": ["CLI-001", "BROWSER-001", "BROWSER-002", "BROWSER-003", "BROWSER-004", "BROWSER-005", "BROWSER-006", "BROWSER-007", "BROWSER-008"],
+      "files": [
+        "src/programmatic_demo/cli/browser.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "BROWSER-001",
+        "BROWSER-002",
+        "BROWSER-003",
+        "BROWSER-004",
+        "BROWSER-005",
+        "BROWSER-006",
+        "BROWSER-007",
+        "BROWSER-008"
+      ],
       "passes": true
     },
-
     {
       "id": "INT-001",
       "category": "integration",
@@ -876,7 +1140,11 @@
         "Verify video file exists"
       ],
       "files": [],
-      "depends_on": ["REC-CLI", "TERM-CLI", "KEY-CLI"],
+      "depends_on": [
+        "REC-CLI",
+        "TERM-CLI",
+        "KEY-CLI"
+      ],
       "passes": true
     },
     {
@@ -891,7 +1159,10 @@
         "Visually verify smooth curve"
       ],
       "files": [],
-      "depends_on": ["REC-CLI", "MOUSE-CLI"],
+      "depends_on": [
+        "REC-CLI",
+        "MOUSE-CLI"
+      ],
       "passes": true
     },
     {
@@ -907,7 +1178,11 @@
         "Stop recording"
       ],
       "files": [],
-      "depends_on": ["REC-CLI", "BROWSER-CLI", "STATE-CLI"],
+      "depends_on": [
+        "REC-CLI",
+        "BROWSER-CLI",
+        "STATE-CLI"
+      ],
       "passes": true
     },
     {
@@ -924,10 +1199,13 @@
         "Verify window info present"
       ],
       "files": [],
-      "depends_on": ["TERM-CLI", "KEY-CLI", "STATE-CLI"],
+      "depends_on": [
+        "TERM-CLI",
+        "KEY-CLI",
+        "STATE-CLI"
+      ],
       "passes": true
     },
-
     {
       "id": "SCRIPT-SKEL",
       "category": "script",
@@ -937,8 +1215,13 @@
         "Create src/programmatic_demo/models/script.py with module docstring",
         "Add placeholder imports for dataclasses and enums"
       ],
-      "files": ["src/programmatic_demo/models/__init__.py", "src/programmatic_demo/models/script.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/models/__init__.py",
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -949,8 +1232,12 @@
         "Create ActionType enum in script.py",
         "Add values: click, type, press, scroll, wait, navigate, terminal, hotkey, drag"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-SKEL"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-SKEL"
+      ],
       "passes": true
     },
     {
@@ -961,8 +1248,12 @@
         "Create TargetType enum in script.py",
         "Add values: screen, selector, coordinates, text, window"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-SKEL"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-SKEL"
+      ],
       "passes": true
     },
     {
@@ -973,8 +1264,12 @@
         "Create WaitCondition dataclass",
         "Add fields: type (text/element/timeout), value, timeout_seconds"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-SKEL"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-SKEL"
+      ],
       "passes": true
     },
     {
@@ -985,8 +1280,12 @@
         "Create Target dataclass",
         "Add fields: type (TargetType), description, selector, coords (optional tuple)"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-002"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-002"
+      ],
       "passes": true
     },
     {
@@ -997,8 +1296,14 @@
         "Create Step dataclass",
         "Add fields: action (ActionType), target (Target), wait_for (WaitCondition), narration, params (dict)"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-001", "SCRIPT-003", "SCRIPT-004"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-001",
+        "SCRIPT-003",
+        "SCRIPT-004"
+      ],
       "passes": true
     },
     {
@@ -1009,8 +1314,12 @@
         "Create Scene dataclass",
         "Add fields: name, goal, steps (list[Step]), on_failure (retry/skip/abort)"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-005"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-005"
+      ],
       "passes": true
     },
     {
@@ -1021,8 +1330,12 @@
         "Create Script dataclass",
         "Add fields: name, description, scenes (list[Scene]), metadata (dict)"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-006"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-006"
+      ],
       "passes": true
     },
     {
@@ -1034,8 +1347,12 @@
         "Recursively parse nested scenes and steps",
         "Convert enum strings to enum values"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-007"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-007"
+      ],
       "passes": true
     },
     {
@@ -1047,8 +1364,12 @@
         "Load YAML file or string",
         "Call from_dict with parsed data"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-008"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-008"
+      ],
       "passes": true
     },
     {
@@ -1060,8 +1381,12 @@
         "Load JSON file or string",
         "Call from_dict with parsed data"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-008"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-008"
+      ],
       "passes": true
     },
     {
@@ -1073,8 +1398,12 @@
         "Recursively convert dataclasses to dicts",
         "Convert enums to string values"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-007"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-007"
+      ],
       "passes": true
     },
     {
@@ -1087,8 +1416,12 @@
         "Validate enum values are valid",
         "Return list of validation errors"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-007"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-007"
+      ],
       "passes": true
     },
     {
@@ -1100,8 +1433,12 @@
         "Verify on_failure scene names exist",
         "Check for circular dependencies"
       ],
-      "files": ["src/programmatic_demo/models/script.py"],
-      "depends_on": ["SCRIPT-012"],
+      "files": [
+        "src/programmatic_demo/models/script.py"
+      ],
+      "depends_on": [
+        "SCRIPT-012"
+      ],
       "passes": true
     },
     {
@@ -1115,11 +1452,18 @@
         "Add export command - convert between yaml/json",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/script.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["CLI-001", "SCRIPT-009", "SCRIPT-010", "SCRIPT-012"],
+      "files": [
+        "src/programmatic_demo/cli/script.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "SCRIPT-009",
+        "SCRIPT-010",
+        "SCRIPT-012"
+      ],
       "passes": true
     },
-
     {
       "id": "NLP-SKEL",
       "category": "nlp",
@@ -1129,8 +1473,13 @@
         "Create src/programmatic_demo/nlp/parser.py with module docstring",
         "Add placeholder imports"
       ],
-      "files": ["src/programmatic_demo/nlp/__init__.py", "src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/nlp/__init__.py",
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -1141,8 +1490,12 @@
         "Create ActionIntent dataclass in parser.py",
         "Add fields: action_type, target_description, params (dict), confidence"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-SKEL"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1154,8 +1507,12 @@
         "Patterns for: click, type, press, scroll, wait, navigate",
         "Include capture groups for target and parameters"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-SKEL"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1167,8 +1524,12 @@
         "Create TargetResolver class with method stubs",
         "Add methods: resolve(description, observation) -> coords"
       ],
-      "files": ["src/programmatic_demo/nlp/resolver.py"],
-      "depends_on": ["NLP-SKEL"],
+      "files": [
+        "src/programmatic_demo/nlp/resolver.py"
+      ],
+      "depends_on": [
+        "NLP-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1180,8 +1541,13 @@
         "Use OCR.find_text to locate text on screen",
         "Return center coordinates of found text"
       ],
-      "files": ["src/programmatic_demo/nlp/resolver.py"],
-      "depends_on": ["NLP-003", "OCR-003"],
+      "files": [
+        "src/programmatic_demo/nlp/resolver.py"
+      ],
+      "depends_on": [
+        "NLP-003",
+        "OCR-003"
+      ],
       "passes": true
     },
     {
@@ -1193,8 +1559,12 @@
         "Use difflib.SequenceMatcher for similarity",
         "Return best match above threshold (0.7)"
       ],
-      "files": ["src/programmatic_demo/nlp/resolver.py"],
-      "depends_on": ["NLP-004"],
+      "files": [
+        "src/programmatic_demo/nlp/resolver.py"
+      ],
+      "depends_on": [
+        "NLP-004"
+      ],
       "passes": true
     },
     {
@@ -1206,8 +1576,12 @@
         "Recognize keywords: button, field, input, link, menu, tab",
         "Adjust search strategy based on element type"
       ],
-      "files": ["src/programmatic_demo/nlp/resolver.py"],
-      "depends_on": ["NLP-004"],
+      "files": [
+        "src/programmatic_demo/nlp/resolver.py"
+      ],
+      "depends_on": [
+        "NLP-004"
+      ],
       "passes": true
     },
     {
@@ -1219,8 +1593,12 @@
         "Recognize: top, bottom, left, right, first, last, near",
         "Filter candidates based on position hints"
       ],
-      "files": ["src/programmatic_demo/nlp/resolver.py"],
-      "depends_on": ["NLP-004"],
+      "files": [
+        "src/programmatic_demo/nlp/resolver.py"
+      ],
+      "depends_on": [
+        "NLP-004"
+      ],
       "passes": true
     },
     {
@@ -1232,8 +1610,13 @@
         "Handle: click X, press X button, tap on X",
         "Extract target description from text"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-001", "NLP-002"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-001",
+        "NLP-002"
+      ],
       "passes": true
     },
     {
@@ -1245,8 +1628,13 @@
         "Handle: type X, enter X in Y, write X",
         "Extract text to type and optional target field"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-001", "NLP-002"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-001",
+        "NLP-002"
+      ],
       "passes": true
     },
     {
@@ -1258,8 +1646,13 @@
         "Handle: press Enter, hit Tab, escape key",
         "Map common key names to pyautogui keys"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-001", "NLP-002"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-001",
+        "NLP-002"
+      ],
       "passes": true
     },
     {
@@ -1271,8 +1664,13 @@
         "Handle: wait for X, until X appears, wait N seconds",
         "Extract wait condition type and value"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-001", "NLP-002"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-001",
+        "NLP-002"
+      ],
       "passes": true
     },
     {
@@ -1284,8 +1682,13 @@
         "Handle: scroll down, scroll up, scroll to X",
         "Extract direction and optional amount"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-001", "NLP-002"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-001",
+        "NLP-002"
+      ],
       "passes": true
     },
     {
@@ -1297,8 +1700,13 @@
         "Handle: go to X, open X, navigate to X",
         "Extract URL or app name"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-001", "NLP-002"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-001",
+        "NLP-002"
+      ],
       "passes": true
     },
     {
@@ -1310,8 +1718,17 @@
         "Try each action parser in order",
         "Return ActionIntent with highest confidence match"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-008", "NLP-009", "NLP-010", "NLP-011", "NLP-012", "NLP-013"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-008",
+        "NLP-009",
+        "NLP-010",
+        "NLP-011",
+        "NLP-012",
+        "NLP-013"
+      ],
       "passes": true
     },
     {
@@ -1324,8 +1741,13 @@
         "Dispatch to appropriate actuator",
         "Return execution result"
       ],
-      "files": ["src/programmatic_demo/nlp/parser.py"],
-      "depends_on": ["NLP-014", "NLP-004"],
+      "files": [
+        "src/programmatic_demo/nlp/parser.py"
+      ],
+      "depends_on": [
+        "NLP-014",
+        "NLP-004"
+      ],
       "passes": true
     },
     {
@@ -1339,11 +1761,17 @@
         "Add execute command - parse, resolve, and execute",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/action.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["CLI-001", "NLP-014", "NLP-015"],
+      "files": [
+        "src/programmatic_demo/cli/action.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "NLP-014",
+        "NLP-015"
+      ],
       "passes": true
     },
-
     {
       "id": "DIRECTOR-SKEL",
       "category": "director",
@@ -1353,8 +1781,13 @@
         "Create src/programmatic_demo/agents/director.py",
         "Add Director class with method stubs"
       ],
-      "files": ["src/programmatic_demo/agents/__init__.py", "src/programmatic_demo/agents/director.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/agents/__init__.py",
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -1366,8 +1799,12 @@
         "Create ClaudeClient class",
         "Add method stubs: send_message, send_with_image"
       ],
-      "files": ["src/programmatic_demo/agents/claude_client.py"],
-      "depends_on": ["DIRECTOR-SKEL"],
+      "files": [
+        "src/programmatic_demo/agents/claude_client.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1381,8 +1818,13 @@
         "Fall back to config file",
         "Raise error if not found"
       ],
-      "files": ["src/programmatic_demo/agents/claude_client.py"],
-      "depends_on": ["DIRECTOR-001", "UTIL-003"],
+      "files": [
+        "src/programmatic_demo/agents/claude_client.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-001",
+        "UTIL-003"
+      ],
       "passes": true
     },
     {
@@ -1395,8 +1837,12 @@
         "Accept system prompt and user message",
         "Return properly formatted messages list"
       ],
-      "files": ["src/programmatic_demo/agents/claude_client.py"],
-      "depends_on": ["DIRECTOR-001"],
+      "files": [
+        "src/programmatic_demo/agents/claude_client.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-001"
+      ],
       "passes": true
     },
     {
@@ -1409,8 +1855,13 @@
         "Accept base64 image string",
         "Format as Claude vision message content"
       ],
-      "files": ["src/programmatic_demo/agents/claude_client.py"],
-      "depends_on": ["DIRECTOR-003", "SCREEN-004"],
+      "files": [
+        "src/programmatic_demo/agents/claude_client.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-003",
+        "SCREEN-004"
+      ],
       "passes": true
     },
     {
@@ -1424,8 +1875,12 @@
         "Handle markdown code blocks",
         "Return parsed dict"
       ],
-      "files": ["src/programmatic_demo/agents/claude_client.py"],
-      "depends_on": ["DIRECTOR-001"],
+      "files": [
+        "src/programmatic_demo/agents/claude_client.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-001"
+      ],
       "passes": true
     },
     {
@@ -1437,9 +1892,14 @@
         "Format observation dict as readable text",
         "Include OCR text, terminal output, window info"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-004", "STATE-002"],
-      "passes": false
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-004",
+        "STATE-002"
+      ],
+      "passes": true
     },
     {
       "id": "DIRECTOR-007",
@@ -1451,8 +1911,12 @@
         "Reduce JPEG quality to 85%",
         "Return compressed base64"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-006"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-006"
+      ],
       "passes": false
     },
     {
@@ -1465,8 +1929,12 @@
         "Keep most recent terminal output",
         "Preserve key information"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-006"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-006"
+      ],
       "passes": false
     },
     {
@@ -1478,9 +1946,13 @@
         "Create __init__.py",
         "Add placeholder .txt files for each prompt type"
       ],
-      "files": ["src/programmatic_demo/prompts/__init__.py"],
-      "depends_on": ["DIRECTOR-SKEL"],
-      "passes": false
+      "files": [
+        "src/programmatic_demo/prompts/__init__.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-SKEL"
+      ],
+      "passes": true
     },
     {
       "id": "DIRECTOR-010",
@@ -1492,8 +1964,12 @@
         "Define output format (list of steps)",
         "Add examples of good scene plans"
       ],
-      "files": ["src/programmatic_demo/prompts/scene_planner.txt"],
-      "depends_on": ["DIRECTOR-009"],
+      "files": [
+        "src/programmatic_demo/prompts/scene_planner.txt"
+      ],
+      "depends_on": [
+        "DIRECTOR-009"
+      ],
       "passes": false
     },
     {
@@ -1506,8 +1982,12 @@
         "Define available actions and format",
         "Add decision-making guidelines"
       ],
-      "files": ["src/programmatic_demo/prompts/action_decider.txt"],
-      "depends_on": ["DIRECTOR-009"],
+      "files": [
+        "src/programmatic_demo/prompts/action_decider.txt"
+      ],
+      "depends_on": [
+        "DIRECTOR-009"
+      ],
       "passes": false
     },
     {
@@ -1520,8 +2000,12 @@
         "Define retry strategies",
         "Add recovery suggestion format"
       ],
-      "files": ["src/programmatic_demo/prompts/failure_analyzer.txt"],
-      "depends_on": ["DIRECTOR-009"],
+      "files": [
+        "src/programmatic_demo/prompts/failure_analyzer.txt"
+      ],
+      "depends_on": [
+        "DIRECTOR-009"
+      ],
       "passes": false
     },
     {
@@ -1534,8 +2018,12 @@
         "Substitute {variables} with provided values",
         "Return formatted prompt string"
       ],
-      "files": ["src/programmatic_demo/prompts/__init__.py"],
-      "depends_on": ["DIRECTOR-009"],
+      "files": [
+        "src/programmatic_demo/prompts/__init__.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-009"
+      ],
       "passes": false
     },
     {
@@ -1548,8 +2036,14 @@
         "Send to Claude with context",
         "Parse response into Step objects"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-010", "DIRECTOR-013", "SCRIPT-005"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-010",
+        "DIRECTOR-013",
+        "SCRIPT-005"
+      ],
       "passes": false
     },
     {
@@ -1562,8 +2056,14 @@
         "Include compressed screenshot",
         "Parse response into single Step"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-011", "DIRECTOR-013", "DIRECTOR-006"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-011",
+        "DIRECTOR-013",
+        "DIRECTOR-006"
+      ],
       "passes": false
     },
     {
@@ -1576,8 +2076,12 @@
         "Check OCR text for expected content",
         "Return True if state matches"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-006"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-006"
+      ],
       "passes": false
     },
     {
@@ -1590,8 +2094,13 @@
         "Send observation and failed step",
         "Parse response into retry strategy"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-012", "DIRECTOR-013"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-012",
+        "DIRECTOR-013"
+      ],
       "passes": false
     },
     {
@@ -1603,11 +2112,14 @@
         "Based on failure analysis, suggest alternative action",
         "Return recovery Step or None if unrecoverable"
       ],
-      "files": ["src/programmatic_demo/agents/director.py"],
-      "depends_on": ["DIRECTOR-017"],
+      "files": [
+        "src/programmatic_demo/agents/director.py"
+      ],
+      "depends_on": [
+        "DIRECTOR-017"
+      ],
       "passes": false
     },
-
     {
       "id": "ORCH-SKEL",
       "category": "orchestrator",
@@ -1617,8 +2129,13 @@
         "Create src/programmatic_demo/orchestrator/runner.py",
         "Add Runner class with method stubs"
       ],
-      "files": ["src/programmatic_demo/orchestrator/__init__.py", "src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/orchestrator/__init__.py",
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -1629,8 +2146,12 @@
         "Create RunnerConfig dataclass",
         "Add fields: max_retries, step_timeout, scene_timeout, verify_after_action"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-SKEL"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1641,8 +2162,12 @@
         "Create StepResult dataclass",
         "Add fields: success, observation, error, duration, retries"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-SKEL"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1653,8 +2178,12 @@
         "Create SceneResult dataclass",
         "Add fields: success, steps_completed, steps_total, error, duration"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-002"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-002"
+      ],
       "passes": true
     },
     {
@@ -1665,8 +2194,12 @@
         "Create DemoResult dataclass",
         "Add fields: success, scenes_completed, scenes_total, video_path, duration"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-003"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-003"
+      ],
       "passes": true
     },
     {
@@ -1678,8 +2211,12 @@
         "Create ActionDispatcher class",
         "Add dispatch(step) method that routes to appropriate actuator"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-SKEL"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1691,8 +2228,14 @@
         "Resolve target to coordinates using NLP resolver",
         "Call Mouse.click_at with coordinates"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "MOUSE-003", "NLP-004"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "MOUSE-003",
+        "NLP-004"
+      ],
       "passes": true
     },
     {
@@ -1703,8 +2246,13 @@
         "Add dispatch_type method to ActionDispatcher",
         "Call Keyboard.type_text with provided text"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "KEY-001"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "KEY-001"
+      ],
       "passes": true
     },
     {
@@ -1715,8 +2263,13 @@
         "Add dispatch_press method to ActionDispatcher",
         "Call Keyboard.press with key name"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "KEY-002"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "KEY-002"
+      ],
       "passes": true
     },
     {
@@ -1727,8 +2280,13 @@
         "Add dispatch_scroll method to ActionDispatcher",
         "Call Mouse.scroll with direction and amount"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "MOUSE-004"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "MOUSE-004"
+      ],
       "passes": true
     },
     {
@@ -1741,8 +2299,13 @@
         "Check if condition is met",
         "Return when satisfied or timeout"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "STATE-002"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "STATE-002"
+      ],
       "passes": true
     },
     {
@@ -1754,8 +2317,13 @@
         "Launch browser if not open",
         "Call Browser.navigate with URL"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "BROWSER-002"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "BROWSER-002"
+      ],
       "passes": true
     },
     {
@@ -1767,8 +2335,13 @@
         "Launch terminal if no session",
         "Call Terminal.exec with command"
       ],
-      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
-      "depends_on": ["ORCH-005", "TERM-003"],
+      "files": [
+        "src/programmatic_demo/orchestrator/dispatcher.py"
+      ],
+      "depends_on": [
+        "ORCH-005",
+        "TERM-003"
+      ],
       "passes": true
     },
     {
@@ -1781,8 +2354,16 @@
         "Capture observation after action",
         "Return StepResult with timing"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-006", "ORCH-007", "ORCH-008", "ORCH-009", "ORCH-010"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-006",
+        "ORCH-007",
+        "ORCH-008",
+        "ORCH-009",
+        "ORCH-010"
+      ],
       "passes": false
     },
     {
@@ -1794,8 +2375,13 @@
         "Check wait_for condition against observation",
         "Use Director.detect_success for complex verification"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-013", "STATE-002"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-013",
+        "STATE-002"
+      ],
       "passes": false
     },
     {
@@ -1808,8 +2394,13 @@
         "Execute and verify each step",
         "Handle failures based on on_failure strategy"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-013", "ORCH-014"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-013",
+        "ORCH-014"
+      ],
       "passes": false
     },
     {
@@ -1823,8 +2414,12 @@
         "Execute each scene",
         "Stop recording and return result"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-015"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-015"
+      ],
       "passes": false
     },
     {
@@ -1837,8 +2432,13 @@
         "Use Director.analyze_failure for smart retries",
         "Return after max attempts or success"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-013", "DIRECTOR-017"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-013",
+        "DIRECTOR-017"
+      ],
       "passes": false
     },
     {
@@ -1851,8 +2451,12 @@
         "Reset to known state",
         "Clear terminal if active"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-015"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-015"
+      ],
       "passes": false
     },
     {
@@ -1865,8 +2469,12 @@
         "Stop recording if active",
         "Save partial progress"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-016"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-016"
+      ],
       "passes": false
     },
     {
@@ -1878,8 +2486,12 @@
         "Add on_scene_start, on_scene_complete callbacks",
         "Call callbacks at appropriate points in execution"
       ],
-      "files": ["src/programmatic_demo/orchestrator/runner.py"],
-      "depends_on": ["ORCH-016"],
+      "files": [
+        "src/programmatic_demo/orchestrator/runner.py"
+      ],
+      "depends_on": [
+        "ORCH-016"
+      ],
       "passes": false
     },
     {
@@ -1893,11 +2505,16 @@
         "Add step command - run single step",
         "Add progress output and JSON mode"
       ],
-      "files": ["src/programmatic_demo/cli/run.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["CLI-001", "ORCH-016"],
+      "files": [
+        "src/programmatic_demo/cli/run.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "ORCH-016"
+      ],
       "passes": false
     },
-
     {
       "id": "EFFECTS-SKEL",
       "category": "effects",
@@ -1907,8 +2524,13 @@
         "Create src/programmatic_demo/effects/compositor.py",
         "Add Compositor class with method stubs"
       ],
-      "files": ["src/programmatic_demo/effects/__init__.py", "src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/effects/__init__.py",
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -1919,8 +2541,12 @@
         "Create EffectType enum in compositor.py",
         "Add values: zoom, ripple, highlight, callout, spotlight"
       ],
-      "files": ["src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["EFFECTS-SKEL"],
+      "files": [
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "EFFECTS-SKEL"
+      ],
       "passes": true
     },
     {
@@ -1931,8 +2557,12 @@
         "Create EffectConfig dataclass",
         "Add fields: type, params (dict), duration_ms, easing"
       ],
-      "files": ["src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["EFFECTS-001"],
+      "files": [
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "EFFECTS-001"
+      ],
       "passes": true
     },
     {
@@ -1943,8 +2573,12 @@
         "Create EffectEvent dataclass",
         "Add fields: type, timestamp_ms, position (x, y), config"
       ],
-      "files": ["src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["EFFECTS-002"],
+      "files": [
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "EFFECTS-002"
+      ],
       "passes": true
     },
     {
@@ -1956,8 +2590,12 @@
         "Create MouseTracker class",
         "Add method stubs: start, stop, get_position, on_click"
       ],
-      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
-      "depends_on": ["EFFECTS-SKEL"],
+      "files": [
+        "src/programmatic_demo/effects/mouse_tracker.py"
+      ],
+      "depends_on": [
+        "EFFECTS-SKEL"
+      ],
       "passes": false
     },
     {
@@ -1970,8 +2608,12 @@
         "Poll pyautogui.position() at 60fps",
         "Store positions with timestamps"
       ],
-      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
-      "depends_on": ["EFFECTS-004"],
+      "files": [
+        "src/programmatic_demo/effects/mouse_tracker.py"
+      ],
+      "depends_on": [
+        "EFFECTS-004"
+      ],
       "passes": false
     },
     {
@@ -1983,8 +2625,12 @@
         "Return current mouse coordinates",
         "Include timestamp"
       ],
-      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
-      "depends_on": ["EFFECTS-004"],
+      "files": [
+        "src/programmatic_demo/effects/mouse_tracker.py"
+      ],
+      "depends_on": [
+        "EFFECTS-004"
+      ],
       "passes": false
     },
     {
@@ -1996,8 +2642,12 @@
         "Use pynput or similar for click detection",
         "Call registered callbacks with position and button"
       ],
-      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
-      "depends_on": ["EFFECTS-004"],
+      "files": [
+        "src/programmatic_demo/effects/mouse_tracker.py"
+      ],
+      "depends_on": [
+        "EFFECTS-004"
+      ],
       "passes": false
     },
     {
@@ -2009,8 +2659,12 @@
         "Return list of (timestamp, x, y) tuples",
         "Support time range filtering"
       ],
-      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
-      "depends_on": ["EFFECTS-004"],
+      "files": [
+        "src/programmatic_demo/effects/mouse_tracker.py"
+      ],
+      "depends_on": [
+        "EFFECTS-004"
+      ],
       "passes": false
     },
     {
@@ -2022,8 +2676,12 @@
         "Create ClickEffect class",
         "Add method stubs for ripple generation"
       ],
-      "files": ["src/programmatic_demo/effects/click_effect.py"],
-      "depends_on": ["EFFECTS-SKEL"],
+      "files": [
+        "src/programmatic_demo/effects/click_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2034,8 +2692,12 @@
         "Define RippleConfig dataclass",
         "Add fields: color, start_radius, end_radius, duration_ms, opacity"
       ],
-      "files": ["src/programmatic_demo/effects/click_effect.py"],
-      "depends_on": ["EFFECTS-009"],
+      "files": [
+        "src/programmatic_demo/effects/click_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-009"
+      ],
       "passes": false
     },
     {
@@ -2048,8 +2710,12 @@
         "Generate frame sequence for animation",
         "Return list of PIL Images"
       ],
-      "files": ["src/programmatic_demo/effects/click_effect.py"],
-      "depends_on": ["EFFECTS-010"],
+      "files": [
+        "src/programmatic_demo/effects/click_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-010"
+      ],
       "passes": false
     },
     {
@@ -2062,8 +2728,12 @@
         "Play using playsound or similar",
         "Make optional via config"
       ],
-      "files": ["src/programmatic_demo/effects/click_effect.py"],
-      "depends_on": ["EFFECTS-009"],
+      "files": [
+        "src/programmatic_demo/effects/click_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-009"
+      ],
       "passes": false
     },
     {
@@ -2075,8 +2745,12 @@
         "Create ZoomEffect class",
         "Add method stubs for zoom calculation"
       ],
-      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
-      "depends_on": ["EFFECTS-SKEL"],
+      "files": [
+        "src/programmatic_demo/effects/zoom_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2089,8 +2763,13 @@
         "Account for screen edges",
         "Return crop coordinates"
       ],
-      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
-      "depends_on": ["EFFECTS-013", "EFFECTS-006"],
+      "files": [
+        "src/programmatic_demo/effects/zoom_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-013",
+        "EFFECTS-006"
+      ],
       "passes": false
     },
     {
@@ -2103,8 +2782,12 @@
         "Calculate intermediate zoom levels",
         "Return zoom value for given timestamp"
       ],
-      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
-      "depends_on": ["EFFECTS-014"],
+      "files": [
+        "src/programmatic_demo/effects/zoom_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-014"
+      ],
       "passes": false
     },
     {
@@ -2116,8 +2799,12 @@
         "Add fields: zoom_level (1.5x, 2x), transition_ms, hold_ms",
         "Add presets: subtle (1.25x), medium (1.5x), dramatic (2x)"
       ],
-      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
-      "depends_on": ["EFFECTS-014"],
+      "files": [
+        "src/programmatic_demo/effects/zoom_effect.py"
+      ],
+      "depends_on": [
+        "EFFECTS-014"
+      ],
       "passes": false
     },
     {
@@ -2129,8 +2816,12 @@
         "Create Highlight class",
         "Add method stubs for highlight generation"
       ],
-      "files": ["src/programmatic_demo/effects/highlight.py"],
-      "depends_on": ["EFFECTS-SKEL"],
+      "files": [
+        "src/programmatic_demo/effects/highlight.py"
+      ],
+      "depends_on": [
+        "EFFECTS-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2143,8 +2834,12 @@
         "Configurable color, thickness, corner radius",
         "Return overlay image"
       ],
-      "files": ["src/programmatic_demo/effects/highlight.py"],
-      "depends_on": ["EFFECTS-017"],
+      "files": [
+        "src/programmatic_demo/effects/highlight.py"
+      ],
+      "depends_on": [
+        "EFFECTS-017"
+      ],
       "passes": false
     },
     {
@@ -2157,8 +2852,12 @@
         "Cut out spotlight region",
         "Smooth feathered edges"
       ],
-      "files": ["src/programmatic_demo/effects/highlight.py"],
-      "depends_on": ["EFFECTS-017"],
+      "files": [
+        "src/programmatic_demo/effects/highlight.py"
+      ],
+      "depends_on": [
+        "EFFECTS-017"
+      ],
       "passes": false
     },
     {
@@ -2170,8 +2869,12 @@
         "Create Callout class",
         "Add method stubs for callout generation"
       ],
-      "files": ["src/programmatic_demo/effects/callout.py"],
-      "depends_on": ["EFFECTS-SKEL"],
+      "files": [
+        "src/programmatic_demo/effects/callout.py"
+      ],
+      "depends_on": [
+        "EFFECTS-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2184,8 +2887,12 @@
         "Draw arrow from box to target point",
         "Configurable position (auto, top, bottom, left, right)"
       ],
-      "files": ["src/programmatic_demo/effects/callout.py"],
-      "depends_on": ["EFFECTS-020"],
+      "files": [
+        "src/programmatic_demo/effects/callout.py"
+      ],
+      "depends_on": [
+        "EFFECTS-020"
+      ],
       "passes": false
     },
     {
@@ -2198,8 +2905,15 @@
         "Chain filters in correct order",
         "Return filter complex string"
       ],
-      "files": ["src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["EFFECTS-011", "EFFECTS-015", "EFFECTS-018", "EFFECTS-021"],
+      "files": [
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "EFFECTS-011",
+        "EFFECTS-015",
+        "EFFECTS-018",
+        "EFFECTS-021"
+      ],
       "passes": false
     },
     {
@@ -2212,8 +2926,12 @@
         "Support add_event, get_events_in_range methods",
         "Sort events by timestamp"
       ],
-      "files": ["src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["EFFECTS-003"],
+      "files": [
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "EFFECTS-003"
+      ],
       "passes": false
     },
     {
@@ -2226,8 +2944,14 @@
         "Apply effects in post-processing or real-time",
         "Support both modes via config"
       ],
-      "files": ["src/programmatic_demo/effects/compositor.py"],
-      "depends_on": ["EFFECTS-022", "EFFECTS-023", "REC-001"],
+      "files": [
+        "src/programmatic_demo/effects/compositor.py"
+      ],
+      "depends_on": [
+        "EFFECTS-022",
+        "EFFECTS-023",
+        "REC-001"
+      ],
       "passes": false
     },
     {
@@ -2241,11 +2965,16 @@
         "Add preview command - test effect on screenshot",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/effects.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["CLI-001", "EFFECTS-024"],
+      "files": [
+        "src/programmatic_demo/cli/effects.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "EFFECTS-024"
+      ],
       "passes": false
     },
-
     {
       "id": "POST-SKEL",
       "category": "postprocess",
@@ -2255,8 +2984,13 @@
         "Create src/programmatic_demo/postprocess/editor.py",
         "Add VideoEditor class with method stubs"
       ],
-      "files": ["src/programmatic_demo/postprocess/__init__.py", "src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/postprocess/__init__.py",
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -2267,8 +3001,12 @@
         "Create VideoSegment dataclass",
         "Add fields: path, start_time, end_time, effects (list)"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-SKEL"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-SKEL"
+      ],
       "passes": true
     },
     {
@@ -2279,8 +3017,12 @@
         "Create EditProject dataclass",
         "Add fields: segments (list), output_path, resolution, fps"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-001"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-001"
+      ],
       "passes": true
     },
     {
@@ -2293,8 +3035,12 @@
         "Build command string from method chain",
         "Execute via subprocess"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-SKEL"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2307,8 +3053,12 @@
         "Handle timestamp formats (seconds or HH:MM:SS)",
         "Return output path"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2321,8 +3071,12 @@
         "Optional crossfade between clips",
         "Handle different resolutions"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2335,8 +3089,12 @@
         "Use atempo filter for audio",
         "Support slow-mo (0.5x) and fast-forward (2x)"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2349,8 +3107,12 @@
         "Maintain aspect ratio option",
         "Support common presets (720p, 1080p, 4k)"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2362,8 +3124,12 @@
         "Create Overlays class",
         "Add method stubs for overlay operations"
       ],
-      "files": ["src/programmatic_demo/postprocess/overlays.py"],
-      "depends_on": ["POST-SKEL"],
+      "files": [
+        "src/programmatic_demo/postprocess/overlays.py"
+      ],
+      "depends_on": [
+        "POST-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2376,8 +3142,13 @@
         "Support font, size, color, background",
         "Position presets: top, bottom, center"
       ],
-      "files": ["src/programmatic_demo/postprocess/overlays.py"],
-      "depends_on": ["POST-008", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/overlays.py"
+      ],
+      "depends_on": [
+        "POST-008",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2390,8 +3161,13 @@
         "Support PNG with transparency",
         "Configurable position and opacity"
       ],
-      "files": ["src/programmatic_demo/postprocess/overlays.py"],
-      "depends_on": ["POST-008", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/overlays.py"
+      ],
+      "depends_on": [
+        "POST-008",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2404,8 +3180,12 @@
         "Add padding from edges",
         "Semi-transparent by default"
       ],
-      "files": ["src/programmatic_demo/postprocess/overlays.py"],
-      "depends_on": ["POST-010"],
+      "files": [
+        "src/programmatic_demo/postprocess/overlays.py"
+      ],
+      "depends_on": [
+        "POST-010"
+      ],
       "passes": false
     },
     {
@@ -2418,8 +3198,13 @@
         "Fill based on video progress",
         "Configurable color and height"
       ],
-      "files": ["src/programmatic_demo/postprocess/overlays.py"],
-      "depends_on": ["POST-008", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/overlays.py"
+      ],
+      "depends_on": [
+        "POST-008",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2431,8 +3216,12 @@
         "Create Transitions class",
         "Add method stubs for transition effects"
       ],
-      "files": ["src/programmatic_demo/postprocess/transitions.py"],
-      "depends_on": ["POST-SKEL"],
+      "files": [
+        "src/programmatic_demo/postprocess/transitions.py"
+      ],
+      "depends_on": [
+        "POST-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2445,8 +3234,13 @@
         "Configurable duration",
         "Support fade to/from black or white"
       ],
-      "files": ["src/programmatic_demo/postprocess/transitions.py"],
-      "depends_on": ["POST-013", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/transitions.py"
+      ],
+      "depends_on": [
+        "POST-013",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2459,8 +3253,13 @@
         "Configurable duration and offset",
         "Support various transition types"
       ],
-      "files": ["src/programmatic_demo/postprocess/transitions.py"],
-      "depends_on": ["POST-013", "POST-005"],
+      "files": [
+        "src/programmatic_demo/postprocess/transitions.py"
+      ],
+      "depends_on": [
+        "POST-013",
+        "POST-005"
+      ],
       "passes": false
     },
     {
@@ -2473,8 +3272,13 @@
         "Use xfade with wipe transition",
         "Configurable duration"
       ],
-      "files": ["src/programmatic_demo/postprocess/transitions.py"],
-      "depends_on": ["POST-013", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/transitions.py"
+      ],
+      "depends_on": [
+        "POST-013",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2486,8 +3290,12 @@
         "Create AudioEditor class",
         "Add method stubs for audio operations"
       ],
-      "files": ["src/programmatic_demo/postprocess/audio.py"],
-      "depends_on": ["POST-SKEL"],
+      "files": [
+        "src/programmatic_demo/postprocess/audio.py"
+      ],
+      "depends_on": [
+        "POST-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2500,8 +3308,13 @@
         "Adjustable volume level",
         "Loop audio if shorter than video"
       ],
-      "files": ["src/programmatic_demo/postprocess/audio.py"],
-      "depends_on": ["POST-017", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/audio.py"
+      ],
+      "depends_on": [
+        "POST-017",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2514,8 +3327,13 @@
         "Duck background audio during voiceover",
         "Support multiple voiceover segments"
       ],
-      "files": ["src/programmatic_demo/postprocess/audio.py"],
-      "depends_on": ["POST-017", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/audio.py"
+      ],
+      "depends_on": [
+        "POST-017",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2528,8 +3346,13 @@
         "Target -16 LUFS for web",
         "Optional peak limiting"
       ],
-      "files": ["src/programmatic_demo/postprocess/audio.py"],
-      "depends_on": ["POST-017", "POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/audio.py"
+      ],
+      "depends_on": [
+        "POST-017",
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2542,8 +3365,12 @@
         "Support background color/image",
         "Configurable text style and animation"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2556,8 +3383,12 @@
         "Support call-to-action text",
         "Optional logo placement"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-003"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-003"
+      ],
       "passes": false
     },
     {
@@ -2570,8 +3401,13 @@
         "Optional transition between them",
         "Convenience wrapper for common pattern"
       ],
-      "files": ["src/programmatic_demo/postprocess/editor.py"],
-      "depends_on": ["POST-021", "POST-005"],
+      "files": [
+        "src/programmatic_demo/postprocess/editor.py"
+      ],
+      "depends_on": [
+        "POST-021",
+        "POST-005"
+      ],
       "passes": false
     },
     {
@@ -2586,11 +3422,19 @@
         "Add export command - transcode with presets",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/video.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["CLI-001", "POST-004", "POST-005", "POST-009", "POST-018"],
+      "files": [
+        "src/programmatic_demo/cli/video.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "POST-004",
+        "POST-005",
+        "POST-009",
+        "POST-018"
+      ],
       "passes": false
     },
-
     {
       "id": "TMPL-SKEL",
       "category": "templates",
@@ -2600,8 +3444,12 @@
         "Create src/programmatic_demo/templates/builtin/ directory",
         "Add placeholder README"
       ],
-      "files": ["src/programmatic_demo/templates/__init__.py"],
-      "depends_on": ["SETUP-001"],
+      "files": [
+        "src/programmatic_demo/templates/__init__.py"
+      ],
+      "depends_on": [
+        "SETUP-001"
+      ],
       "passes": true
     },
     {
@@ -2612,8 +3460,12 @@
         "Create Template dataclass",
         "Add fields: name, description, script_path, variables (list)"
       ],
-      "files": ["src/programmatic_demo/templates/__init__.py"],
-      "depends_on": ["TMPL-SKEL"],
+      "files": [
+        "src/programmatic_demo/templates/__init__.py"
+      ],
+      "depends_on": [
+        "TMPL-SKEL"
+      ],
       "passes": true
     },
     {
@@ -2624,8 +3476,12 @@
         "Create TemplateVariable dataclass",
         "Add fields: name, type (str/int/bool/path), default, description, required"
       ],
-      "files": ["src/programmatic_demo/templates/__init__.py"],
-      "depends_on": ["TMPL-001"],
+      "files": [
+        "src/programmatic_demo/templates/__init__.py"
+      ],
+      "depends_on": [
+        "TMPL-001"
+      ],
       "passes": true
     },
     {
@@ -2638,8 +3494,12 @@
         "Scan builtin/ directory for templates",
         "Support custom template directories"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-SKEL"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-SKEL"
+      ],
       "passes": false
     },
     {
@@ -2651,8 +3511,12 @@
         "Return all available templates",
         "Include builtin and custom templates"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-003"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-003"
+      ],
       "passes": false
     },
     {
@@ -2665,8 +3529,12 @@
         "Load and parse template file",
         "Return Template object"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-003"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-003"
+      ],
       "passes": false
     },
     {
@@ -2679,8 +3547,12 @@
         "Extract variable metadata from comments",
         "Return list of TemplateVariable"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-002"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-002"
+      ],
       "passes": false
     },
     {
@@ -2693,8 +3565,13 @@
         "Parse resulting YAML/JSON",
         "Return Script object"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-006", "SCRIPT-007"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-006",
+        "SCRIPT-007"
+      ],
       "passes": false
     },
     {
@@ -2707,8 +3584,12 @@
         "Validate types match",
         "Return validation errors"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-006"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-006"
+      ],
       "passes": false
     },
     {
@@ -2721,8 +3602,13 @@
         "Variables: tool_name, commands, working_dir",
         "Scenes: intro, demo commands, outro"
       ],
-      "files": ["src/programmatic_demo/templates/builtin/cli-tool-demo.yaml"],
-      "depends_on": ["TMPL-001", "SCRIPT-009"],
+      "files": [
+        "src/programmatic_demo/templates/builtin/cli-tool-demo.yaml"
+      ],
+      "depends_on": [
+        "TMPL-001",
+        "SCRIPT-009"
+      ],
       "passes": false
     },
     {
@@ -2735,8 +3621,14 @@
         "Variables: app_url, features, login_creds",
         "Scenes: navigate, login, feature demos"
       ],
-      "files": ["src/programmatic_demo/templates/builtin/web-app-walkthrough.yaml"],
-      "depends_on": ["TMPL-001", "SCRIPT-009", "BROWSER-CLI"],
+      "files": [
+        "src/programmatic_demo/templates/builtin/web-app-walkthrough.yaml"
+      ],
+      "depends_on": [
+        "TMPL-001",
+        "SCRIPT-009",
+        "BROWSER-CLI"
+      ],
       "passes": false
     },
     {
@@ -2749,8 +3641,13 @@
         "Variables: project_path, file_to_edit, changes",
         "Scenes: open project, edit file, run/test"
       ],
-      "files": ["src/programmatic_demo/templates/builtin/code-editor-demo.yaml"],
-      "depends_on": ["TMPL-001", "SCRIPT-009"],
+      "files": [
+        "src/programmatic_demo/templates/builtin/code-editor-demo.yaml"
+      ],
+      "depends_on": [
+        "TMPL-001",
+        "SCRIPT-009"
+      ],
       "passes": false
     },
     {
@@ -2763,8 +3660,13 @@
         "Variables: api_base_url, endpoints, auth_token",
         "Scenes: terminal curl, browser response"
       ],
-      "files": ["src/programmatic_demo/templates/builtin/api-demo.yaml"],
-      "depends_on": ["TMPL-001", "SCRIPT-009"],
+      "files": [
+        "src/programmatic_demo/templates/builtin/api-demo.yaml"
+      ],
+      "depends_on": [
+        "TMPL-001",
+        "SCRIPT-009"
+      ],
       "passes": false
     },
     {
@@ -2777,8 +3679,13 @@
         "Show descriptions and defaults",
         "Validate input and generate script"
       ],
-      "files": ["src/programmatic_demo/templates/registry.py"],
-      "depends_on": ["TMPL-007", "TMPL-008"],
+      "files": [
+        "src/programmatic_demo/templates/registry.py"
+      ],
+      "depends_on": [
+        "TMPL-007",
+        "TMPL-008"
+      ],
       "passes": false
     },
     {
@@ -2793,11 +3700,19 @@
         "Add create command - create new template from script",
         "Register in main.py"
       ],
-      "files": ["src/programmatic_demo/cli/template.py", "src/programmatic_demo/cli/main.py"],
-      "depends_on": ["CLI-001", "TMPL-004", "TMPL-005", "TMPL-007", "TMPL-013"],
+      "files": [
+        "src/programmatic_demo/cli/template.py",
+        "src/programmatic_demo/cli/main.py"
+      ],
+      "depends_on": [
+        "CLI-001",
+        "TMPL-004",
+        "TMPL-005",
+        "TMPL-007",
+        "TMPL-013"
+      ],
       "passes": false
     },
-
     {
       "id": "INT-005",
       "category": "integration",
@@ -2809,7 +3724,9 @@
         "Verify no errors returned"
       ],
       "files": [],
-      "depends_on": ["SCRIPT-CLI"],
+      "depends_on": [
+        "SCRIPT-CLI"
+      ],
       "passes": false
     },
     {
@@ -2823,7 +3740,9 @@
         "Verify confidence scores"
       ],
       "files": [],
-      "depends_on": ["NLP-CLI"],
+      "depends_on": [
+        "NLP-CLI"
+      ],
       "passes": false
     },
     {
@@ -2837,7 +3756,9 @@
         "Verify wait conditions make sense"
       ],
       "files": [],
-      "depends_on": ["DIRECTOR-014"],
+      "depends_on": [
+        "DIRECTOR-014"
+      ],
       "passes": false
     },
     {
@@ -2851,7 +3772,10 @@
         "Verify video file created"
       ],
       "files": [],
-      "depends_on": ["ORCH-CLI", "REC-CLI"],
+      "depends_on": [
+        "ORCH-CLI",
+        "REC-CLI"
+      ],
       "passes": false
     },
     {
@@ -2865,7 +3789,9 @@
         "Verify ripple visible in output"
       ],
       "files": [],
-      "depends_on": ["EFFECTS-011"],
+      "depends_on": [
+        "EFFECTS-011"
+      ],
       "passes": false
     },
     {
@@ -2879,7 +3805,9 @@
         "Verify output duration correct"
       ],
       "files": [],
-      "depends_on": ["POST-CLI"],
+      "depends_on": [
+        "POST-CLI"
+      ],
       "passes": false
     },
     {
@@ -2893,7 +3821,9 @@
         "Verify script is valid"
       ],
       "files": [],
-      "depends_on": ["TMPL-CLI"],
+      "depends_on": [
+        "TMPL-CLI"
+      ],
       "passes": false
     }
   ],
