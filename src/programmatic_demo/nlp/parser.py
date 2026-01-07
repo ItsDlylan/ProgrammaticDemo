@@ -192,3 +192,59 @@ def parse_key(text: str) -> ActionIntent | None:
         )
 
     return None
+
+
+def parse_wait(text: str) -> ActionIntent | None:
+    """Parse a wait action from natural language text.
+
+    Handles phrases like:
+    - "wait for X"
+    - "wait 5 seconds"
+    - "wait 2s"
+    - "pause for the loading screen"
+    - "until X appears"
+
+    Args:
+        text: Natural language description of a wait action.
+
+    Returns:
+        ActionIntent with action_type="wait" and params containing either
+        "seconds" (for duration) or "condition" (for text/element wait),
+        or None if not parsed.
+    """
+    # Check for "until X appears" pattern
+    until_pattern = re.compile(
+        r"(?:wait\s+)?until\s+(?:the\s+)?(.+?)(?:\s+appears?)?$",
+        re.IGNORECASE,
+    )
+    until_match = until_pattern.search(text.strip())
+    if until_match:
+        condition = until_match.group(1).strip()
+        return ActionIntent(
+            action_type="wait",
+            params={"condition": condition, "type": "text"},
+            confidence=1.0,
+        )
+
+    # Use standard wait pattern
+    pattern = ACTION_PATTERNS["wait"]
+    match = pattern.search(text.strip())
+
+    if match:
+        seconds = match.group(1)
+        condition = match.group(2)
+
+        if seconds:
+            return ActionIntent(
+                action_type="wait",
+                params={"seconds": int(seconds), "type": "duration"},
+                confidence=1.0,
+            )
+        elif condition:
+            return ActionIntent(
+                action_type="wait",
+                params={"condition": condition.strip(), "type": "text"},
+                confidence=1.0,
+            )
+
+    return None
