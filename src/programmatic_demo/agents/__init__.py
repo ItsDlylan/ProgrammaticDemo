@@ -8,6 +8,10 @@ This package contains the agent roles that collaborate to create demos:
 """
 
 from programmatic_demo.agents.claude_client import ClaudeClient
-from programmatic_demo.agents.director import Director, observation_to_prompt
+from programmatic_demo.agents.director import (
+    Director,
+    compress_screenshot,
+    observation_to_prompt,
+)
 
-__all__ = ["ClaudeClient", "Director", "observation_to_prompt"]
+__all__ = ["ClaudeClient", "Director", "compress_screenshot", "observation_to_prompt"]

@@ -7,9 +7,59 @@ The Director is responsible for:
 - Coordinating with other agents (Observer, Editor)
 """
 
+import base64
+import io
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
+
+from PIL import Image
+
+
+def compress_screenshot(
+    image_data: bytes | str,
+    max_size: int = 1568,
+    quality: int = 85,
+) -> str:
+    """Compress a screenshot for efficient API transmission.
+
+    Args:
+        image_data: Raw image bytes or base64-encoded string.
+        max_size: Maximum dimension on the longest side (default 1568px).
+        quality: JPEG quality percentage (default 85%).
+
+    Returns:
+        Base64-encoded compressed JPEG image.
+    """
+    # Handle base64 input
+    if isinstance(image_data, str):
+        image_data = base64.b64decode(image_data)
+
+    # Open image
+    img = Image.open(io.BytesIO(image_data))
+
+    # Convert to RGB if necessary (for PNG with alpha, etc.)
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
+
+    # Resize if larger than max_size
+    width, height = img.size
+    if width > max_size or height > max_size:
+        if width > height:
+            new_width = max_size
+            new_height = int(height * (max_size / width))
+        else:
+            new_height = max_size
+            new_width = int(width * (max_size / height))
+        img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+    # Compress to JPEG
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG", quality=quality, optimize=True)
+    buffer.seek(0)
+
+    # Return as base64
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 
 def observation_to_prompt(observation: dict[str, Any]) -> str:
