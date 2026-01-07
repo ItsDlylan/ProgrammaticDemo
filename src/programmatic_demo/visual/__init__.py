@@ -48,6 +48,12 @@ from programmatic_demo.visual.animation_detector import (
     wait_for_animation_complete,
     wait_for_animation_complete_sync,
 )
+from programmatic_demo.visual.framing_analyzer import FramingAnalyzer
+from programmatic_demo.visual.section_detector import (
+    AsyncSectionDetector,
+    SectionDetector,
+    detect_section_type,
+)
 
 __all__ = [
     # Enums
@@ -88,4 +94,10 @@ __all__ = [
     "wait_for_animation_complete",
     "wait_for_animation_complete_sync",
     "AnimationWatcher",
+    # Framing analyzer
+    "FramingAnalyzer",
+    # Section detection
+    "SectionDetector",
+    "AsyncSectionDetector",
+    "detect_section_type",
 ]

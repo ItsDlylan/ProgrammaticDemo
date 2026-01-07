@@ -3907,7 +3907,7 @@
         "VISUAL-001",
         "SCREEN-001"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VISUAL-004",
@@ -3974,7 +3974,7 @@
         "VISUAL-001",
         "BROWSER-001"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VISUAL-007",
