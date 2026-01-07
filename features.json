@@ -2914,7 +2914,7 @@
         "EFFECTS-018",
         "EFFECTS-021"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-023",
@@ -2952,7 +2952,7 @@
         "EFFECTS-023",
         "REC-001"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-CLI",
@@ -2973,7 +2973,7 @@
         "CLI-001",
         "EFFECTS-024"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-SKEL",
@@ -3408,7 +3408,7 @@
         "POST-021",
         "POST-005"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-CLI",
@@ -3433,7 +3433,7 @@
         "POST-009",
         "POST-018"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-SKEL",
@@ -3609,7 +3609,7 @@
         "TMPL-001",
         "SCRIPT-009"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-010",
@@ -3629,7 +3629,7 @@
         "SCRIPT-009",
         "BROWSER-CLI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-011",
@@ -3648,7 +3648,7 @@
         "TMPL-001",
         "SCRIPT-009"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-012",
@@ -3667,7 +3667,7 @@
         "TMPL-001",
         "SCRIPT-009"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-013",
@@ -3686,7 +3686,7 @@
         "TMPL-007",
         "TMPL-008"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-CLI",
@@ -4019,7 +4019,7 @@
         "VISUAL-004",
         "STATE-001"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VISUAL-009",

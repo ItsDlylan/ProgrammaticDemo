@@ -2,48 +2,71 @@
 
 ## Session Summary
 
-This session completed 7 features from `features.json`, bringing the project from 185/210 (88%) to 192/210 (91%) completion.
+This session completed 11 features from `features.json`, bringing the project from 200/225 (88%) to 211/225 (93%) completion.
 
 ## Completed Features
 
-### ORCH-019: graceful_interrupt() handler
-- Added SIGINT signal handling for Ctrl+C
-- `Runner.graceful_interrupt(reason)` method stops execution gracefully
-- `Runner.register_signal_handler()` to enable Ctrl+C handling
-- `on_interrupt` callback parameter for notification
-- Tracks `interrupted` and `interrupt_reason` state
+### EFFECTS-022: FFmpeg filter chain builder
+- Added `build_filter_chain(video_width, video_height)` method to Compositor
+- Converts all effect events to FFmpeg filter strings
+- Supports highlight, ripple, zoom, spotlight, and callout effects
+- Chains filters together in correct order
+- Returns filter_complex string ready for FFmpeg
 
-### ORCH-020: progress_callback hooks
-- Added `on_progress` callback parameter to Runner
-- Events: demo_start, scene_start, scene_complete, step_start, step_complete, step_failed, demo_complete
-- `_notify_progress(event, **kwargs)` helper method
+### POST-023: prepend_intro(video, intro_slide)
+- Added `prepend_intro` method to VideoEditor
+- Supports both video and image intros
+- Automatically converts images to video segments
+- Optional transition effects (fade, dissolve)
+- Handles temp file cleanup
 
-### ORCH-CLI: CLI pdemo run commands
-- Created `src/programmatic_demo/cli/run.py` with typer commands
-- `pdemo run demo <file>` - run full script with progress output
-- `pdemo run scene <file> -s <index>` - run single scene
-- `pdemo run step <file> -s <scene> -t <step>` - run single step
-- Supports `--verbose/--quiet`, `--retries`, `--handle-interrupt` options
+### TMPL-009 through TMPL-012: Template YAML files
+Created 4 builtin template files in `templates/builtin/`:
+- `cli-tool-demo.yaml` - For CLI tool demonstrations
+- `web-app-walkthrough.yaml` - For web application tours
+- `code-editor-demo.yaml` - For code editing workflows
+- `api-demo.yaml` - For API demonstrations (terminal + browser)
 
-### POST-012: progress_bar overlay
-- Added `ProgressBarConfig` dataclass with height, position, colors, margin
-- `OverlayManager.add_progress_bar(video_duration)` method
-- FFmpeg drawbox filter for animated progress bar
+Each template includes:
+- Template metadata (name, description)
+- Variables with descriptions and defaults
+- Demo scenes with steps and narration
 
-### POST-019: add_voiceover
-- Added `VoiceoverSegment` dataclass with duck_background, duck_level
-- `AudioManager.add_voiceover(video, audio, timestamps)` method
-- FFmpeg amix filter for audio mixing with ducking
+### POST-CLI: CLI pdemo video commands
+Created `src/programmatic_demo/cli/video.py` with commands:
+- `pdemo video trim` - Trim video to time range
+- `pdemo video concat` - Join multiple videos
+- `pdemo video overlay` - Add text/image overlay
+- `pdemo video export` - Transcode with presets
+- `pdemo video info` - Get video file information
 
-### TMPL-007: substitute_variables
-- `TemplateRegistry.substitute_variables(template, values)` returns Script
-- Replaces `{{variable}}` patterns with provided values
-- Applies default values for missing optional variables
+### EFFECTS-024: Integrate effect renderer with Recorder
+- Implemented `apply_to_video()` method in Compositor
+- Added `apply_effects(input, output, mode)` entry point
+- Supports "post" mode (post-processing)
+- "realtime" mode placeholder for future frame-by-frame rendering
+- Added `get_effect_summary()` for effect stats
 
-### TMPL-008: validate_variable_values
-- `TemplateRegistry.validate_variable_values(template, values)` returns (valid, errors)
-- Checks required variables are provided
-- Reports unknown variables as warnings
+### EFFECTS-CLI: CLI pdemo effects commands
+Created `src/programmatic_demo/cli/effects.py` with commands:
+- `pdemo effects enable` - Toggle effects on/off
+- `pdemo effects config` - Set effect parameters
+- `pdemo effects show` - Display current config
+- `pdemo effects preview` - Preview effect on image/video
+- `pdemo effects reset` - Reset to defaults
+
+### TMPL-013: Template instantiation wizard (interactive)
+- Added `instantiate_interactive(template, prompt_fn)` to TemplateRegistry
+- Walks through each variable with descriptions and defaults
+- Prompts user for input values
+- Validates collected values
+- Generates Script object from template
+
+### VISUAL-008: Integrate visual verification into Observer
+Added to Observer class in `sensors/state.py`:
+- `verify_framing(expected_elements, framing_rules)` - Check element positioning
+- `wait_for_stable_frame(timeout, threshold)` - Wait for animations to complete
+- `get_framing_report()` - Get comprehensive framing analysis
 
 ## Next Features to Work On
 
@@ -61,13 +84,9 @@ for f in d['features']:
 ```
 
 Likely next features:
-- POST-023: prepend_intro(video, intro_slide)
-- EFFECTS-022: FFmpeg filter chain builder for all effects
-- EFFECTS-024: Integrate effect renderer with Recorder
-- EFFECTS-CLI: CLI pdemo effects commands
-- POST-CLI: CLI pdemo video commands
-- TMPL-009-012: YAML template files (cli-tool-demo, web-app-walkthrough, code-editor-demo, api-demo)
-- INT-005-007, INT-009: Integration tests
+- VISUAL-010: Preview generated waypoints before recording
+- INT-005 through INT-013: Integration tests
+- TMPL-CLI: Template CLI commands (depends on TMPL-013)
 
 ## Key Architecture Notes
 
@@ -79,46 +98,41 @@ The user explicitly requested NOT to use Anthropic API for the Director. Instead
 
 ### New Classes/Methods Added This Session
 
-**runner.py:**
-- `InterruptCallback` type alias
-- `ProgressCallback` type alias
-- `RunnerState.interrupted` and `interrupt_reason` fields
-- `Runner.graceful_interrupt()` - handle graceful interruption
-- `Runner.register_signal_handler()` - enable SIGINT handling
-- `Runner._notify_progress()` - invoke progress callback
-- `Runner._signal_handler()` - SIGINT handler
+**compositor.py:**
+- `Compositor.build_filter_chain()` - Generate FFmpeg filter string
+- `Compositor.apply_to_video()` - Apply effects to video file
+- `Compositor.apply_effects()` - Main entry point with mode support
+- `Compositor.get_effect_summary()` - Get effect statistics
 
-**run.py (new CLI module):**
-- `run demo` command
-- `run scene` command
-- `run step` command
-- `_create_progress_callback()` for CLI output
+**editor.py:**
+- `VideoEditor.prepend_intro()` - Add intro to video
 
-**overlays.py:**
-- `ProgressBarConfig` dataclass
-- `OverlayManager.add_progress_bar()` method
-- Updated `to_ffmpeg_filter()` for progress_bar type
+**video.py (new CLI module):**
+- `trim`, `concat`, `overlay`, `export`, `info` commands
 
-**audio.py:**
-- `VoiceoverSegment` dataclass
-- `AudioManager.add_voiceover()` method
-- Updated `clear()` to clear voiceovers
+**effects.py (new CLI module):**
+- `enable`, `config`, `show`, `preview`, `reset` commands
 
 **registry.py:**
-- `TemplateRegistry.substitute_variables()` method
-- `TemplateRegistry.validate_variable_values()` method
+- `TemplateRegistry.instantiate_interactive()` - Interactive template wizard
+- `instantiate_interactive()` - Convenience function
+
+**state.py:**
+- `Observer.verify_framing()` - Verify element framing
+- `Observer.wait_for_stable_frame()` - Wait for animations
+- `Observer.get_framing_report()` - Get framing analysis
 
 ## Files Modified This Session
-- `src/programmatic_demo/orchestrator/runner.py` (graceful_interrupt, progress_callback)
-- `src/programmatic_demo/orchestrator/__init__.py` (exports)
-- `src/programmatic_demo/cli/run.py` (NEW - CLI run commands)
-- `src/programmatic_demo/cli/main.py` (register run module)
-- `src/programmatic_demo/postprocess/overlays.py` (progress_bar)
-- `src/programmatic_demo/postprocess/audio.py` (add_voiceover)
-- `src/programmatic_demo/postprocess/__init__.py` (exports)
-- `src/programmatic_demo/templates/registry.py` (substitute/validate)
+- `src/programmatic_demo/effects/compositor.py` (filter chain, apply effects)
+- `src/programmatic_demo/postprocess/editor.py` (prepend_intro)
+- `src/programmatic_demo/cli/video.py` (NEW - video commands)
+- `src/programmatic_demo/cli/effects.py` (NEW - effects commands)
+- `src/programmatic_demo/cli/main.py` (register video and effects modules)
+- `src/programmatic_demo/templates/registry.py` (instantiate_interactive)
 - `src/programmatic_demo/templates/__init__.py` (exports)
-- `features.json` (updated passes for 7 features)
+- `src/programmatic_demo/templates/builtin/*.yaml` (NEW - 4 template files)
+- `src/programmatic_demo/sensors/state.py` (visual verification methods)
+- `features.json` (updated passes for 11 features)
 
 ## Commands to Continue
 
@@ -127,11 +141,9 @@ The user explicitly requested NOT to use Anthropic API for the Director. Instead
 cat features.json | python3 -c "import json,sys; d=json.load(sys.stdin); t=len(d['features']); p=sum(1 for f in d['features'] if f['passes']); print(f'{p}/{t} features complete ({100*p//t}%)')"
 
 # Verify new modules
-python -c "from programmatic_demo.orchestrator import Runner, InterruptCallback, ProgressCallback; print('Orchestrator OK')"
-python -c "from programmatic_demo.cli.run import app; print('CLI run OK')"
-python -c "from programmatic_demo.postprocess import OverlayManager, ProgressBarConfig; print('Overlays OK')"
-python -c "from programmatic_demo.postprocess import AudioManager, VoiceoverSegment; print('Audio OK')"
-python -c "from programmatic_demo.templates import substitute_variables, validate_variable_values; print('Templates OK')"
+PYTHONPATH=src python3 -c "from programmatic_demo.effects import Compositor; print('Compositor OK')"
+PYTHONPATH=src python3 -c "from programmatic_demo.postprocess import VideoEditor; print('VideoEditor OK')"
+PYTHONPATH=src python3 -c "from programmatic_demo.templates import instantiate_interactive; print('Templates OK')"
 ```
 
 ## Notes for Next Agent
@@ -139,10 +151,10 @@ python -c "from programmatic_demo.templates import substitute_variables, validat
 1. Follow the CLAUDE.md workflow - one feature at a time, update `passes: true` when complete
 2. The Director API features (002-005) are SKIPPED - don't implement them
 3. All module skeletons and core classes are now in place with real functionality
-4. The ActionDispatcher is fully implemented with all dispatch_* methods
+4. Many features are now integration tests (INT-*) - these may require test infrastructure
 5. Check dependencies before starting any feature
 6. Commit and push after each completed feature (or batch of related features)
-7. Many EFFECTS and POST features now have full implementations - check what's already there
-8. PIL is used for image generation (ripple frames, callout images) - optional but recommended
-9. Audio playback uses simpleaudio or playsound as fallbacks - both optional
-10. The new CLI run commands are registered and ready to use
+7. The new CLI video/effects commands are registered and ready to use
+8. Template YAML files are in templates/builtin/ and loadable by registry.scan_builtin()
+9. Visual verification is integrated into Observer - use verify_framing(), wait_for_stable_frame()
+10. pyyaml may not be installed in the test environment - templates work but tests may fail

@@ -1,0 +1,116 @@
+# API Demo Template
+# Use this template to demonstrate REST APIs using terminal and browser
+
+name: api-demo
+description: Template for demonstrating REST APIs with curl and browser
+
+variables:
+  - name: api_base_url
+    description: Base URL of the API
+    required: true
+  - name: api_name
+    description: Name of the API being demonstrated
+    required: true
+  - name: endpoints
+    description: Endpoints to demonstrate (comma-separated)
+    required: true
+  - name: auth_token
+    description: Authorization token (if required)
+    default: ""
+    required: false
+  - name: auth_header
+    description: Authorization header name
+    default: "Authorization"
+    required: false
+  - name: intro_text
+    description: Introduction text for the demo
+    default: "Let's explore this API"
+    required: false
+
+# Script template with placeholders
+name: "{{api_name}} API Demo"
+description: "Demonstration of {{api_name}} REST API endpoints"
+
+metadata:
+  template: api-demo
+  api_url: "{{api_base_url}}"
+  type: api
+
+scenes:
+  - name: intro
+    goal: "Introduce the {{api_name}} API"
+    steps:
+      - action: wait
+        params:
+          seconds: 1
+        narration: "{{intro_text}}. We'll be working with the {{api_name}} API at {{api_base_url}}"
+
+      - action: terminal
+        params:
+          command: "echo 'API Base URL: {{api_base_url}}'"
+        narration: "First, let's confirm our API base URL"
+
+  - name: health_check
+    goal: "Verify the API is accessible"
+    on_failure: skip
+    steps:
+      - action: terminal
+        params:
+          command: "curl -s -o /dev/null -w '%{http_code}' {{api_base_url}}/health || curl -s -o /dev/null -w '%{http_code}' {{api_base_url}}"
+        wait_for:
+          type: timeout
+          timeout_seconds: 10
+        narration: "Let's check if the API is responding"
+
+  - name: terminal_requests
+    goal: "Demonstrate API calls from the terminal"
+    steps:
+      - action: terminal
+        params:
+          command: "curl -s {{api_base_url}} | head -20"
+        wait_for:
+          type: timeout
+          timeout_seconds: 15
+        narration: "Making a GET request to the API root"
+
+      - action: wait
+        params:
+          seconds: 2
+        narration: "Now let's explore the endpoints: {{endpoints}}"
+
+  - name: authenticated_request
+    goal: "Demonstrate authenticated API request"
+    on_failure: skip
+    steps:
+      - action: terminal
+        params:
+          command: "curl -s -H '{{auth_header}}: Bearer {{auth_token}}' {{api_base_url}}/me 2>/dev/null || echo 'Auth endpoint not available'"
+        wait_for:
+          type: timeout
+          timeout_seconds: 10
+        narration: "Making an authenticated request"
+
+  - name: browser_view
+    goal: "View API response in browser"
+    steps:
+      - action: navigate
+        params:
+          url: "{{api_base_url}}"
+        wait_for:
+          type: element
+          value: "body"
+          timeout_seconds: 15
+        narration: "Let's view the API response in the browser"
+
+      - action: wait
+        params:
+          seconds: 3
+        narration: "Here we can see the JSON response formatted in the browser"
+
+  - name: outro
+    goal: "Conclude the API demonstration"
+    steps:
+      - action: wait
+        params:
+          seconds: 2
+        narration: "That concludes our demonstration of the {{api_name}} API. We explored: {{endpoints}}"

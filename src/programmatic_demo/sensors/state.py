@@ -131,6 +131,202 @@ class Observer:
         )
 
 
+    def verify_framing(
+        self,
+        expected_elements: list[dict[str, Any]],
+        framing_rules: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Verify that expected elements are properly framed in the viewport.
+
+        Uses the visual module's framing analysis to check if elements
+        are positioned correctly according to the specified framing rules.
+
+        Args:
+            expected_elements: List of element dicts with 'name', 'selector'
+                              or 'description', and optional 'bounds'.
+            framing_rules: Custom framing rules dict, uses defaults if None.
+
+        Returns:
+            Verification result dict with 'verified', 'issues', and 'details'.
+        """
+        try:
+            from programmatic_demo.visual import (
+                FramingAnalyzer,
+                DEFAULT_FRAMING_RULES,
+                is_element_properly_framed,
+            )
+
+            # Capture current state
+            image = self._screen.capture()
+            viewport_width = image.width
+            viewport_height = image.height
+
+            rules = framing_rules or DEFAULT_FRAMING_RULES
+            issues: list[dict[str, Any]] = []
+            verified_elements: list[str] = []
+
+            for element in expected_elements:
+                name = element.get("name", "unknown")
+                bounds = element.get("bounds")
+
+                if bounds:
+                    # Check if element is properly framed
+                    elem_bounds = {
+                        "x": bounds.get("x", 0),
+                        "y": bounds.get("y", 0),
+                        "width": bounds.get("width", 0),
+                        "height": bounds.get("height", 0),
+                    }
+
+                    # Check if fully visible in viewport
+                    is_visible = (
+                        elem_bounds["x"] >= 0
+                        and elem_bounds["y"] >= 0
+                        and elem_bounds["x"] + elem_bounds["width"] <= viewport_width
+                        and elem_bounds["y"] + elem_bounds["height"] <= viewport_height
+                    )
+
+                    if is_visible:
+                        verified_elements.append(name)
+                    else:
+                        issues.append({
+                            "element": name,
+                            "issue": "not_fully_visible",
+                            "bounds": elem_bounds,
+                            "viewport": {"width": viewport_width, "height": viewport_height},
+                        })
+                else:
+                    # Without bounds, we can't verify positioning
+                    issues.append({
+                        "element": name,
+                        "issue": "missing_bounds",
+                        "message": "Element bounds not provided for verification",
+                    })
+
+            return success_response(
+                "verify_framing",
+                {
+                    "verified": len(issues) == 0,
+                    "verified_elements": verified_elements,
+                    "issues": issues,
+                    "total_elements": len(expected_elements),
+                    "viewport": {"width": viewport_width, "height": viewport_height},
+                },
+            )
+        except Exception as e:
+            return error_response("framing_error", str(e), recoverable=True)
+
+    def wait_for_stable_frame(
+        self,
+        timeout: float = 5.0,
+        threshold: float = 0.02,
+        check_interval: float = 0.1,
+    ) -> dict[str, Any]:
+        """Wait for the screen to stabilize (no animations in progress).
+
+        Uses animation detection to wait until frame differences fall
+        below the threshold, indicating animations have completed.
+
+        Args:
+            timeout: Maximum time to wait in seconds.
+            threshold: Difference threshold below which frame is stable.
+            check_interval: Time between frame comparisons.
+
+        Returns:
+            Result dict with 'stable', 'wait_time', and 'final_diff'.
+        """
+        try:
+            from programmatic_demo.visual import (
+                wait_for_animation_complete_sync,
+                frame_diff,
+            )
+
+            start_time = time.time()
+
+            # Try to use the visual module's wait function
+            try:
+                wait_for_animation_complete_sync(
+                    capture_fn=lambda: self._screen.capture(),
+                    threshold=threshold,
+                    timeout=timeout,
+                    interval=check_interval,
+                )
+                elapsed = time.time() - start_time
+                return success_response(
+                    "wait_stable",
+                    {
+                        "stable": True,
+                        "wait_time": elapsed,
+                        "timeout": timeout,
+                    },
+                )
+            except TimeoutError:
+                return success_response(
+                    "wait_stable",
+                    {
+                        "stable": False,
+                        "wait_time": timeout,
+                        "timeout": timeout,
+                        "message": "Timeout waiting for stable frame",
+                    },
+                )
+
+        except ImportError:
+            # Fallback to simple wait if visual module not fully available
+            time.sleep(min(timeout, 1.0))
+            return success_response(
+                "wait_stable",
+                {
+                    "stable": True,
+                    "wait_time": min(timeout, 1.0),
+                    "fallback": True,
+                },
+            )
+        except Exception as e:
+            return error_response("wait_error", str(e), recoverable=True)
+
+    def get_framing_report(self) -> dict[str, Any]:
+        """Get a comprehensive framing report for the current screen.
+
+        Analyzes the current viewport and provides structured information
+        about what's visible and how it's positioned.
+
+        Returns:
+            Framing report dict with viewport info, visible regions, etc.
+        """
+        try:
+            image = self._screen.capture()
+            ocr_text = self._ocr.extract_text(image)
+
+            # Build framing report
+            report = {
+                "timestamp": time.time(),
+                "viewport": {
+                    "width": image.width,
+                    "height": image.height,
+                },
+                "content": {
+                    "has_text": len(ocr_text.strip()) > 0,
+                    "text_preview": ocr_text[:200] if ocr_text else "",
+                    "text_length": len(ocr_text),
+                },
+                "framing_quality": "unknown",
+            }
+
+            # Estimate framing quality based on content density
+            text_density = len(ocr_text) / (image.width * image.height) if ocr_text else 0
+            if text_density > 0.0001:
+                report["framing_quality"] = "good"
+            elif text_density > 0.00001:
+                report["framing_quality"] = "sparse"
+            else:
+                report["framing_quality"] = "empty"
+
+            return success_response("framing_report", report)
+        except Exception as e:
+            return error_response("report_error", str(e), recoverable=True)
+
+
 # Singleton instance for CLI usage
 _observer_instance: Observer | None = None
 

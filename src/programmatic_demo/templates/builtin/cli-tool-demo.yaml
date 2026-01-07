@@ -1,0 +1,78 @@
+# CLI Tool Demo Template
+# Use this template to create demos showcasing command-line tools
+
+name: cli-tool-demo
+description: Template for demonstrating CLI tools and their commands
+
+variables:
+  - name: tool_name
+    description: Name of the CLI tool being demonstrated
+    required: true
+  - name: commands
+    description: List of commands to demonstrate (comma-separated)
+    required: true
+  - name: working_dir
+    description: Working directory for the demo
+    default: "~"
+    required: false
+  - name: intro_text
+    description: Introduction text for the demo
+    default: "Welcome to the CLI tool demonstration"
+    required: false
+
+# Script template with placeholders
+name: "{{tool_name}} CLI Demo"
+description: "Demonstration of {{tool_name}} command-line tool"
+
+metadata:
+  template: cli-tool-demo
+  tool: "{{tool_name}}"
+  type: terminal
+
+scenes:
+  - name: intro
+    goal: "Introduce the {{tool_name}} tool"
+    steps:
+      - action: terminal
+        params:
+          command: "cd {{working_dir}}"
+        narration: "First, let's navigate to our working directory"
+
+      - action: wait
+        params:
+          seconds: 1
+        narration: "{{intro_text}}"
+
+      - action: terminal
+        params:
+          command: "{{tool_name}} --version"
+        wait_for:
+          type: text
+          value: "version"
+          timeout_seconds: 5
+        narration: "Let's verify {{tool_name}} is installed"
+
+  - name: demo_commands
+    goal: "Demonstrate the main commands of {{tool_name}}"
+    steps:
+      - action: terminal
+        params:
+          command: "{{tool_name}} --help"
+        wait_for:
+          type: text
+          value: "Usage"
+          timeout_seconds: 5
+        narration: "Here are the available commands for {{tool_name}}"
+
+      - action: wait
+        params:
+          seconds: 2
+        narration: "Now let's run through the main commands: {{commands}}"
+
+  - name: outro
+    goal: "Conclude the demonstration"
+    steps:
+      - action: wait
+        params:
+          seconds: 2
+        narration: "That concludes our demonstration of {{tool_name}}"

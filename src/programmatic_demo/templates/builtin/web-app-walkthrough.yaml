@@ -1,0 +1,119 @@
+# Web App Walkthrough Template
+# Use this template to create demos of web applications
+
+name: web-app-walkthrough
+description: Template for demonstrating web application features
+
+variables:
+  - name: app_url
+    description: URL of the web application
+    required: true
+  - name: app_name
+    description: Name of the application
+    required: true
+  - name: features
+    description: Features to demonstrate (comma-separated)
+    required: true
+  - name: login_username
+    description: Username for login (if applicable)
+    default: ""
+    required: false
+  - name: login_password
+    description: Password for login (if applicable)
+    default: ""
+    required: false
+  - name: intro_text
+    description: Introduction text for the demo
+    default: "Welcome to this web application walkthrough"
+    required: false
+
+# Script template with placeholders
+name: "{{app_name}} Web App Demo"
+description: "Walkthrough of {{app_name}} web application features"
+
+metadata:
+  template: web-app-walkthrough
+  app_url: "{{app_url}}"
+  type: browser
+
+scenes:
+  - name: navigate
+    goal: "Navigate to the application"
+    steps:
+      - action: navigate
+        params:
+          url: "{{app_url}}"
+        wait_for:
+          type: element
+          value: "body"
+          timeout_seconds: 15
+        narration: "{{intro_text}}. Let's navigate to {{app_name}}"
+
+      - action: wait
+        params:
+          seconds: 2
+        narration: "The application has loaded successfully"
+
+  - name: login
+    goal: "Log into the application"
+    on_failure: skip
+    steps:
+      - action: click
+        target:
+          type: text
+          description: "Login button or link"
+        wait_for:
+          type: element
+          value: "input[type='password']"
+          timeout_seconds: 10
+        narration: "Let's log in to access all features"
+
+      - action: type
+        target:
+          type: selector
+          selector: "input[type='email'], input[name='username'], input[type='text']"
+        params:
+          text: "{{login_username}}"
+        narration: "Entering the username"
+
+      - action: type
+        target:
+          type: selector
+          selector: "input[type='password']"
+        params:
+          text: "{{login_password}}"
+        narration: "Entering the password"
+
+      - action: click
+        target:
+          type: text
+          description: "Submit or Login button"
+        wait_for:
+          type: timeout
+          timeout_seconds: 3
+        narration: "Submitting the login form"
+
+  - name: feature_demos
+    goal: "Demonstrate the main features: {{features}}"
+    steps:
+      - action: wait
+        params:
+          seconds: 2
+        narration: "Now let's explore the main features of {{app_name}}: {{features}}"
+
+      - action: scroll
+        target:
+          type: screen
+          description: "Page content"
+        params:
+          direction: "down"
+          amount: 300
+        narration: "Let's scroll through the interface"
+
+  - name: outro
+    goal: "Conclude the walkthrough"
+    steps:
+      - action: wait
+        params:
+          seconds: 2
+        narration: "That concludes our tour of {{app_name}}. We've seen the key features: {{features}}"

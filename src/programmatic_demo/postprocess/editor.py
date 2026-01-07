@@ -559,6 +559,115 @@ class VideoEditor:
         # Outro slide uses same logic as title slide
         return self.create_title_slide(text, duration, output_path, style)
 
+    def prepend_intro(
+        self,
+        video_path: str,
+        intro_path: str,
+        output_path: str,
+        transition: str | None = None,
+        transition_duration: float = 0.5,
+    ) -> dict[str, Any]:
+        """Prepend an intro slide or video to a main video.
+
+        This is a convenience method for the common pattern of adding
+        an intro to a demo video. Supports both video and image intros.
+
+        Args:
+            video_path: Path to the main video file.
+            intro_path: Path to intro video or image file.
+            output_path: Path for the combined output video.
+            transition: Optional transition type ("fade", "dissolve", None).
+            transition_duration: Duration of transition in seconds.
+
+        Returns:
+            Result dict with success status and output path.
+        """
+        import os
+
+        if not os.path.exists(video_path):
+            return {"success": False, "error": f"Video file not found: {video_path}"}
+        if not os.path.exists(intro_path):
+            return {"success": False, "error": f"Intro file not found: {intro_path}"}
+
+        # Detect if intro is an image (needs conversion to video)
+        intro_ext = os.path.splitext(intro_path)[1].lower()
+        image_extensions = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"}
+
+        if intro_ext in image_extensions:
+            # Convert image to video segment
+            import tempfile
+            temp_intro = tempfile.mktemp(suffix=".mp4")
+            intro_duration = 3.0  # Default 3 seconds for image intros
+
+            builder = (
+                FFmpegBuilder()
+                .overwrite()
+                .option("loop", 1)
+                .option("t", intro_duration)
+                .input(intro_path)
+                .output(temp_intro, vcodec="libx264", pix_fmt="yuv420p")
+            )
+
+            try:
+                builder.run()
+            except subprocess.CalledProcessError as e:
+                return {"success": False, "error": f"Failed to convert intro image: {e.stderr.decode() if e.stderr else str(e)}"}
+
+            intro_video = temp_intro
+        else:
+            intro_video = intro_path
+            temp_intro = None
+
+        try:
+            # Build filter based on transition type
+            if transition in ("fade", "dissolve"):
+                # Use xfade filter for transitions
+                builder = FFmpegBuilder().overwrite()
+                builder.input(intro_video)
+                builder.input(video_path)
+
+                # Get intro duration for offset calculation
+                # Using a simplified approach - assume 3s for images or use probe
+                offset = 3.0 - transition_duration if intro_ext in image_extensions else 2.0
+
+                if transition == "fade":
+                    filter_str = (
+                        f"[0:v][1:v]xfade=transition=fade:"
+                        f"duration={transition_duration}:offset={offset}[v]"
+                    )
+                else:  # dissolve
+                    filter_str = (
+                        f"[0:v][1:v]xfade=transition=dissolve:"
+                        f"duration={transition_duration}:offset={offset}[v]"
+                    )
+
+                builder.filter_complex(filter_str)
+                builder.output(output_path, **{"map": "[v]"})
+            else:
+                # Simple concat without transition
+                builder = FFmpegBuilder().overwrite()
+                builder.input(intro_video)
+                builder.input(video_path)
+                filter_str = "[0:v][1:v]concat=n=2:v=1:a=0[v]"
+                builder.filter_complex(filter_str)
+                builder.output(output_path, **{"map": "[v]"})
+
+            builder.run()
+            result = {"success": True, "output": output_path}
+
+        except subprocess.CalledProcessError as e:
+            result = {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
+
+        finally:
+            # Clean up temp file if created
+            if temp_intro and os.path.exists(temp_intro):
+                try:
+                    os.remove(temp_intro)
+                except OSError:
+                    pass
+
+        return result
+
     def reset(self) -> None:
         """Reset the editor to a fresh state."""
         self._project = EditProject()

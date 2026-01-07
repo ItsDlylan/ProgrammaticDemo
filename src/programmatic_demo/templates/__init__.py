@@ -45,7 +45,11 @@ class Template:
 
 
 # Import registry after Template is defined to avoid circular imports
-from programmatic_demo.templates.registry import TemplateRegistry, get_registry
+from programmatic_demo.templates.registry import (
+    TemplateRegistry,
+    get_registry,
+    instantiate_interactive,
+)
 
 
 def list_templates() -> list[Template]:
@@ -117,6 +121,7 @@ __all__ = [
     "TemplateVariable",
     "get_registry",
     "get_template",
+    "instantiate_interactive",
     "list_templates",
     "parse_variables",
     "substitute_variables",

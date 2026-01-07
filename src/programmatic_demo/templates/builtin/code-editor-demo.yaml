@@ -1,0 +1,133 @@
+# Code Editor Demo Template
+# Use this template to create demos of code editing workflows
+
+name: code-editor-demo
+description: Template for demonstrating code editing in IDEs/editors
+
+variables:
+  - name: project_path
+    description: Path to the project directory
+    required: true
+  - name: editor
+    description: Code editor being used (e.g., vscode, vim, cursor)
+    default: "vscode"
+    required: false
+  - name: file_to_edit
+    description: File path to edit within the project
+    required: true
+  - name: changes
+    description: Description of changes to make
+    required: true
+  - name: run_command
+    description: Command to run/test after editing
+    default: ""
+    required: false
+  - name: intro_text
+    description: Introduction text for the demo
+    default: "Let's walk through editing code in this project"
+    required: false
+
+# Script template with placeholders
+name: "{{editor}} Code Editing Demo"
+description: "Demonstration of editing {{file_to_edit}} in {{editor}}"
+
+metadata:
+  template: code-editor-demo
+  editor: "{{editor}}"
+  project: "{{project_path}}"
+  type: editor
+
+scenes:
+  - name: open_project
+    goal: "Open the project in {{editor}}"
+    steps:
+      - action: terminal
+        params:
+          command: "cd {{project_path}}"
+        narration: "{{intro_text}}. First, let's navigate to our project"
+
+      - action: terminal
+        params:
+          command: "code ."
+        wait_for:
+          type: timeout
+          timeout_seconds: 3
+        narration: "Opening the project in {{editor}}"
+
+      - action: wait
+        params:
+          seconds: 3
+        narration: "Waiting for the editor to launch"
+
+  - name: navigate_to_file
+    goal: "Navigate to {{file_to_edit}}"
+    steps:
+      - action: hotkey
+        params:
+          keys: ["cmd", "p"]
+        narration: "Let's use the quick file finder"
+
+      - action: wait
+        params:
+          seconds: 0.5
+
+      - action: type
+        target:
+          type: selector
+          selector: "input[type='text']"
+        params:
+          text: "{{file_to_edit}}"
+        narration: "Searching for {{file_to_edit}}"
+
+      - action: press
+        params:
+          key: "enter"
+        wait_for:
+          type: timeout
+          timeout_seconds: 2
+        narration: "Opening the file"
+
+  - name: edit_file
+    goal: "Make the code changes: {{changes}}"
+    steps:
+      - action: wait
+        params:
+          seconds: 2
+        narration: "Now let's make our changes: {{changes}}"
+
+      - action: hotkey
+        params:
+          keys: ["cmd", "f"]
+        narration: "Opening the find and replace dialog"
+
+      - action: wait
+        params:
+          seconds: 1
+
+  - name: save_and_test
+    goal: "Save changes and run tests"
+    steps:
+      - action: hotkey
+        params:
+          keys: ["cmd", "s"]
+        narration: "Saving the file"
+
+      - action: wait
+        params:
+          seconds: 1
+
+      - action: terminal
+        params:
+          command: "{{run_command}}"
+        wait_for:
+          type: timeout
+          timeout_seconds: 30
+        narration: "Running the tests to verify our changes"
+
+  - name: outro
+    goal: "Conclude the demonstration"
+    steps:
+      - action: wait
+        params:
+          seconds: 2
+        narration: "We've successfully made our code changes: {{changes}}"
