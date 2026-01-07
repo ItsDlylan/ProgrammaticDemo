@@ -7,6 +7,11 @@ descriptions to screen coordinates using OCR and visual analysis.
 from dataclasses import dataclass
 from typing import Any
 
+from PIL import Image
+
+from programmatic_demo.sensors.ocr import OCR, get_ocr
+from programmatic_demo.sensors.screen import Screen, get_screen
+
 
 @dataclass
 class ResolvedTarget:
@@ -31,9 +36,46 @@ class TargetResolver:
     Uses OCR and visual analysis to find UI elements matching descriptions.
     """
 
-    def __init__(self) -> None:
-        """Initialize the TargetResolver."""
-        pass
+    def __init__(
+        self,
+        ocr: OCR | None = None,
+        screen: Screen | None = None,
+    ) -> None:
+        """Initialize the TargetResolver.
+
+        Args:
+            ocr: OCR instance (uses singleton if None).
+            screen: Screen instance (uses singleton if None).
+        """
+        self._ocr = ocr or get_ocr()
+        self._screen = screen or get_screen()
+
+    def resolve_by_text(
+        self,
+        text: str,
+        image: Image.Image,
+        partial: bool = True,
+    ) -> ResolvedTarget | None:
+        """Find text on screen using OCR.
+
+        Args:
+            text: Text to search for.
+            image: Screenshot image to search in.
+            partial: Allow partial text matches (default True).
+
+        Returns:
+            ResolvedTarget with center coordinates, or None if not found.
+        """
+        result = self._ocr.find_text(image, text, partial=partial)
+
+        if result is None:
+            return None
+
+        return ResolvedTarget(
+            coords=(result["x"], result["y"]),
+            confidence=1.0,
+            element_text=text,
+        )
 
     def resolve(
         self,
@@ -49,8 +91,28 @@ class TargetResolver:
         Returns:
             ResolvedTarget with coordinates, or None if not found
         """
-        # Placeholder implementation - will be implemented in NLP-004
-        return None
+        # Get image from observation or capture fresh screenshot
+        image: Image.Image | None = None
+
+        if observation is not None:
+            # Try to get image from observation result
+            result = observation.get("result", {})
+            screenshot = result.get("screenshot", {})
+
+            # Try loading from path first
+            path = screenshot.get("path")
+            if path:
+                try:
+                    image = Image.open(path)
+                except Exception:
+                    pass
+
+        # Capture fresh screenshot if no image from observation
+        if image is None:
+            image = self._screen.capture()
+
+        # Use text-based resolution
+        return self.resolve_by_text(description, image, partial=True)
 
 
 # Singleton instance

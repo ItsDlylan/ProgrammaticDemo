@@ -1182,7 +1182,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/resolver.py"],
       "depends_on": ["NLP-003", "OCR-003"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-005",
