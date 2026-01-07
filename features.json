@@ -939,7 +939,7 @@
       ],
       "files": ["src/programmatic_demo/models/__init__.py", "src/programmatic_demo/models/script.py"],
       "depends_on": ["SETUP-001"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-001",
