@@ -7,8 +7,11 @@ The Runner orchestrates the execution of demo scenes by:
 - Coordinating with the Director agent
 """
 
+import time
 from dataclasses import dataclass, field
 from typing import Any
+
+from programmatic_demo.orchestrator.dispatcher import get_dispatcher
 
 
 @dataclass
@@ -168,6 +171,73 @@ class Runner:
             Result dict with success status and action outcome.
         """
         raise NotImplementedError("execute_action not yet implemented")
+
+    def execute_step(self, step: dict[str, Any]) -> StepResult:
+        """Execute a single step and return the result.
+
+        Args:
+            step: Step dict containing action type and parameters.
+
+        Returns:
+            StepResult with success status, observation, and timing.
+        """
+        start_time = time.time()
+        retries = 0
+
+        dispatcher = get_dispatcher()
+
+        while retries <= self._config.max_retries:
+            try:
+                # Dispatch the action
+                result = dispatcher.dispatch(step)
+
+                # Capture observation after action (if observe is implemented)
+                observation = None
+                try:
+                    observation = self.observe()
+                except NotImplementedError:
+                    pass
+
+                # Check if action succeeded
+                if result.get("success", False):
+                    duration = time.time() - start_time
+                    self._state.total_actions += 1
+                    return StepResult(
+                        success=True,
+                        observation=observation,
+                        error=None,
+                        duration=duration,
+                        retries=retries,
+                    )
+
+                # Action failed, try again if retries remain
+                retries += 1
+                if retries <= self._config.max_retries:
+                    time.sleep(0.5)  # Brief pause before retry
+
+            except Exception as e:
+                retries += 1
+                if retries > self._config.max_retries:
+                    duration = time.time() - start_time
+                    self._state.failed_actions += 1
+                    return StepResult(
+                        success=False,
+                        observation=None,
+                        error={"type": "exception", "message": str(e)},
+                        duration=duration,
+                        retries=retries - 1,
+                    )
+
+        # All retries exhausted
+        duration = time.time() - start_time
+        self._state.failed_actions += 1
+        return StepResult(
+            success=False,
+            observation=None,
+            error={"type": "max_retries", "message": "Maximum retries exceeded"},
+            duration=duration,
+            retries=retries,
+        )
 
     def observe(self) -> dict[str, Any]:
         """Capture current observation.
