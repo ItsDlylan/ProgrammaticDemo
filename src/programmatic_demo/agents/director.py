@@ -62,6 +62,50 @@ def compress_screenshot(
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 
+def summarize_context(
+    observation: dict[str, Any],
+    max_ocr_chars: int = 2000,
+    max_terminal_lines: int = 50,
+) -> dict[str, Any]:
+    """Summarize observation context to reduce token usage.
+
+    Args:
+        observation: Full observation dict.
+        max_ocr_chars: Maximum characters to keep from OCR text.
+        max_terminal_lines: Maximum lines to keep from terminal output.
+
+    Returns:
+        Summarized observation dict with truncated content.
+    """
+    result = dict(observation)
+
+    # Truncate OCR text
+    if "ocr_text" in result and result["ocr_text"]:
+        ocr_text = result["ocr_text"]
+        if len(ocr_text) > max_ocr_chars:
+            # Keep first portion and last portion
+            half = max_ocr_chars // 2
+            result["ocr_text"] = (
+                ocr_text[:half]
+                + "\n\n[... truncated ...]\n\n"
+                + ocr_text[-half:]
+            )
+
+    # Keep most recent terminal output
+    if "terminal_output" in result and result["terminal_output"]:
+        terminal = result["terminal_output"]
+        lines = terminal.split("\n")
+        if len(lines) > max_terminal_lines:
+            # Keep last N lines (most recent output)
+            result["terminal_output"] = "\n".join(lines[-max_terminal_lines:])
+
+    # Remove raw screenshot data to save space (keep path reference)
+    if "screenshot_base64" in result:
+        result["screenshot_base64"] = "[compressed image data]"
+
+    return result
+
+
 def observation_to_prompt(observation: dict[str, Any]) -> str:
     """Convert an observation dict to a human-readable prompt string.
 

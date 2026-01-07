@@ -1935,7 +1935,7 @@
       "depends_on": [
         "DIRECTOR-006"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DIRECTOR-009",
