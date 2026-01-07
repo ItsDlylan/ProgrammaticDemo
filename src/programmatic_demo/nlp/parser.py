@@ -248,3 +248,39 @@ def parse_wait(text: str) -> ActionIntent | None:
             )
 
     return None
+
+
+def parse_scroll(text: str) -> ActionIntent | None:
+    """Parse a scroll action from natural language text.
+
+    Handles phrases like:
+    - "scroll down"
+    - "scroll up"
+    - "scroll left"
+    - "scroll right"
+    - "scroll down to the footer"
+    - "scroll up on the menu"
+
+    Args:
+        text: Natural language description of a scroll action.
+
+    Returns:
+        ActionIntent with action_type="scroll" and params containing
+        "direction" and optional "target", or None if not parsed.
+    """
+    pattern = ACTION_PATTERNS["scroll"]
+    match = pattern.search(text.strip())
+
+    if match:
+        direction = match.group(1).lower()
+        target = match.group(2)
+        target = target.strip() if target else None
+
+        return ActionIntent(
+            action_type="scroll",
+            target_description=target,
+            params={"direction": direction},
+            confidence=1.0,
+        )
+
+    return None
