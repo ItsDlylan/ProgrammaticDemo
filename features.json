@@ -3759,7 +3759,7 @@
       "depends_on": [
         "DIRECTOR-014"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-008",
@@ -3776,7 +3776,7 @@
         "ORCH-CLI",
         "REC-CLI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-009",
@@ -3824,7 +3824,7 @@
       "depends_on": [
         "TMPL-CLI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VISUAL-SKEL",
@@ -4109,7 +4109,7 @@
       "depends_on": [
         "VISUAL-006"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-013",
@@ -4127,7 +4127,7 @@
       "depends_on": [
         "VISUAL-005"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-014",
