@@ -2,71 +2,50 @@
 
 ## Session Summary
 
-This session completed 11 features from `features.json`, bringing the project from 200/225 (88%) to 211/225 (93%) completion.
+This session completed 5 features from `features.json`, bringing the project from 211/225 (93%) to 216/225 (96%) completion.
 
 ## Completed Features
 
-### EFFECTS-022: FFmpeg filter chain builder
-- Added `build_filter_chain(video_width, video_height)` method to Compositor
-- Converts all effect events to FFmpeg filter strings
-- Supports highlight, ripple, zoom, spotlight, and callout effects
-- Chains filters together in correct order
-- Returns filter_complex string ready for FFmpeg
+### TMPL-CLI: CLI pdemo template commands
+Created `src/programmatic_demo/cli/template.py` with commands:
+- `pdemo template list` - List all available templates
+- `pdemo template info <name>` - Show detailed template info
+- `pdemo template use <name> -o output.yaml` - Instantiate a template
+  - `--interactive` flag for prompted input
+  - `--values` for JSON string of values
+  - `--values-file` for JSON file with values
+- `pdemo template create <name>` - Create new template with boilerplate
 
-### POST-023: prepend_intro(video, intro_slide)
-- Added `prepend_intro` method to VideoEditor
-- Supports both video and image intros
-- Automatically converts images to video segments
-- Optional transition effects (fade, dissolve)
-- Handles temp file cleanup
+Also fixed registry.py to use file stem as template name (avoiding YAML duplicate key issue) and updated type annotations from `callable` to `Callable`.
 
-### TMPL-009 through TMPL-012: Template YAML files
-Created 4 builtin template files in `templates/builtin/`:
-- `cli-tool-demo.yaml` - For CLI tool demonstrations
-- `web-app-walkthrough.yaml` - For web application tours
-- `code-editor-demo.yaml` - For code editing workflows
-- `api-demo.yaml` - For API demonstrations (terminal + browser)
+### INT-005: Test parse and validate YAML script
+Created `tests/integration/test_script_yaml.py`:
+- Tests Script.from_yaml() loading
+- Validates script structure parsing
+- Tests scene and step parsing
+- Tests to_dict() roundtrip conversion
 
-Each template includes:
-- Template metadata (name, description)
-- Variables with descriptions and defaults
-- Demo scenes with steps and narration
+### INT-006: Test NLP action parsing accuracy
+Created `tests/integration/test_nlp_parsing.py` with 62 tests:
+- Tests all action types: click, type, press, scroll, wait, navigate
+- Tests edge cases (empty strings, whitespace)
+- Tests case insensitivity
+- Tests confidence score handling
 
-### POST-CLI: CLI pdemo video commands
-Created `src/programmatic_demo/cli/video.py` with commands:
-- `pdemo video trim` - Trim video to time range
-- `pdemo video concat` - Join multiple videos
-- `pdemo video overlay` - Add text/image overlay
-- `pdemo video export` - Transcode with presets
-- `pdemo video info` - Get video file information
+### INT-009: Test click effect rendering
+Created `tests/integration/test_click_effect.py` with 20 tests:
+- Tests ClickEffectConfig defaults and customization
+- Tests ripple frame generation
+- Tests highlight and pulse effects
+- Tests compositor integration
+- Tests EventQueue functionality
 
-### EFFECTS-024: Integrate effect renderer with Recorder
-- Implemented `apply_to_video()` method in Compositor
-- Added `apply_effects(input, output, mode)` entry point
-- Supports "post" mode (post-processing)
-- "realtime" mode placeholder for future frame-by-frame rendering
-- Added `get_effect_summary()` for effect stats
-
-### EFFECTS-CLI: CLI pdemo effects commands
-Created `src/programmatic_demo/cli/effects.py` with commands:
-- `pdemo effects enable` - Toggle effects on/off
-- `pdemo effects config` - Set effect parameters
-- `pdemo effects show` - Display current config
-- `pdemo effects preview` - Preview effect on image/video
-- `pdemo effects reset` - Reset to defaults
-
-### TMPL-013: Template instantiation wizard (interactive)
-- Added `instantiate_interactive(template, prompt_fn)` to TemplateRegistry
-- Walks through each variable with descriptions and defaults
-- Prompts user for input values
-- Validates collected values
-- Generates Script object from template
-
-### VISUAL-008: Integrate visual verification into Observer
-Added to Observer class in `sensors/state.py`:
-- `verify_framing(expected_elements, framing_rules)` - Check element positioning
-- `wait_for_stable_frame(timeout, threshold)` - Wait for animations to complete
-- `get_framing_report()` - Get comprehensive framing analysis
+### INT-010: Test video trim and concat
+Created `tests/integration/test_video_trim_concat.py` with 14 tests:
+- Tests VideoEditor.trim() with duration verification
+- Tests VideoEditor.concat() with multiple videos
+- Tests FFmpegBuilder utility class
+- Tests combined trim+concat workflow
 
 ## Next Features to Work On
 
@@ -84,9 +63,12 @@ for f in d['features']:
 ```
 
 Likely next features:
+- INT-007: Test Director scene planning (depends on DIRECTOR-014)
+- INT-008: Test full demo execution with recording
+- INT-012: Test automatic section detection on sample pages
+- INT-013: Test auto-scroll correction achieves correct framing
+- VISUAL-009: Demo recorder with automatic framing and animation detection
 - VISUAL-010: Preview generated waypoints before recording
-- INT-005 through INT-013: Integration tests
-- TMPL-CLI: Template CLI commands (depends on TMPL-013)
 
 ## Key Architecture Notes
 
@@ -96,43 +78,24 @@ The user explicitly requested NOT to use Anthropic API for the Director. Instead
 - Director functionality leverages Claude Code's agentic capabilities
 - No API key management needed
 
-### New Classes/Methods Added This Session
-
-**compositor.py:**
-- `Compositor.build_filter_chain()` - Generate FFmpeg filter string
-- `Compositor.apply_to_video()` - Apply effects to video file
-- `Compositor.apply_effects()` - Main entry point with mode support
-- `Compositor.get_effect_summary()` - Get effect statistics
-
-**editor.py:**
-- `VideoEditor.prepend_intro()` - Add intro to video
-
-**video.py (new CLI module):**
-- `trim`, `concat`, `overlay`, `export`, `info` commands
-
-**effects.py (new CLI module):**
-- `enable`, `config`, `show`, `preview`, `reset` commands
-
-**registry.py:**
-- `TemplateRegistry.instantiate_interactive()` - Interactive template wizard
-- `instantiate_interactive()` - Convenience function
-
-**state.py:**
-- `Observer.verify_framing()` - Verify element framing
-- `Observer.wait_for_stable_frame()` - Wait for animations
-- `Observer.get_framing_report()` - Get framing analysis
+### Test Infrastructure
+Created test infrastructure in `tests/` directory:
+- `tests/__init__.py`
+- `tests/integration/__init__.py`
+- Integration tests use pytest with parametrized tests
+- Video tests skip if FFmpeg is not available
 
 ## Files Modified This Session
-- `src/programmatic_demo/effects/compositor.py` (filter chain, apply effects)
-- `src/programmatic_demo/postprocess/editor.py` (prepend_intro)
-- `src/programmatic_demo/cli/video.py` (NEW - video commands)
-- `src/programmatic_demo/cli/effects.py` (NEW - effects commands)
-- `src/programmatic_demo/cli/main.py` (register video and effects modules)
-- `src/programmatic_demo/templates/registry.py` (instantiate_interactive)
-- `src/programmatic_demo/templates/__init__.py` (exports)
-- `src/programmatic_demo/templates/builtin/*.yaml` (NEW - 4 template files)
-- `src/programmatic_demo/sensors/state.py` (visual verification methods)
-- `features.json` (updated passes for 11 features)
+- `src/programmatic_demo/cli/template.py` (NEW - template CLI commands)
+- `src/programmatic_demo/cli/main.py` (register template module)
+- `src/programmatic_demo/templates/registry.py` (use file stem, fix Callable type)
+- `tests/__init__.py` (NEW)
+- `tests/integration/__init__.py` (NEW)
+- `tests/integration/test_script_yaml.py` (NEW - INT-005)
+- `tests/integration/test_nlp_parsing.py` (NEW - INT-006)
+- `tests/integration/test_click_effect.py` (NEW - INT-009)
+- `tests/integration/test_video_trim_concat.py` (NEW - INT-010)
+- `features.json` (updated passes for 5 features)
 
 ## Commands to Continue
 
@@ -140,21 +103,20 @@ The user explicitly requested NOT to use Anthropic API for the Director. Instead
 # Check current progress
 cat features.json | python3 -c "import json,sys; d=json.load(sys.stdin); t=len(d['features']); p=sum(1 for f in d['features'] if f['passes']); print(f'{p}/{t} features complete ({100*p//t}%)')"
 
-# Verify new modules
-PYTHONPATH=src python3 -c "from programmatic_demo.effects import Compositor; print('Compositor OK')"
-PYTHONPATH=src python3 -c "from programmatic_demo.postprocess import VideoEditor; print('VideoEditor OK')"
-PYTHONPATH=src python3 -c "from programmatic_demo.templates import instantiate_interactive; print('Templates OK')"
+# Run all tests
+source .venv/bin/activate && PYTHONPATH=src pytest tests/ -v
+
+# Verify new CLI commands
+source .venv/bin/activate && PYTHONPATH=src python -c "from programmatic_demo.cli.template import app; print('Template CLI OK')"
 ```
 
 ## Notes for Next Agent
 
 1. Follow the CLAUDE.md workflow - one feature at a time, update `passes: true` when complete
 2. The Director API features (002-005) are SKIPPED - don't implement them
-3. All module skeletons and core classes are now in place with real functionality
-4. Many features are now integration tests (INT-*) - these may require test infrastructure
-5. Check dependencies before starting any feature
+3. Test infrastructure is now in place - add new tests to `tests/integration/`
+4. All tests currently pass - run tests before and after changes
+5. The template CLI is registered in main.py and ready to use
 6. Commit and push after each completed feature (or batch of related features)
-7. The new CLI video/effects commands are registered and ready to use
-8. Template YAML files are in templates/builtin/ and loadable by registry.scan_builtin()
-9. Visual verification is integrated into Observer - use verify_framing(), wait_for_stable_frame()
-10. pyyaml may not be installed in the test environment - templates work but tests may fail
+7. The remaining features are mostly integration tests and visual verification features
+8. Check dependencies before starting any feature
