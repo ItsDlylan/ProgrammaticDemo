@@ -1326,7 +1326,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/parser.py"],
       "depends_on": ["NLP-014", "NLP-004"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-CLI",

@@ -365,3 +365,128 @@ def parse_action(text: str) -> ActionIntent | None:
                 best_result = result
 
     return best_result
+
+
+def resolve_and_execute(
+    intent: ActionIntent,
+    observation: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Resolve target and execute an action intent.
+
+    Args:
+        intent: The ActionIntent to execute.
+        observation: Optional observation dict with screenshot for target resolution.
+
+    Returns:
+        Execution result dict with success/error info.
+    """
+    from programmatic_demo.actuators.keyboard import get_keyboard
+    from programmatic_demo.actuators.mouse import get_mouse
+    from programmatic_demo.nlp.resolver import get_resolver
+    from programmatic_demo.utils.output import error_response, success_response
+
+    mouse = get_mouse()
+    keyboard = get_keyboard()
+    resolver = get_resolver()
+
+    action = intent.action_type
+    params = intent.params or {}
+
+    # Handle click action
+    if action == "click":
+        target = intent.target_description
+        if not target:
+            return error_response("missing_target", "Click action requires a target")
+
+        # Resolve target to coordinates
+        resolved = resolver.resolve(target, observation)
+        if not resolved:
+            return error_response(
+                "target_not_found",
+                f"Could not find target: {target}",
+                recoverable=True,
+            )
+
+        # Execute click at resolved coordinates
+        return mouse.click_at(resolved.coords[0], resolved.coords[1])
+
+    # Handle type action
+    elif action == "type":
+        text = params.get("text")
+        if not text:
+            return error_response("missing_text", "Type action requires text")
+
+        # If there's a target, click it first
+        target = intent.target_description
+        if target:
+            resolved = resolver.resolve(target, observation)
+            if resolved:
+                click_result = mouse.click_at(resolved.coords[0], resolved.coords[1])
+                if not click_result.get("success"):
+                    return click_result
+
+        # Type the text
+        return keyboard.type_text(text)
+
+    # Handle key press action
+    elif action == "press":
+        key = params.get("key")
+        if not key:
+            return error_response("missing_key", "Press action requires a key")
+
+        return keyboard.press(key)
+
+    # Handle wait action
+    elif action == "wait":
+        import time
+
+        wait_type = params.get("type")
+        if wait_type == "duration":
+            seconds = params.get("seconds", 1)
+            time.sleep(seconds)
+            return success_response("wait_complete", {"seconds": seconds})
+        elif wait_type == "text":
+            condition = params.get("condition")
+            # For text wait, we'd poll for the text to appear
+            # Simplified: just wait a bit and check once
+            time.sleep(1)
+            if condition:
+                resolved = resolver.resolve(condition, observation)
+                if resolved:
+                    return success_response("wait_complete", {"found": condition})
+            return error_response(
+                "wait_timeout",
+                f"Condition not met: {condition}",
+                recoverable=True,
+            )
+        return error_response("invalid_wait", "Invalid wait type")
+
+    # Handle scroll action
+    elif action == "scroll":
+        direction = params.get("direction", "down")
+        amount = params.get("amount", 3)
+
+        # If there's a target, move to it first
+        target = intent.target_description
+        if target:
+            resolved = resolver.resolve(target, observation)
+            if resolved:
+                mouse.move_to(resolved.coords[0], resolved.coords[1])
+
+        return mouse.scroll(direction, amount)
+
+    # Handle navigate action
+    elif action == "navigate":
+        # Navigation would typically use browser actuator
+        destination = intent.target_description
+        nav_type = params.get("type")
+
+        if nav_type == "url":
+            from programmatic_demo.actuators.browser import get_browser
+            browser = get_browser()
+            return browser.goto(destination)
+        else:
+            # For app navigation, we'd use window manager
+            return success_response("navigate", {"destination": destination, "type": nav_type})
+
+    return error_response("unknown_action", f"Unknown action type: {action}")
