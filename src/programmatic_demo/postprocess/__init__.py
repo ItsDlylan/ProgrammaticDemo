@@ -7,6 +7,11 @@ This package provides video editing capabilities:
 - Final export and encoding
 """
 
-from programmatic_demo.postprocess.editor import VideoEditor
+from programmatic_demo.postprocess.editor import (
+    EditProject,
+    FFmpegBuilder,
+    VideoEditor,
+    VideoSegment,
+)
 
-__all__ = ["VideoEditor"]
+__all__ = ["EditProject", "FFmpegBuilder", "VideoEditor", "VideoSegment"]

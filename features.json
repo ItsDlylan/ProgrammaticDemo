@@ -3041,7 +3041,7 @@
       "depends_on": [
         "POST-SKEL"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-004",
