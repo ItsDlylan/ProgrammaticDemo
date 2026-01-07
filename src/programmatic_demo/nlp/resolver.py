@@ -4,8 +4,10 @@ This module provides functionality to resolve natural language target
 descriptions to screen coordinates using OCR and visual analysis.
 """
 
+import re
 from dataclasses import dataclass
 from difflib import SequenceMatcher
+from enum import Enum
 from typing import Any
 
 from PIL import Image
@@ -15,6 +17,29 @@ from programmatic_demo.sensors.screen import Screen, get_screen
 
 # Default similarity threshold for fuzzy matching
 DEFAULT_FUZZY_THRESHOLD = 0.7
+
+
+class ElementType(Enum):
+    """Types of UI elements that can be identified."""
+
+    BUTTON = "button"
+    FIELD = "field"
+    INPUT = "input"
+    LINK = "link"
+    MENU = "menu"
+    TAB = "tab"
+    UNKNOWN = "unknown"
+
+
+# Keywords that identify element types
+ELEMENT_TYPE_KEYWORDS: dict[ElementType, list[str]] = {
+    ElementType.BUTTON: ["button", "btn", "submit", "cancel", "ok", "confirm"],
+    ElementType.FIELD: ["field", "textfield", "textarea"],
+    ElementType.INPUT: ["input", "textbox", "entry", "box"],
+    ElementType.LINK: ["link", "href", "url", "hyperlink"],
+    ElementType.MENU: ["menu", "dropdown", "select", "option", "menuitem"],
+    ElementType.TAB: ["tab", "tabs", "panel"],
+}
 
 
 @dataclass
@@ -53,6 +78,35 @@ class TargetResolver:
         """
         self._ocr = ocr or get_ocr()
         self._screen = screen or get_screen()
+
+    def infer_element_type(self, description: str) -> tuple[ElementType, str]:
+        """Infer the element type from a description.
+
+        Parses the description to identify element type keywords and extracts
+        the target text (with element type keywords removed).
+
+        Args:
+            description: Natural language description of the target.
+
+        Returns:
+            Tuple of (ElementType, cleaned_description) where cleaned_description
+            has element type keywords removed.
+        """
+        desc_lower = description.lower()
+
+        # Check each element type's keywords
+        for element_type, keywords in ELEMENT_TYPE_KEYWORDS.items():
+            for keyword in keywords:
+                # Match keyword as whole word
+                pattern = rf"\b{re.escape(keyword)}\b"
+                if re.search(pattern, desc_lower):
+                    # Remove the keyword from description
+                    cleaned = re.sub(pattern, "", desc_lower, flags=re.IGNORECASE)
+                    # Clean up extra whitespace
+                    cleaned = " ".join(cleaned.split()).strip()
+                    return element_type, cleaned if cleaned else description
+
+        return ElementType.UNKNOWN, description
 
     def resolve_by_text(
         self,
