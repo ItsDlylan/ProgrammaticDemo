@@ -31,6 +31,18 @@ class ElementType(Enum):
     UNKNOWN = "unknown"
 
 
+class PositionHint(Enum):
+    """Position hints for locating elements."""
+
+    TOP = "top"
+    BOTTOM = "bottom"
+    LEFT = "left"
+    RIGHT = "right"
+    FIRST = "first"
+    LAST = "last"
+    NEAR = "near"
+
+
 # Keywords that identify element types
 ELEMENT_TYPE_KEYWORDS: dict[ElementType, list[str]] = {
     ElementType.BUTTON: ["button", "btn", "submit", "cancel", "ok", "confirm"],
@@ -39,6 +51,17 @@ ELEMENT_TYPE_KEYWORDS: dict[ElementType, list[str]] = {
     ElementType.LINK: ["link", "href", "url", "hyperlink"],
     ElementType.MENU: ["menu", "dropdown", "select", "option", "menuitem"],
     ElementType.TAB: ["tab", "tabs", "panel"],
+}
+
+# Keywords that identify position hints
+POSITION_HINT_KEYWORDS: dict[PositionHint, list[str]] = {
+    PositionHint.TOP: ["top", "upper", "above"],
+    PositionHint.BOTTOM: ["bottom", "lower", "below"],
+    PositionHint.LEFT: ["left", "leftmost"],
+    PositionHint.RIGHT: ["right", "rightmost"],
+    PositionHint.FIRST: ["first", "1st"],
+    PositionHint.LAST: ["last", "final"],
+    PositionHint.NEAR: ["near", "next to", "beside", "by"],
 }
 
 
@@ -107,6 +130,88 @@ class TargetResolver:
                     return element_type, cleaned if cleaned else description
 
         return ElementType.UNKNOWN, description
+
+    def parse_position_hint(
+        self, description: str
+    ) -> tuple[PositionHint | None, str]:
+        """Parse position hints from a description.
+
+        Args:
+            description: Natural language description of the target.
+
+        Returns:
+            Tuple of (PositionHint or None, cleaned_description) where
+            cleaned_description has position keywords removed.
+        """
+        desc_lower = description.lower()
+
+        # Check each position hint's keywords
+        for hint, keywords in POSITION_HINT_KEYWORDS.items():
+            for keyword in keywords:
+                # Match keyword as whole word (handle multi-word keywords)
+                pattern = rf"\b{re.escape(keyword)}\b"
+                if re.search(pattern, desc_lower):
+                    # Remove the keyword from description
+                    cleaned = re.sub(pattern, "", desc_lower, flags=re.IGNORECASE)
+                    # Clean up extra whitespace
+                    cleaned = " ".join(cleaned.split()).strip()
+                    return hint, cleaned if cleaned else description
+
+        return None, description
+
+    def filter_by_position(
+        self,
+        candidates: list[dict[str, Any]],
+        hint: PositionHint,
+    ) -> list[dict[str, Any]]:
+        """Filter candidates based on position hint.
+
+        Args:
+            candidates: List of OCR elements with x, y, width, height.
+            hint: Position hint to filter by.
+
+        Returns:
+            Filtered list of candidates matching the position hint.
+        """
+        if not candidates:
+            return candidates
+
+        if hint == PositionHint.TOP:
+            # Sort by y (ascending) and take top quartile
+            sorted_cands = sorted(candidates, key=lambda e: e["y"])
+            cutoff = len(sorted_cands) // 4 or 1
+            return sorted_cands[:cutoff]
+
+        elif hint == PositionHint.BOTTOM:
+            # Sort by y (descending) and take bottom quartile
+            sorted_cands = sorted(candidates, key=lambda e: e["y"], reverse=True)
+            cutoff = len(sorted_cands) // 4 or 1
+            return sorted_cands[:cutoff]
+
+        elif hint == PositionHint.LEFT:
+            # Sort by x (ascending) and take left quartile
+            sorted_cands = sorted(candidates, key=lambda e: e["x"])
+            cutoff = len(sorted_cands) // 4 or 1
+            return sorted_cands[:cutoff]
+
+        elif hint == PositionHint.RIGHT:
+            # Sort by x (descending) and take right quartile
+            sorted_cands = sorted(candidates, key=lambda e: e["x"], reverse=True)
+            cutoff = len(sorted_cands) // 4 or 1
+            return sorted_cands[:cutoff]
+
+        elif hint == PositionHint.FIRST:
+            # Return first candidate (top-to-bottom, left-to-right order)
+            sorted_cands = sorted(candidates, key=lambda e: (e["y"], e["x"]))
+            return sorted_cands[:1]
+
+        elif hint == PositionHint.LAST:
+            # Return last candidate (top-to-bottom, left-to-right order)
+            sorted_cands = sorted(candidates, key=lambda e: (e["y"], e["x"]))
+            return sorted_cands[-1:]
+
+        # NEAR hint needs a reference point, return all for now
+        return candidates
 
     def resolve_by_text(
         self,

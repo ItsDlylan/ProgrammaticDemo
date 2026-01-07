@@ -1221,7 +1221,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/resolver.py"],
       "depends_on": ["NLP-004"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-008",
