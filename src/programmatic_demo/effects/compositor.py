@@ -7,9 +7,10 @@ The Compositor applies visual effects to demo videos:
 - Scene transitions
 """
 
+from bisect import insort_left
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Iterator
 
 
 class EffectType(Enum):
@@ -73,6 +74,122 @@ class EffectEvent:
     config: EffectConfig | None = None
 
 
+@dataclass
+class EventQueueItem:
+    """An item in the event queue with timestamp ordering.
+
+    Attributes:
+        event: The effect event.
+        timestamp_ms: Event timestamp for ordering.
+    """
+
+    event: EffectEvent
+    timestamp_ms: int
+
+    def __lt__(self, other: "EventQueueItem") -> bool:
+        """Compare by timestamp for sorted insertion."""
+        return self.timestamp_ms < other.timestamp_ms
+
+
+class EventQueue:
+    """A timestamp-ordered queue for effect events.
+
+    Maintains events sorted by timestamp for efficient
+    range queries during video processing.
+    """
+
+    def __init__(self) -> None:
+        """Initialize the EventQueue."""
+        self._items: list[EventQueueItem] = []
+
+    def add_event(self, event: EffectEvent) -> None:
+        """Add an event to the queue (maintains sort order).
+
+        Args:
+            event: Effect event to add.
+        """
+        item = EventQueueItem(event=event, timestamp_ms=event.timestamp_ms)
+        insort_left(self._items, item)
+
+    def get_events_in_range(
+        self,
+        start_ms: int,
+        end_ms: int,
+    ) -> list[EffectEvent]:
+        """Get all events within a time range.
+
+        Args:
+            start_ms: Start of range (inclusive).
+            end_ms: End of range (inclusive).
+
+        Returns:
+            List of EffectEvent objects in the range.
+        """
+        return [
+            item.event
+            for item in self._items
+            if start_ms <= item.timestamp_ms <= end_ms
+        ]
+
+    def get_events_at(self, timestamp_ms: int) -> list[EffectEvent]:
+        """Get all events at a specific timestamp.
+
+        Args:
+            timestamp_ms: Timestamp to query.
+
+        Returns:
+            List of EffectEvent objects at the timestamp.
+        """
+        return [
+            item.event
+            for item in self._items
+            if item.timestamp_ms == timestamp_ms
+        ]
+
+    def get_active_events(
+        self,
+        timestamp_ms: int,
+        default_duration_ms: int = 500,
+    ) -> list[EffectEvent]:
+        """Get events that would be active at a timestamp.
+
+        An event is active if timestamp_ms is within its duration.
+
+        Args:
+            timestamp_ms: Current timestamp.
+            default_duration_ms: Default duration if event doesn't specify.
+
+        Returns:
+            List of active EffectEvent objects.
+        """
+        active = []
+        for item in self._items:
+            event = item.event
+            duration = default_duration_ms
+            if event.config and event.config.duration_ms:
+                duration = event.config.duration_ms
+            if item.timestamp_ms <= timestamp_ms < item.timestamp_ms + duration:
+                active.append(event)
+        return active
+
+    def clear(self) -> None:
+        """Clear all events from the queue."""
+        self._items.clear()
+
+    def __len__(self) -> int:
+        """Return number of events in the queue."""
+        return len(self._items)
+
+    def __iter__(self) -> Iterator[EffectEvent]:
+        """Iterate over all events in order."""
+        return (item.event for item in self._items)
+
+    @property
+    def events(self) -> list[EffectEvent]:
+        """Get all events in order."""
+        return [item.event for item in self._items]
+
+
 class Compositor:
     """Applies visual effects to demo videos.
 
@@ -83,6 +200,12 @@ class Compositor:
     def __init__(self) -> None:
         """Initialize the Compositor."""
         self._effects: list[Effect] = []
+        self._event_queue: EventQueue = EventQueue()
+
+    @property
+    def event_queue(self) -> EventQueue:
+        """Get the effect event queue."""
+        return self._event_queue
 
     def add_effect(self, effect: Effect) -> None:
         """Add an effect to the composition.

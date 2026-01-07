@@ -7,6 +7,12 @@ elements on screen during demos.
 from dataclasses import dataclass, field
 from typing import Any
 
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+
 
 @dataclass
 class CalloutConfig:
@@ -305,6 +311,165 @@ class CalloutEffect:
             filter_str += f":enable='between(t,{start},{end})'"
 
         return filter_str
+
+    def generate_callout(
+        self,
+        callout: Callout,
+        frame_size: tuple[int, int] = (400, 200),
+    ) -> Any:
+        """Generate a callout with arrow as a PIL Image.
+
+        Renders the callout text box with background, border, and
+        an arrow pointing to the target position.
+
+        Args:
+            callout: Callout object to render.
+            frame_size: Size of the output image (width, height).
+
+        Returns:
+            PIL Image with the callout rendered, or None if PIL unavailable.
+        """
+        if not HAS_PIL:
+            return None
+
+        cfg = callout.config or self._config
+        pos = callout.position
+
+        # Create transparent image
+        img = Image.new("RGBA", frame_size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+
+        # Parse colors
+        def parse_color(hex_color: str, opacity: float = 1.0) -> tuple[int, int, int, int]:
+            h = hex_color.lstrip("#")
+            if len(h) == 6:
+                r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+            else:
+                r, g, b = 51, 51, 51  # Default gray
+            return (r, g, b, int(255 * opacity))
+
+        bg_color = parse_color(cfg.bg_color, cfg.bg_opacity)
+        text_color = parse_color(cfg.text_color)
+        border_color = parse_color(cfg.border_color)
+
+        # Try to load font
+        try:
+            font = ImageFont.truetype(cfg.font, cfg.font_size)
+        except (IOError, OSError):
+            try:
+                font = ImageFont.truetype("Arial", cfg.font_size)
+            except (IOError, OSError):
+                font = ImageFont.load_default()
+
+        # Get text bounding box
+        text_bbox = draw.textbbox((0, 0), callout.text, font=font)
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+
+        # Box dimensions
+        box_width = min(text_width + 2 * cfg.padding, cfg.max_width)
+        box_height = text_height + 2 * cfg.padding
+
+        # Box position
+        box_x = pos.x
+        box_y = pos.y
+
+        # Ensure box stays within frame
+        box_x = max(0, min(box_x, frame_size[0] - box_width))
+        box_y = max(0, min(box_y, frame_size[1] - box_height))
+
+        # Draw rounded rectangle background
+        box_rect = (box_x, box_y, box_x + box_width, box_y + box_height)
+        if cfg.corner_radius > 0:
+            draw.rounded_rectangle(box_rect, radius=cfg.corner_radius, fill=bg_color)
+            if cfg.border_width > 0:
+                draw.rounded_rectangle(
+                    box_rect,
+                    radius=cfg.corner_radius,
+                    outline=border_color,
+                    width=cfg.border_width,
+                )
+        else:
+            draw.rectangle(box_rect, fill=bg_color)
+            if cfg.border_width > 0:
+                draw.rectangle(box_rect, outline=border_color, width=cfg.border_width)
+
+        # Draw text
+        text_x = box_x + cfg.padding
+        text_y = box_y + cfg.padding
+        draw.text((text_x, text_y), callout.text, font=font, fill=text_color)
+
+        # Draw arrow pointing to target
+        if cfg.arrow_size > 0:
+            arrow_points = self._calculate_arrow_points(
+                box_x, box_y, box_width, box_height,
+                pos.target_x, pos.target_y,
+                pos.placement, cfg.arrow_size
+            )
+            if arrow_points:
+                draw.polygon(arrow_points, fill=bg_color)
+
+        return img
+
+    def _calculate_arrow_points(
+        self,
+        box_x: int,
+        box_y: int,
+        box_width: int,
+        box_height: int,
+        target_x: int,
+        target_y: int,
+        placement: str,
+        arrow_size: int,
+    ) -> list[tuple[int, int]] | None:
+        """Calculate arrow polygon points.
+
+        Args:
+            box_x: Box left edge.
+            box_y: Box top edge.
+            box_width: Box width.
+            box_height: Box height.
+            target_x: Target X coordinate.
+            target_y: Target Y coordinate.
+            placement: Placement direction.
+            arrow_size: Arrow base width.
+
+        Returns:
+            List of (x, y) tuples for polygon, or None if no arrow needed.
+        """
+        if placement == "top":
+            # Arrow points down from bottom of box to target
+            mid_x = box_x + box_width // 2
+            return [
+                (mid_x - arrow_size, box_y + box_height),
+                (mid_x + arrow_size, box_y + box_height),
+                (target_x, target_y),
+            ]
+        elif placement == "bottom":
+            # Arrow points up from top of box to target
+            mid_x = box_x + box_width // 2
+            return [
+                (mid_x - arrow_size, box_y),
+                (mid_x + arrow_size, box_y),
+                (target_x, target_y),
+            ]
+        elif placement == "left":
+            # Arrow points right from right side of box to target
+            mid_y = box_y + box_height // 2
+            return [
+                (box_x + box_width, mid_y - arrow_size),
+                (box_x + box_width, mid_y + arrow_size),
+                (target_x, target_y),
+            ]
+        elif placement == "right":
+            # Arrow points left from left side of box to target
+            mid_y = box_y + box_height // 2
+            return [
+                (box_x, mid_y - arrow_size),
+                (box_x, mid_y + arrow_size),
+                (target_x, target_y),
+            ]
+        return None
 
 
 # Convenience functions

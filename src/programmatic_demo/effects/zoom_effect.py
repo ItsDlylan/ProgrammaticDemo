@@ -7,7 +7,16 @@ Generates zoom effects to focus on specific areas:
 """
 
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any
+
+
+class ZoomPreset(Enum):
+    """Zoom level presets for common use cases."""
+
+    SUBTLE = "subtle"       # Gentle zoom for small UI elements
+    MEDIUM = "medium"       # Default zoom for most use cases
+    DRAMATIC = "dramatic"   # Strong zoom for emphasis
 
 
 @dataclass
@@ -17,6 +26,7 @@ class ZoomEffectConfig:
     Attributes:
         zoom_factor: Maximum zoom level (1.0 = no zoom, 2.0 = 2x).
         duration_ms: Duration of the zoom animation.
+        hold_ms: Duration to hold at max zoom before zooming out.
         easing: Easing function name (linear, ease-in, ease-out, ease-in-out).
         center_x: Zoom center X coordinate (normalized 0-1).
         center_y: Zoom center Y coordinate (normalized 0-1).
@@ -24,9 +34,30 @@ class ZoomEffectConfig:
 
     zoom_factor: float = 1.5
     duration_ms: int = 500
+    hold_ms: int = 1000
     easing: str = "ease-in-out"
     center_x: float = 0.5
     center_y: float = 0.5
+
+    @classmethod
+    def from_preset(cls, preset: ZoomPreset | str) -> "ZoomEffectConfig":
+        """Create config from a preset.
+
+        Args:
+            preset: Preset name or ZoomPreset enum.
+
+        Returns:
+            ZoomEffectConfig with preset values.
+        """
+        if isinstance(preset, str):
+            preset = ZoomPreset(preset)
+
+        presets = {
+            ZoomPreset.SUBTLE: cls(zoom_factor=1.25, duration_ms=400, hold_ms=800),
+            ZoomPreset.MEDIUM: cls(zoom_factor=1.5, duration_ms=500, hold_ms=1000),
+            ZoomPreset.DRAMATIC: cls(zoom_factor=2.0, duration_ms=600, hold_ms=1500),
+        }
+        return presets.get(preset, cls())
 
 
 @dataclass
@@ -87,6 +118,42 @@ class ZoomEffect:
             else:
                 return 1 - ((-2 * progress + 2) ** 2) / 2
         return progress
+
+    def interpolate_zoom(
+        self,
+        start_zoom: float,
+        end_zoom: float,
+        timestamp_ms: float,
+        start_time_ms: float,
+        duration_ms: float | None = None,
+    ) -> float:
+        """Interpolate zoom level at a given timestamp with easing.
+
+        Provides smooth transitions between any two zoom levels using
+        the configured easing function.
+
+        Args:
+            start_zoom: Starting zoom level.
+            end_zoom: Ending zoom level.
+            timestamp_ms: Current timestamp.
+            start_time_ms: Animation start time.
+            duration_ms: Duration of interpolation (uses config if None).
+
+        Returns:
+            Interpolated zoom level.
+        """
+        dur = duration_ms if duration_ms is not None else self._config.duration_ms
+        elapsed = timestamp_ms - start_time_ms
+
+        if elapsed <= 0:
+            return start_zoom
+        if elapsed >= dur:
+            return end_zoom
+
+        progress = elapsed / dur
+        eased = self._apply_easing(progress)
+
+        return start_zoom + (end_zoom - start_zoom) * eased
 
     def calculate_zoom(
         self,
@@ -266,3 +333,30 @@ def create_zoom_effect(
     config = ZoomEffectConfig(zoom_factor=zoom_factor, duration_ms=duration_ms)
     effect = ZoomEffect(config)
     return effect.generate_zoom_in(x, y, width, height)
+
+
+def create_subtle_zoom() -> ZoomEffectConfig:
+    """Create a subtle zoom config (1.25x).
+
+    Returns:
+        ZoomEffectConfig with subtle preset values.
+    """
+    return ZoomEffectConfig.from_preset(ZoomPreset.SUBTLE)
+
+
+def create_medium_zoom() -> ZoomEffectConfig:
+    """Create a medium zoom config (1.5x).
+
+    Returns:
+        ZoomEffectConfig with medium preset values.
+    """
+    return ZoomEffectConfig.from_preset(ZoomPreset.MEDIUM)
+
+
+def create_dramatic_zoom() -> ZoomEffectConfig:
+    """Create a dramatic zoom config (2.0x).
+
+    Returns:
+        ZoomEffectConfig with dramatic preset values.
+    """
+    return ZoomEffectConfig.from_preset(ZoomPreset.DRAMATIC)

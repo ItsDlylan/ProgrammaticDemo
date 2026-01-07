@@ -9,6 +9,15 @@ Generates visual effects for mouse clicks such as:
 from dataclasses import dataclass
 from typing import Any
 
+import os
+from pathlib import Path
+
+try:
+    from PIL import Image, ImageDraw
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+
 
 @dataclass
 class ClickEffectConfig:
@@ -20,6 +29,8 @@ class ClickEffectConfig:
         color: Effect color as hex string or RGB tuple.
         opacity: Starting opacity (0.0-1.0).
         style: Effect style (ripple, highlight, pulse).
+        enable_sound: Whether to play click sound effect.
+        sound_path: Path to custom click sound file.
     """
 
     radius: int = 30
@@ -27,6 +38,8 @@ class ClickEffectConfig:
     color: str = "#FF5722"
     opacity: float = 0.7
     style: str = "ripple"
+    enable_sound: bool = False
+    sound_path: str | None = None
 
 
 @dataclass
@@ -185,6 +198,127 @@ class ClickEffect:
             f"r={self._config.radius}:color={self._config.color}@0.5:"
             f"enable='between(t,{first.timestamp_ms/1000},{last.timestamp_ms/1000})'"
         )
+
+    def generate_ripple_frames(
+        self,
+        x: int,
+        y: int,
+        frame_size: tuple[int, int] = (100, 100),
+        start_time_ms: float = 0,
+    ) -> list[Any]:
+        """Generate ripple animation as PIL Image sequence.
+
+        Creates a sequence of PNG-compatible images showing an expanding
+        ripple effect with fading opacity.
+
+        Args:
+            x: X coordinate of the ripple center (used for metadata).
+            y: Y coordinate of the ripple center (used for metadata).
+            frame_size: Size of each frame (width, height).
+            start_time_ms: Starting timestamp for the animation.
+
+        Returns:
+            List of PIL Image objects representing the animation frames.
+            Returns empty list if PIL is not available.
+        """
+        if not HAS_PIL:
+            return []
+
+        images: list[Any] = []
+        num_frames = max(1, self._config.duration_ms // 16)  # ~60fps
+
+        # Parse color from hex
+        color_hex = self._config.color.lstrip("#")
+        if len(color_hex) == 6:
+            r = int(color_hex[0:2], 16)
+            g = int(color_hex[2:4], 16)
+            b = int(color_hex[4:6], 16)
+        else:
+            r, g, b = 255, 87, 34  # Default orange
+
+        center_x, center_y = frame_size[0] // 2, frame_size[1] // 2
+
+        for i in range(num_frames + 1):
+            progress = i / num_frames
+
+            # Create transparent image
+            img = Image.new("RGBA", frame_size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(img)
+
+            # Calculate current radius and opacity
+            radius = int(self._config.radius * progress)
+            opacity = int(255 * self._config.opacity * (1 - progress))
+
+            if radius > 0 and opacity > 0:
+                # Draw expanding circle with fading opacity
+                bbox = (
+                    center_x - radius,
+                    center_y - radius,
+                    center_x + radius,
+                    center_y + radius,
+                )
+                draw.ellipse(bbox, outline=(r, g, b, opacity), width=2)
+
+            images.append(img)
+
+        return images
+
+    def play_click_sound(
+        self,
+        sound_path: str | None = None,
+        blocking: bool = False,
+    ) -> dict[str, Any]:
+        """Play a click sound effect.
+
+        Args:
+            sound_path: Path to custom click sound file.
+                        Uses config sound_path or default if None.
+            blocking: If True, wait for sound to finish.
+
+        Returns:
+            Dict with success status and any error message.
+        """
+        # Determine sound file path
+        if sound_path is None:
+            sound_path = self._config.sound_path
+
+        if sound_path is None:
+            # Default to assets directory
+            assets_dir = Path(__file__).parent.parent / "assets" / "sounds"
+            sound_path = str(assets_dir / "click.wav")
+
+        if not os.path.exists(sound_path):
+            return {
+                "success": False,
+                "error": f"Sound file not found: {sound_path}",
+            }
+
+        try:
+            # Try simpleaudio first (cross-platform, non-blocking support)
+            try:
+                import simpleaudio as sa
+                wave_obj = sa.WaveObject.from_wave_file(sound_path)
+                play_obj = wave_obj.play()
+                if blocking:
+                    play_obj.wait_done()
+                return {"success": True, "sound": sound_path}
+            except ImportError:
+                pass
+
+            # Fallback to playsound
+            try:
+                from playsound import playsound
+                playsound(sound_path, block=blocking)
+                return {"success": True, "sound": sound_path}
+            except ImportError:
+                pass
+
+            return {
+                "success": False,
+                "error": "No audio library available (install simpleaudio or playsound)",
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
 
 def create_click_effect(

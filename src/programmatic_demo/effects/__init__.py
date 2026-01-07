@@ -21,7 +21,15 @@ from programmatic_demo.effects.click_effect import (
     RippleFrame,
     create_click_effect,
 )
-from programmatic_demo.effects.compositor import Compositor, Effect, EffectConfig, EffectEvent, EffectType
+from programmatic_demo.effects.compositor import (
+    Compositor,
+    Effect,
+    EffectConfig,
+    EffectEvent,
+    EffectType,
+    EventQueue,
+    EventQueueItem,
+)
 from programmatic_demo.effects.highlight import (
     Highlight,
     HighlightConfig,
@@ -33,6 +41,10 @@ from programmatic_demo.effects.zoom_effect import (
     ZoomEffect,
     ZoomEffectConfig,
     ZoomFrame,
+    ZoomPreset,
+    create_dramatic_zoom,
+    create_medium_zoom,
+    create_subtle_zoom,
     create_zoom_effect,
 )
 
@@ -48,6 +60,8 @@ __all__ = [
     "EffectConfig",
     "EffectEvent",
     "EffectType",
+    "EventQueue",
+    "EventQueueItem",
     "Highlight",
     "HighlightConfig",
     "HighlightRegion",
@@ -57,9 +71,13 @@ __all__ = [
     "ZoomEffect",
     "ZoomEffectConfig",
     "ZoomFrame",
+    "ZoomPreset",
     "create_callout",
     "create_click_effect",
+    "create_dramatic_zoom",
     "create_highlight",
+    "create_medium_zoom",
+    "create_subtle_zoom",
     "create_tooltip",
     "create_zoom_effect",
     "get_mouse_tracker",
