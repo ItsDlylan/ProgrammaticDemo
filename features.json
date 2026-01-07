@@ -3711,7 +3711,7 @@
         "TMPL-007",
         "TMPL-013"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-005",
@@ -3727,7 +3727,7 @@
       "depends_on": [
         "SCRIPT-CLI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-006",
@@ -3743,7 +3743,7 @@
       "depends_on": [
         "NLP-CLI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-007",
@@ -3792,7 +3792,7 @@
       "depends_on": [
         "EFFECTS-011"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-010",
@@ -3808,7 +3808,7 @@
       "depends_on": [
         "POST-CLI"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "INT-011",

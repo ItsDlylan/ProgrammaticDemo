@@ -5,7 +5,7 @@ Provides template discovery, registration, and lookup.
 
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import yaml
 
@@ -139,7 +139,9 @@ class TemplateRegistry:
             if not isinstance(data, dict):
                 return None
 
-            name = data.get("name", path.stem)
+            # Use file stem as template name (since YAML may have duplicate 'name' keys
+            # where the second is for the script definition with placeholders)
+            name = path.stem
             description = data.get("description", "")
 
             variables: list[TemplateVariable] = []
@@ -267,7 +269,7 @@ class TemplateRegistry:
     def instantiate_interactive(
         self,
         template: "Template",
-        prompt_fn: callable | None = None,
+        prompt_fn: Callable[[str, Any], str] | None = None,
     ) -> Any:
         """Interactively instantiate a template by prompting for variables.
 
@@ -362,7 +364,7 @@ class TemplateRegistry:
 
 def instantiate_interactive(
     template_name: str,
-    prompt_fn: callable | None = None,
+    prompt_fn: Callable[[str, Any], str] | None = None,
 ) -> Any:
     """Convenience function to interactively instantiate a template by name.
 
