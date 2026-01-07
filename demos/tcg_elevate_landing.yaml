@@ -1,0 +1,157 @@
+name: TCG Elevate Landing Demo
+description: A polished walkthrough showcasing the TCG Elevate trading card management platform
+
+# Demo Configuration
+config:
+  resolution: 1920x1080
+  fps: 30
+  mouse_speed: smooth  # Options: instant, fast, smooth, natural
+  pause_between_scenes: 1.5
+
+scenes:
+  - name: Opening - Hero View
+    goal: Establish the product with a clean hero shot
+    narration: "TCG Elevate - The ultimate trading card collection management platform"
+    steps:
+      - action: navigate
+        target:
+          type: url
+          value: "https://9wknbkdzcl.sharedwithexpose.com"
+        wait_for:
+          type: timeout
+          value: 2000
+        narration: "Opening the application"
+
+      - action: wait
+        params:
+          duration: 3000
+        narration: "Let viewers absorb the interface"
+
+  - name: Navigation Tour
+    goal: Show the main navigation areas
+    narration: "Explore the intuitive navigation"
+    steps:
+      - action: mouse_move
+        target:
+          type: coordinates
+          description: "Move to navigation area"
+        params:
+          curve: bezier  # Natural curved movement
+          duration: 800
+
+      - action: hover
+        target:
+          type: text
+          description: "Dashboard link"
+        params:
+          duration: 1500
+        narration: "Central dashboard for analytics"
+
+      - action: hover
+        target:
+          type: text
+          description: "Inventory link"
+        params:
+          duration: 1500
+        narration: "Manage your card inventory"
+
+      - action: hover
+        target:
+          type: text
+          description: "Events link"
+        params:
+          duration: 1500
+        narration: "Track trades at events"
+
+  - name: Content Scroll
+    goal: Reveal page content with smooth scrolling
+    narration: "Discover all the features"
+    steps:
+      - action: scroll
+        params:
+          direction: down
+          amount: 400
+          duration: 1500  # Smooth scroll over 1.5s
+          easing: ease-out
+
+      - action: wait
+        params:
+          duration: 2000
+        narration: "Pause to view section"
+
+      - action: scroll
+        params:
+          direction: down
+          amount: 400
+          duration: 1500
+          easing: ease-out
+
+      - action: wait
+        params:
+          duration: 2000
+
+      - action: scroll
+        params:
+          direction: down
+          amount: 400
+          duration: 1500
+          easing: ease-out
+
+      - action: wait
+        params:
+          duration: 2000
+
+  - name: Feature Highlight
+    goal: Highlight a key interactive element
+    narration: "Powerful search capabilities"
+    steps:
+      - action: click
+        target:
+          type: selector
+          description: "Search input or command palette"
+        params:
+          highlight: true  # Add visual emphasis
+
+      - action: wait
+        params:
+          duration: 2000
+
+      - action: press
+        params:
+          key: Escape
+        narration: "Close the search"
+
+  - name: Return to Top
+    goal: Bring viewer back to hero for clean ending
+    steps:
+      - action: scroll
+        params:
+          direction: up
+          amount: 1200
+          duration: 2000
+          easing: ease-in-out
+
+      - action: wait
+        params:
+          duration: 2000
+        narration: "TCG Elevate - Elevate your collection"
+
+# Post-processing effects to apply
+effects:
+  - type: cursor_highlight
+    params:
+      color: "#FFD700"
+      radius: 20
+      opacity: 0.3
+
+  - type: click_ripple
+    params:
+      color: "#00AAFF"
+      duration: 300
+
+# Export settings
+export:
+  format: mp4
+  codec: h264
+  quality: high
+  output: "tcg_elevate_demo_final.mp4"

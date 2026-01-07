@@ -1,0 +1,44 @@
+name: TCG Elevate - Intro Video
+description: 15-30 second marketing intro showcasing the landing page
+duration_target: 20 seconds
+
+scenes:
+  - name: Hero Reveal
+    duration: 5s
+    steps:
+      - action: navigate
+        url: "https://9wknbkdzcl.sharedwithexpose.com"
+      - action: pause
+        duration: 4s
+        note: "Clean hero shot - let the design speak"
+
+  - name: Smooth Scroll Down
+    duration: 8s
+    steps:
+      - action: smooth_scroll
+        direction: down
+        total_distance: 800
+        duration: 6s
+        easing: ease-in-out
+        note: "Cinematic reveal of page content"
+      - action: pause
+        duration: 2s
+
+  - name: Return & Hold
+    duration: 7s
+    steps:
+      - action: smooth_scroll
+        direction: up
+        total_distance: 800
+        duration: 4s
+        easing: ease-in-out
+      - action: pause
+        duration: 3s
+        note: "End on hero for brand impression"
+
+# Mouse behavior
+mouse:
+  visible: false  # Hide cursor for cleaner marketing look
+  # OR if visible:
+  # movement: cinematic  # Smooth, purposeful movements
+  # speed: slow
