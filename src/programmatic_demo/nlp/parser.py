@@ -62,6 +62,32 @@ ACTION_PATTERNS: dict[str, re.Pattern[str]] = {
 }
 
 
-# Placeholder for future implementations
-# Classes will be added in subsequent features:
-# - NLP-003: IntentParser class
+def parse_click(text: str) -> ActionIntent | None:
+    """Parse a click action from natural language text.
+
+    Handles phrases like:
+    - "click X"
+    - "click on X"
+    - "click the X button"
+    - "press X button"
+    - "tap on X"
+
+    Args:
+        text: Natural language description of a click action.
+
+    Returns:
+        ActionIntent with action_type="click" and target_description,
+        or None if no click action could be parsed.
+    """
+    pattern = ACTION_PATTERNS["click"]
+    match = pattern.search(text.strip())
+
+    if match:
+        target = match.group(1).strip()
+        return ActionIntent(
+            action_type="click",
+            target_description=target,
+            confidence=1.0,
+        )
+
+    return None
