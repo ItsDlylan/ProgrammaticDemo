@@ -3,6 +3,7 @@
 Provides template discovery, registration, and lookup.
 """
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -161,6 +162,107 @@ class TemplateRegistry:
             )
         except Exception:
             return None
+
+    def substitute_variables(
+        self,
+        template: Template,
+        values: dict[str, Any],
+    ) -> Any:
+        """Substitute variables in a template and return a Script.
+
+        Replaces {{variable}} patterns with provided values,
+        parses the resulting YAML, and returns a Script object.
+
+        Args:
+            template: Template to substitute variables in.
+            values: Dictionary mapping variable names to values.
+
+        Returns:
+            Script object with variables substituted.
+
+        Raises:
+            FileNotFoundError: If template script file doesn't exist.
+            ValueError: If template parsing fails after substitution.
+        """
+        # Import Script here to avoid circular imports
+        from programmatic_demo.models.script import Script
+
+        # Load template file content
+        script_path = Path(template.script_path)
+        if not script_path.exists():
+            raise FileNotFoundError(f"Template file not found: {script_path}")
+
+        with open(script_path) as f:
+            content = f.read()
+
+        # Apply default values for missing variables
+        effective_values = {}
+        for var in template.variables:
+            if var.name in values:
+                effective_values[var.name] = values[var.name]
+            elif var.default is not None:
+                effective_values[var.name] = var.default
+
+        # Substitute {{variable}} patterns
+        def replace_var(match: re.Match) -> str:
+            var_name = match.group(1).strip()
+            if var_name in effective_values:
+                value = effective_values[var_name]
+                # Handle string escaping for YAML
+                if isinstance(value, str):
+                    return value
+                return str(value)
+            # Leave unmatched variables as-is
+            return match.group(0)
+
+        substituted = re.sub(r"\{\{\s*(\w+)\s*\}\}", replace_var, content)
+
+        # Parse the substituted YAML
+        try:
+            data = yaml.safe_load(substituted)
+        except yaml.YAMLError as e:
+            raise ValueError(f"Failed to parse substituted template: {e}")
+
+        if not isinstance(data, dict):
+            raise ValueError("Template must contain a YAML dictionary")
+
+        # Create and return Script object
+        return Script.from_dict(data)
+
+    def validate_variable_values(
+        self,
+        template: Template,
+        values: dict[str, Any],
+    ) -> tuple[bool, list[str]]:
+        """Validate that provided values match template requirements.
+
+        Checks that all required variables are provided and have valid values.
+
+        Args:
+            template: Template to validate against.
+            values: Dictionary mapping variable names to values.
+
+        Returns:
+            Tuple of (is_valid, list of error messages).
+        """
+        errors: list[str] = []
+
+        # Check required variables are provided
+        for var in template.variables:
+            if var.required:
+                if var.name not in values:
+                    if var.default is None:
+                        errors.append(f"Missing required variable: {var.name}")
+                elif values[var.name] is None:
+                    errors.append(f"Variable '{var.name}' cannot be None")
+
+        # Check for unknown variables (optional, just a warning)
+        known_vars = {var.name for var in template.variables}
+        for name in values:
+            if name not in known_vars:
+                errors.append(f"Unknown variable: {name}")
+
+        return (len(errors) == 0, errors)
 
 
 # Singleton instance

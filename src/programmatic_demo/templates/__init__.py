@@ -83,6 +83,34 @@ def parse_variables(template: Template) -> list[TemplateVariable]:
     return template.variables.copy() if template.variables else []
 
 
+def substitute_variables(template: Template, values: dict) -> Any:
+    """Substitute variables in a template and return a Script.
+
+    Args:
+        template: Template to substitute variables in.
+        values: Dictionary mapping variable names to values.
+
+    Returns:
+        Script object with variables substituted.
+    """
+    registry = get_registry()
+    return registry.substitute_variables(template, values)
+
+
+def validate_variable_values(template: Template, values: dict) -> tuple[bool, list[str]]:
+    """Validate that provided values match template requirements.
+
+    Args:
+        template: Template to validate against.
+        values: Dictionary mapping variable names to values.
+
+    Returns:
+        Tuple of (is_valid, list of error messages).
+    """
+    registry = get_registry()
+    return registry.validate_variable_values(template, values)
+
+
 __all__ = [
     "Template",
     "TemplateRegistry",
@@ -91,4 +119,6 @@ __all__ = [
     "get_template",
     "list_templates",
     "parse_variables",
+    "substitute_variables",
+    "validate_variable_values",
 ]

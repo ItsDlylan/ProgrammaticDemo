@@ -7,12 +7,20 @@ The Runner orchestrates the execution of demo scenes by:
 - Coordinating with the Director agent
 """
 
+import signal
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 from programmatic_demo.agents.director import detect_success
 from programmatic_demo.orchestrator.dispatcher import get_dispatcher
+
+
+# Type alias for interrupt callback
+InterruptCallback = Callable[[dict[str, Any]], None]
+
+# Type alias for progress callback
+ProgressCallback = Callable[[dict[str, Any]], None]
 
 
 @dataclass
@@ -105,6 +113,8 @@ class RunnerState:
         total_actions: Total actions executed
         failed_actions: Number of failed actions
         is_running: Whether the runner is active
+        interrupted: Whether execution was interrupted
+        interrupt_reason: Reason for interruption (if any)
     """
 
     current_scene: int = 0
@@ -112,6 +122,8 @@ class RunnerState:
     total_actions: int = 0
     failed_actions: int = 0
     is_running: bool = False
+    interrupted: bool = False
+    interrupt_reason: str | None = None
 
 
 class Runner:
@@ -121,14 +133,39 @@ class Runner:
     while maintaining state and handling errors/retries.
     """
 
-    def __init__(self, config: RunnerConfig | None = None) -> None:
+    def __init__(
+        self,
+        config: RunnerConfig | None = None,
+        on_interrupt: InterruptCallback | None = None,
+        on_progress: ProgressCallback | None = None,
+    ) -> None:
         """Initialize the Runner.
 
         Args:
             config: Runner configuration, uses defaults if None.
+            on_interrupt: Callback invoked when execution is interrupted.
+            on_progress: Callback invoked for progress events.
         """
         self._config = config or RunnerConfig()
         self._state = RunnerState()
+        self._on_interrupt = on_interrupt
+        self._on_progress = on_progress
+        self._original_sigint_handler: Any = None
+        self._signal_registered = False
+
+    def _notify_progress(self, event: str, **kwargs: Any) -> None:
+        """Notify progress callback of an event.
+
+        Args:
+            event: Event type (e.g., "scene_start", "step_complete").
+            **kwargs: Additional event data.
+        """
+        if self._on_progress is not None:
+            try:
+                self._on_progress({"event": event, **kwargs})
+            except Exception:
+                # Don't let callback errors propagate
+                pass
 
     @property
     def config(self) -> RunnerConfig:
@@ -183,6 +220,12 @@ class Runner:
         scenes_total = len(scenes)
         scenes_completed = 0
 
+        # Notify demo started
+        self._notify_progress(
+            "demo_start",
+            scenes_total=scenes_total,
+        )
+
         for i, scene in enumerate(scenes):
             if not self._state.is_running:
                 return DemoResult(
@@ -192,11 +235,33 @@ class Runner:
                     duration=time.time() - start_time,
                 )
 
+            # Get scene name if available
+            scene_name = getattr(scene, "name", None) or (
+                scene.get("name") if isinstance(scene, dict) else None
+            )
+
+            # Notify scene starting
+            self._notify_progress(
+                "scene_start",
+                scene_index=i,
+                scene_name=scene_name,
+                scenes_total=scenes_total,
+            )
+
             self._state.current_scene = i
             result = self.execute_scene(scene)
 
             if result.success:
                 scenes_completed += 1
+                # Notify scene completed
+                self._notify_progress(
+                    "scene_complete",
+                    scene_index=i,
+                    scene_name=scene_name,
+                    scenes_completed=scenes_completed,
+                    scenes_total=scenes_total,
+                    duration=result.duration,
+                )
                 # Clean up after scene for isolation
                 self.scene_cleanup()
             else:
@@ -207,11 +272,21 @@ class Runner:
                     duration=time.time() - start_time,
                 )
 
+        duration = time.time() - start_time
+        # Notify demo completed
+        self._notify_progress(
+            "demo_complete",
+            success=True,
+            scenes_completed=scenes_completed,
+            scenes_total=scenes_total,
+            duration=duration,
+        )
+
         return DemoResult(
             success=True,
             scenes_completed=scenes_completed,
             scenes_total=scenes_total,
-            duration=time.time() - start_time,
+            duration=duration,
         )
 
     def scene_cleanup(self) -> None:
@@ -267,7 +342,7 @@ class Runner:
         steps_total = len(steps)
         steps_completed = 0
 
-        for step in steps:
+        for step_index, step in enumerate(steps):
             if not self._state.is_running:
                 # Runner was stopped
                 return SceneResult(
@@ -281,12 +356,38 @@ class Runner:
             # Convert step to dict if needed
             step_dict = step.to_dict() if hasattr(step, "to_dict") else step
 
+            # Notify step starting
+            self._notify_progress(
+                "step_start",
+                step_index=step_index,
+                steps_total=steps_total,
+                action=step_dict.get("action"),
+            )
+
             result = self.execute_step(step_dict)
             self._state.current_step = steps_completed
 
             if result.success:
                 steps_completed += 1
+                # Notify step completed
+                self._notify_progress(
+                    "step_complete",
+                    step_index=step_index,
+                    steps_completed=steps_completed,
+                    steps_total=steps_total,
+                    duration=result.duration,
+                    retries=result.retries,
+                )
             else:
+                # Notify step failed
+                self._notify_progress(
+                    "step_failed",
+                    step_index=step_index,
+                    steps_completed=steps_completed,
+                    steps_total=steps_total,
+                    error=result.error,
+                    retries=result.retries,
+                )
                 # Step failed after retries
                 return SceneResult(
                     success=False,
@@ -495,3 +596,82 @@ class Runner:
     def reset(self) -> None:
         """Reset the runner state for a new run."""
         self._state = RunnerState()
+
+    def graceful_interrupt(self, reason: str = "user_requested") -> dict[str, Any]:
+        """Handle graceful interruption of execution.
+
+        Stops the current execution, cleans up resources, and saves
+        partial progress. This method is safe to call from signal handlers.
+
+        Args:
+            reason: Reason for the interruption (e.g., "user_requested", "sigint").
+
+        Returns:
+            Dict containing interrupt status and partial progress info.
+        """
+        # Mark as interrupted
+        self._state.is_running = False
+        self._state.interrupted = True
+        self._state.interrupt_reason = reason
+
+        # Build progress info
+        progress_info = {
+            "interrupted": True,
+            "reason": reason,
+            "current_scene": self._state.current_scene,
+            "current_step": self._state.current_step,
+            "total_actions": self._state.total_actions,
+            "failed_actions": self._state.failed_actions,
+        }
+
+        # Call interrupt callback if registered
+        if self._on_interrupt is not None:
+            try:
+                self._on_interrupt(progress_info)
+            except Exception:
+                # Don't let callback errors propagate
+                pass
+
+        # Restore original signal handler if we registered one
+        self._unregister_signal_handler()
+
+        return progress_info
+
+    def _signal_handler(self, signum: int, frame: Any) -> None:
+        """Handle SIGINT (Ctrl+C) signal.
+
+        Args:
+            signum: Signal number received.
+            frame: Current stack frame.
+        """
+        self.graceful_interrupt(reason="sigint")
+
+    def register_signal_handler(self) -> None:
+        """Register SIGINT handler for graceful interruption.
+
+        This should be called before starting execution if you want
+        Ctrl+C to trigger graceful interruption instead of raising
+        KeyboardInterrupt.
+        """
+        if not self._signal_registered:
+            self._original_sigint_handler = signal.signal(
+                signal.SIGINT, self._signal_handler
+            )
+            self._signal_registered = True
+
+    def _unregister_signal_handler(self) -> None:
+        """Restore the original SIGINT handler."""
+        if self._signal_registered and self._original_sigint_handler is not None:
+            signal.signal(signal.SIGINT, self._original_sigint_handler)
+            self._signal_registered = False
+            self._original_sigint_handler = None
+
+    @property
+    def interrupted(self) -> bool:
+        """Check if execution was interrupted."""
+        return self._state.interrupted
+
+    @property
+    def interrupt_reason(self) -> str | None:
+        """Get the reason for interruption, if any."""
+        return self._state.interrupt_reason

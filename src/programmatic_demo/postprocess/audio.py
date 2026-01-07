@@ -51,6 +51,27 @@ class SoundEffect:
     volume: float = 1.0
 
 
+@dataclass
+class VoiceoverSegment:
+    """A voiceover segment at a specific timestamp.
+
+    Attributes:
+        path: Path to voiceover audio file.
+        start_time: Start time in video (seconds).
+        end_time: End time (None to use audio duration).
+        volume: Voiceover volume (0.0-1.0).
+        duck_background: Whether to reduce background audio volume.
+        duck_level: Background audio level during voiceover (0.0-1.0).
+    """
+
+    path: str
+    start_time: float
+    end_time: float | None = None
+    volume: float = 1.0
+    duck_background: bool = True
+    duck_level: float = 0.2
+
+
 class AudioManager:
     """Manages audio for demo videos.
 
@@ -62,6 +83,7 @@ class AudioManager:
         """Initialize the AudioManager."""
         self._tracks: list[AudioTrack] = []
         self._effects: list[SoundEffect] = []
+        self._voiceovers: list[VoiceoverSegment] = []
         self._master_volume: float = 1.0
 
     @property
@@ -73,6 +95,11 @@ class AudioManager:
     def effects(self) -> list[SoundEffect]:
         """Get all sound effects."""
         return self._effects.copy()
+
+    @property
+    def voiceovers(self) -> list[VoiceoverSegment]:
+        """Get all voiceover segments."""
+        return self._voiceovers.copy()
 
     def add_background_music(
         self,
@@ -197,6 +224,104 @@ class AudioManager:
         self._tracks.append(track)
         return track
 
+    def add_voiceover(
+        self,
+        video_path: str,
+        audio_path: str,
+        timestamps: list[tuple[float, float | None]] | None = None,
+        output_path: str | None = None,
+        volume: float = 1.0,
+        duck_background: bool = True,
+        duck_level: float = 0.2,
+    ) -> dict[str, Any]:
+        """Add voiceover audio to a video with optional background audio ducking.
+
+        Args:
+            video_path: Path to input video file.
+            audio_path: Path to voiceover audio file.
+            timestamps: List of (start_time, end_time) tuples for segments.
+                       If None, voiceover plays from beginning.
+            output_path: Path for output video (defaults to video_path with suffix).
+            volume: Voiceover volume (0.0-1.0).
+            duck_background: Whether to reduce background audio during voiceover.
+            duck_level: Background volume during voiceover (0.0-1.0).
+
+        Returns:
+            Result dict with success status and output path.
+        """
+        # Create voiceover segments
+        if timestamps:
+            for start, end in timestamps:
+                segment = VoiceoverSegment(
+                    path=audio_path,
+                    start_time=start,
+                    end_time=end,
+                    volume=volume,
+                    duck_background=duck_background,
+                    duck_level=duck_level,
+                )
+                self._voiceovers.append(segment)
+        else:
+            # Single segment from start
+            segment = VoiceoverSegment(
+                path=audio_path,
+                start_time=0.0,
+                end_time=None,
+                volume=volume,
+                duck_background=duck_background,
+                duck_level=duck_level,
+            )
+            self._voiceovers.append(segment)
+
+        # Generate output path if not provided
+        if output_path is None:
+            import os
+            base, ext = os.path.splitext(video_path)
+            output_path = f"{base}_voiceover{ext}"
+
+        # Build FFmpeg command
+        builder = FFmpegBuilder().overwrite().input(video_path).input(audio_path)
+
+        # Build filter complex for mixing audio
+        # [0:a] is original video audio, [1:a] is voiceover
+        filters = []
+
+        if duck_background and self._voiceovers:
+            # Apply sidechaincompress to duck background during voiceover
+            # or use volume automation
+            # Simple approach: reduce original audio volume, mix with voiceover
+            filters.append(f"[0:a]volume={duck_level}[bg]")
+            filters.append(f"[1:a]volume={volume}[vo]")
+            filters.append("[bg][vo]amix=inputs=2:duration=longest[aout]")
+            audio_filter = ";".join(filters)
+            builder = (
+                builder
+                .filter(audio_filter, filter_type="complex")
+                .output(output_path, **{"map": "0:v", "map": "[aout]", "c:v": "copy"})
+            )
+        else:
+            # Simple mix without ducking
+            filters.append(f"[0:a][1:a]amix=inputs=2:duration=longest[aout]")
+            audio_filter = filters[0]
+            builder = (
+                builder
+                .filter(audio_filter, filter_type="complex")
+                .output(output_path, **{"map": "0:v", "map": "[aout]", "c:v": "copy"})
+            )
+
+        try:
+            builder.run()
+            return {
+                "success": True,
+                "output": output_path,
+                "segments": len(self._voiceovers),
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+            }
+
     def set_master_volume(self, volume: float) -> None:
         """Set the master volume level.
 
@@ -265,9 +390,10 @@ class AudioManager:
             return {"success": False, "error": str(e)}
 
     def clear(self) -> None:
-        """Clear all audio tracks and effects."""
+        """Clear all audio tracks, effects, and voiceovers."""
         self._tracks.clear()
         self._effects.clear()
+        self._voiceovers.clear()
 
     def to_ffmpeg_filter(self) -> str:
         """Generate FFmpeg filter for mixing all audio.

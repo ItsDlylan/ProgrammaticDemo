@@ -11,6 +11,7 @@ from programmatic_demo.postprocess.audio import (
     AudioManager,
     AudioTrack,
     SoundEffect,
+    VoiceoverSegment,
     add_background_music,
     add_click_sound,
 )
@@ -24,6 +25,7 @@ from programmatic_demo.postprocess.overlays import (
     ImageOverlayConfig,
     Overlay,
     OverlayManager,
+    ProgressBarConfig,
     TextOverlayConfig,
     add_text_overlay,
 )
@@ -42,6 +44,7 @@ __all__ = [
     "AudioManager",
     "AudioTrack",
     "SoundEffect",
+    "VoiceoverSegment",
     "add_background_music",
     "add_click_sound",
     # Editor
@@ -53,6 +56,7 @@ __all__ = [
     "ImageOverlayConfig",
     "Overlay",
     "OverlayManager",
+    "ProgressBarConfig",
     "TextOverlayConfig",
     "add_text_overlay",
     # Transitions

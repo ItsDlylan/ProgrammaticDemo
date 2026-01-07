@@ -62,6 +62,27 @@ class ImageOverlayConfig:
 
 
 @dataclass
+class ProgressBarConfig:
+    """Configuration for progress bar overlay.
+
+    Attributes:
+        height: Bar height in pixels.
+        position: Position (top or bottom).
+        fg_color: Foreground (progress) color as hex.
+        bg_color: Background color as hex.
+        opacity: Bar opacity (0.0-1.0).
+        margin: Margin from edges in pixels.
+    """
+
+    height: int = 4
+    position: str = "bottom"
+    fg_color: str = "#00FF00"
+    bg_color: str = "#333333"
+    opacity: float = 0.8
+    margin: int = 0
+
+
+@dataclass
 class Overlay:
     """A video overlay element.
 
@@ -224,6 +245,43 @@ class OverlayManager:
             config=config,
         )
 
+    def add_progress_bar(
+        self,
+        video_duration: float,
+        start_time: float = 0.0,
+        end_time: float | None = None,
+        config: ProgressBarConfig | None = None,
+    ) -> Overlay:
+        """Add a progress bar overlay that advances with video playback.
+
+        Args:
+            video_duration: Total video duration in seconds.
+            start_time: Start time for progress bar (default 0).
+            end_time: End time for progress bar (default full duration).
+            config: Progress bar configuration.
+
+        Returns:
+            The created Overlay object.
+        """
+        cfg = config or ProgressBarConfig()
+        overlay = Overlay(
+            overlay_type="progress_bar",
+            content=str(video_duration),
+            start_time=start_time,
+            end_time=end_time or video_duration,
+            config={
+                "height": cfg.height,
+                "position": cfg.position,
+                "fg_color": cfg.fg_color,
+                "bg_color": cfg.bg_color,
+                "opacity": cfg.opacity,
+                "margin": cfg.margin,
+                "video_duration": video_duration,
+            },
+        )
+        self._overlays.append(overlay)
+        return overlay
+
     def clear(self) -> None:
         """Clear all overlays."""
         self._overlays.clear()
@@ -269,6 +327,46 @@ class OverlayManager:
                     filter_str += f":enable='between(t,{overlay.start_time},{end})'"
 
                 filters.append(filter_str)
+
+            elif overlay.overlay_type == "progress_bar":
+                # Progress bar using drawbox filter
+                height = overlay.config.get("height", 4)
+                position = overlay.config.get("position", "bottom")
+                fg_color = overlay.config.get("fg_color", "#00FF00").lstrip("#")
+                bg_color = overlay.config.get("bg_color", "#333333").lstrip("#")
+                margin = overlay.config.get("margin", 0)
+                video_duration = overlay.config.get("video_duration", 1)
+
+                # Y position based on position setting
+                if position == "top":
+                    y_pos = margin
+                else:  # bottom
+                    y_pos = video_height - height - margin
+
+                # Background bar (full width)
+                bg_filter = (
+                    f"drawbox=x={margin}:y={y_pos}:"
+                    f"w={video_width - 2 * margin}:h={height}:"
+                    f"color={bg_color}:t=fill"
+                )
+
+                # Foreground bar (width grows with time)
+                # FFmpeg expression: (t/duration) * width
+                max_width = video_width - 2 * margin
+                fg_filter = (
+                    f"drawbox=x={margin}:y={y_pos}:"
+                    f"w='min({max_width},t/{video_duration}*{max_width})':"
+                    f"h={height}:color={fg_color}:t=fill"
+                )
+
+                # Add time constraints if specified
+                if overlay.start_time > 0 or overlay.end_time is not None:
+                    end = overlay.end_time or 999999
+                    bg_filter += f":enable='between(t,{overlay.start_time},{end})'"
+                    fg_filter += f":enable='between(t,{overlay.start_time},{end})'"
+
+                filters.append(bg_filter)
+                filters.append(fg_filter)
 
         return ",".join(filters) if filters else ""
 

@@ -2475,7 +2475,7 @@
       "depends_on": [
         "ORCH-016"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-020",
@@ -2492,7 +2492,7 @@
       "depends_on": [
         "ORCH-016"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-CLI",
@@ -2513,7 +2513,7 @@
         "CLI-001",
         "ORCH-016"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-SKEL",
@@ -3205,7 +3205,7 @@
         "POST-008",
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-013",
@@ -3334,7 +3334,7 @@
         "POST-017",
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-020",
@@ -3572,7 +3572,7 @@
         "TMPL-006",
         "SCRIPT-007"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-008",
@@ -3590,7 +3590,7 @@
       "depends_on": [
         "TMPL-006"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-009",

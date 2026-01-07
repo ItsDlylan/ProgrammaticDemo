@@ -8,6 +8,26 @@ This package contains the Runner and related components that:
 """
 
 from programmatic_demo.orchestrator.dispatcher import ActionDispatcher, get_dispatcher
-from programmatic_demo.orchestrator.runner import Runner, RunnerConfig, RunnerState, StepResult, SceneResult, DemoResult
+from programmatic_demo.orchestrator.runner import (
+    Runner,
+    RunnerConfig,
+    RunnerState,
+    StepResult,
+    SceneResult,
+    DemoResult,
+    InterruptCallback,
+    ProgressCallback,
+)
 
-__all__ = ["Runner", "RunnerConfig", "RunnerState", "StepResult", "SceneResult", "DemoResult", "ActionDispatcher", "get_dispatcher"]
+__all__ = [
+    "Runner",
+    "RunnerConfig",
+    "RunnerState",
+    "StepResult",
+    "SceneResult",
+    "DemoResult",
+    "ActionDispatcher",
+    "get_dispatcher",
+    "InterruptCallback",
+    "ProgressCallback",
+]
