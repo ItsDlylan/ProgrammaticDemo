@@ -8,7 +8,70 @@ The Director is responsible for:
 """
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
+
+
+def observation_to_prompt(observation: dict[str, Any]) -> str:
+    """Convert an observation dict to a human-readable prompt string.
+
+    Args:
+        observation: Observation dict containing screenshot, OCR, terminal output, etc.
+
+    Returns:
+        Formatted string suitable for inclusion in a prompt.
+    """
+    parts: list[str] = []
+
+    # Timestamp
+    if "timestamp" in observation:
+        ts = observation["timestamp"]
+        if isinstance(ts, (int, float)):
+            ts_str = datetime.fromtimestamp(ts).isoformat()
+        else:
+            ts_str = str(ts)
+        parts.append(f"**Timestamp:** {ts_str}")
+
+    # Window information
+    if "window" in observation and observation["window"]:
+        window = observation["window"]
+        window_info = []
+        if "title" in window:
+            window_info.append(f"Title: {window['title']}")
+        if "app" in window:
+            window_info.append(f"App: {window['app']}")
+        if "bounds" in window:
+            bounds = window["bounds"]
+            window_info.append(f"Bounds: {bounds}")
+        if window_info:
+            parts.append("**Active Window:**\n" + "\n".join(f"  - {info}" for info in window_info))
+
+    # OCR text
+    if "ocr_text" in observation and observation["ocr_text"]:
+        ocr_text = observation["ocr_text"].strip()
+        if ocr_text:
+            parts.append(f"**OCR Text:**\n```\n{ocr_text}\n```")
+
+    # Terminal output
+    if "terminal_output" in observation and observation["terminal_output"]:
+        terminal = observation["terminal_output"].strip()
+        if terminal:
+            parts.append(f"**Terminal Output:**\n```\n{terminal}\n```")
+
+    # Screenshot indicator (we don't include base64, just note it exists)
+    if "screenshot_base64" in observation and observation["screenshot_base64"]:
+        parts.append("**Screenshot:** [Image attached]")
+    elif "screenshot_path" in observation and observation["screenshot_path"]:
+        parts.append(f"**Screenshot:** {observation['screenshot_path']}")
+
+    # Any additional context
+    if "context" in observation and observation["context"]:
+        parts.append(f"**Additional Context:**\n{observation['context']}")
+
+    if not parts:
+        return "No observation data available."
+
+    return "\n\n".join(parts)
 
 
 @dataclass
