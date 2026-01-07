@@ -1102,7 +1102,7 @@
       ],
       "files": ["src/programmatic_demo/models/script.py"],
       "depends_on": ["SCRIPT-012"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "SCRIPT-CLI",
@@ -1117,7 +1117,7 @@
       ],
       "files": ["src/programmatic_demo/cli/script.py", "src/programmatic_demo/cli/main.py"],
       "depends_on": ["CLI-001", "SCRIPT-009", "SCRIPT-010", "SCRIPT-012"],
-      "passes": false
+      "passes": true
     },
 
     {

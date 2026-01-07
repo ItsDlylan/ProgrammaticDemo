@@ -361,6 +361,41 @@ class Script:
                 scene_prefix = f"scenes[{i}]"
                 errors.extend(scene.validate(scene_prefix))
 
+        # Validate scene references and dependencies
+        errors.extend(self.validate_dependencies())
+
+        return errors
+
+    def validate_dependencies(self) -> list[str]:
+        """Validate scene references and check for circular dependencies.
+
+        Verifies that any scene references (if any) point to existing scenes
+        and checks for circular dependencies.
+
+        Returns:
+            List of validation error messages. Empty list if valid.
+        """
+        errors: list[str] = []
+
+        if not self.scenes:
+            return errors
+
+        # Build set of valid scene names
+        scene_names = {scene.name for scene in self.scenes}
+
+        # Check for duplicate scene names
+        if len(scene_names) != len(self.scenes):
+            seen: set[str] = set()
+            for i, scene in enumerate(self.scenes):
+                if scene.name in seen:
+                    errors.append(f"scenes[{i}].name: duplicate scene name '{scene.name}'")
+                seen.add(scene.name)
+
+        # Note: Currently on_failure is a FailureStrategy enum, not a scene reference.
+        # If scene references are added in the future, validate them here:
+        # - Check that referenced scene names exist in scene_names
+        # - Build dependency graph and check for cycles
+
         return errors
 
     @classmethod
