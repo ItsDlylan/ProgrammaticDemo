@@ -926,10 +926,1975 @@
       "files": [],
       "depends_on": ["TERM-CLI", "KEY-CLI", "STATE-CLI"],
       "passes": true
+    },
+
+    {
+      "id": "SCRIPT-SKEL",
+      "category": "script",
+      "description": "Create models/__init__.py and models/script.py skeleton",
+      "steps": [
+        "Create src/programmatic_demo/models/__init__.py",
+        "Create src/programmatic_demo/models/script.py with module docstring",
+        "Add placeholder imports for dataclasses and enums"
+      ],
+      "files": ["src/programmatic_demo/models/__init__.py", "src/programmatic_demo/models/script.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-001",
+      "category": "script",
+      "description": "Define ActionType enum",
+      "steps": [
+        "Create ActionType enum in script.py",
+        "Add values: click, type, press, scroll, wait, navigate, terminal, hotkey, drag"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-002",
+      "category": "script",
+      "description": "Define TargetType enum",
+      "steps": [
+        "Create TargetType enum in script.py",
+        "Add values: screen, selector, coordinates, text, window"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-003",
+      "category": "script",
+      "description": "Define WaitCondition dataclass",
+      "steps": [
+        "Create WaitCondition dataclass",
+        "Add fields: type (text/element/timeout), value, timeout_seconds"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-004",
+      "category": "script",
+      "description": "Define Target dataclass",
+      "steps": [
+        "Create Target dataclass",
+        "Add fields: type (TargetType), description, selector, coords (optional tuple)"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-002"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-005",
+      "category": "script",
+      "description": "Define Step dataclass",
+      "steps": [
+        "Create Step dataclass",
+        "Add fields: action (ActionType), target (Target), wait_for (WaitCondition), narration, params (dict)"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-001", "SCRIPT-003", "SCRIPT-004"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-006",
+      "category": "script",
+      "description": "Define Scene dataclass",
+      "steps": [
+        "Create Scene dataclass",
+        "Add fields: name, goal, steps (list[Step]), on_failure (retry/skip/abort)"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-005"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-007",
+      "category": "script",
+      "description": "Define Script dataclass",
+      "steps": [
+        "Create Script dataclass",
+        "Add fields: name, description, scenes (list[Scene]), metadata (dict)"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-006"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-008",
+      "category": "script",
+      "description": "Implement Script.from_dict() factory method",
+      "steps": [
+        "Add from_dict classmethod to Script",
+        "Recursively parse nested scenes and steps",
+        "Convert enum strings to enum values"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-007"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-009",
+      "category": "script",
+      "description": "Implement Script.from_yaml() using PyYAML",
+      "steps": [
+        "Add from_yaml classmethod to Script",
+        "Load YAML file or string",
+        "Call from_dict with parsed data"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-008"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-010",
+      "category": "script",
+      "description": "Implement Script.from_json() parser",
+      "steps": [
+        "Add from_json classmethod to Script",
+        "Load JSON file or string",
+        "Call from_dict with parsed data"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-008"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-011",
+      "category": "script",
+      "description": "Implement Script.to_dict() serialization",
+      "steps": [
+        "Add to_dict method to Script",
+        "Recursively convert dataclasses to dicts",
+        "Convert enums to string values"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-007"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-012",
+      "category": "script",
+      "description": "Implement Script.validate() - check required fields",
+      "steps": [
+        "Add validate method to Script",
+        "Check all required fields are present",
+        "Validate enum values are valid",
+        "Return list of validation errors"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-007"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-013",
+      "category": "script",
+      "description": "Implement dependency validation (scene references exist)",
+      "steps": [
+        "Extend validate to check scene references",
+        "Verify on_failure scene names exist",
+        "Check for circular dependencies"
+      ],
+      "files": ["src/programmatic_demo/models/script.py"],
+      "depends_on": ["SCRIPT-012"],
+      "passes": false
+    },
+    {
+      "id": "SCRIPT-CLI",
+      "category": "script",
+      "description": "Create CLI pdemo script validate/show/export commands",
+      "steps": [
+        "Create src/programmatic_demo/cli/script.py",
+        "Add validate command - load and validate script file",
+        "Add show command - pretty print script structure",
+        "Add export command - convert between yaml/json",
+        "Register in main.py"
+      ],
+      "files": ["src/programmatic_demo/cli/script.py", "src/programmatic_demo/cli/main.py"],
+      "depends_on": ["CLI-001", "SCRIPT-009", "SCRIPT-010", "SCRIPT-012"],
+      "passes": false
+    },
+
+    {
+      "id": "NLP-SKEL",
+      "category": "nlp",
+      "description": "Create nlp/__init__.py and nlp/parser.py skeleton",
+      "steps": [
+        "Create src/programmatic_demo/nlp/__init__.py",
+        "Create src/programmatic_demo/nlp/parser.py with module docstring",
+        "Add placeholder imports"
+      ],
+      "files": ["src/programmatic_demo/nlp/__init__.py", "src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "NLP-001",
+      "category": "nlp",
+      "description": "Define ActionIntent dataclass",
+      "steps": [
+        "Create ActionIntent dataclass in parser.py",
+        "Add fields: action_type, target_description, params (dict), confidence"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "NLP-002",
+      "category": "nlp",
+      "description": "Implement basic regex patterns for action keywords",
+      "steps": [
+        "Define ACTION_PATTERNS dict with regex for each action type",
+        "Patterns for: click, type, press, scroll, wait, navigate",
+        "Include capture groups for target and parameters"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "NLP-003",
+      "category": "nlp",
+      "description": "Implement TargetResolver class skeleton",
+      "steps": [
+        "Create src/programmatic_demo/nlp/resolver.py",
+        "Create TargetResolver class with method stubs",
+        "Add methods: resolve(description, observation) -> coords"
+      ],
+      "files": ["src/programmatic_demo/nlp/resolver.py"],
+      "depends_on": ["NLP-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "NLP-004",
+      "category": "nlp",
+      "description": "Implement text-based target finding (OCR lookup)",
+      "steps": [
+        "Implement resolve_by_text in TargetResolver",
+        "Use OCR.find_text to locate text on screen",
+        "Return center coordinates of found text"
+      ],
+      "files": ["src/programmatic_demo/nlp/resolver.py"],
+      "depends_on": ["NLP-003", "OCR-003"],
+      "passes": false
+    },
+    {
+      "id": "NLP-005",
+      "category": "nlp",
+      "description": "Implement fuzzy text matching for targets",
+      "steps": [
+        "Add fuzzy_match method to TargetResolver",
+        "Use difflib.SequenceMatcher for similarity",
+        "Return best match above threshold (0.7)"
+      ],
+      "files": ["src/programmatic_demo/nlp/resolver.py"],
+      "depends_on": ["NLP-004"],
+      "passes": false
+    },
+    {
+      "id": "NLP-006",
+      "category": "nlp",
+      "description": "Implement element type inference",
+      "steps": [
+        "Add infer_element_type method",
+        "Recognize keywords: button, field, input, link, menu, tab",
+        "Adjust search strategy based on element type"
+      ],
+      "files": ["src/programmatic_demo/nlp/resolver.py"],
+      "depends_on": ["NLP-004"],
+      "passes": false
+    },
+    {
+      "id": "NLP-007",
+      "category": "nlp",
+      "description": "Implement position hints parsing",
+      "steps": [
+        "Add parse_position_hint method",
+        "Recognize: top, bottom, left, right, first, last, near",
+        "Filter candidates based on position hints"
+      ],
+      "files": ["src/programmatic_demo/nlp/resolver.py"],
+      "depends_on": ["NLP-004"],
+      "passes": false
+    },
+    {
+      "id": "NLP-008",
+      "category": "nlp",
+      "description": "Implement click action parsing",
+      "steps": [
+        "Add parse_click method to parser",
+        "Handle: click X, press X button, tap on X",
+        "Extract target description from text"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-001", "NLP-002"],
+      "passes": false
+    },
+    {
+      "id": "NLP-009",
+      "category": "nlp",
+      "description": "Implement type action parsing",
+      "steps": [
+        "Add parse_type method to parser",
+        "Handle: type X, enter X in Y, write X",
+        "Extract text to type and optional target field"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-001", "NLP-002"],
+      "passes": false
+    },
+    {
+      "id": "NLP-010",
+      "category": "nlp",
+      "description": "Implement key action parsing",
+      "steps": [
+        "Add parse_key method to parser",
+        "Handle: press Enter, hit Tab, escape key",
+        "Map common key names to pyautogui keys"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-001", "NLP-002"],
+      "passes": false
+    },
+    {
+      "id": "NLP-011",
+      "category": "nlp",
+      "description": "Implement wait parsing",
+      "steps": [
+        "Add parse_wait method to parser",
+        "Handle: wait for X, until X appears, wait N seconds",
+        "Extract wait condition type and value"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-001", "NLP-002"],
+      "passes": false
+    },
+    {
+      "id": "NLP-012",
+      "category": "nlp",
+      "description": "Implement scroll parsing",
+      "steps": [
+        "Add parse_scroll method to parser",
+        "Handle: scroll down, scroll up, scroll to X",
+        "Extract direction and optional amount"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-001", "NLP-002"],
+      "passes": false
+    },
+    {
+      "id": "NLP-013",
+      "category": "nlp",
+      "description": "Implement navigate parsing",
+      "steps": [
+        "Add parse_navigate method to parser",
+        "Handle: go to X, open X, navigate to X",
+        "Extract URL or app name"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-001", "NLP-002"],
+      "passes": false
+    },
+    {
+      "id": "NLP-014",
+      "category": "nlp",
+      "description": "Implement parse_action(text) -> ActionIntent",
+      "steps": [
+        "Create main parse_action function",
+        "Try each action parser in order",
+        "Return ActionIntent with highest confidence match"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-008", "NLP-009", "NLP-010", "NLP-011", "NLP-012", "NLP-013"],
+      "passes": false
+    },
+    {
+      "id": "NLP-015",
+      "category": "nlp",
+      "description": "Implement resolve_and_execute(intent, observation)",
+      "steps": [
+        "Create resolve_and_execute function",
+        "Resolve target using TargetResolver",
+        "Dispatch to appropriate actuator",
+        "Return execution result"
+      ],
+      "files": ["src/programmatic_demo/nlp/parser.py"],
+      "depends_on": ["NLP-014", "NLP-004"],
+      "passes": false
+    },
+    {
+      "id": "NLP-CLI",
+      "category": "nlp",
+      "description": "Create CLI pdemo action parse/resolve/execute commands",
+      "steps": [
+        "Create src/programmatic_demo/cli/action.py",
+        "Add parse command - parse natural language to ActionIntent",
+        "Add resolve command - find target coordinates",
+        "Add execute command - parse, resolve, and execute",
+        "Register in main.py"
+      ],
+      "files": ["src/programmatic_demo/cli/action.py", "src/programmatic_demo/cli/main.py"],
+      "depends_on": ["CLI-001", "NLP-014", "NLP-015"],
+      "passes": false
+    },
+
+    {
+      "id": "DIRECTOR-SKEL",
+      "category": "director",
+      "description": "Create agents/__init__.py and agents/director.py skeleton",
+      "steps": [
+        "Create src/programmatic_demo/agents/__init__.py",
+        "Create src/programmatic_demo/agents/director.py",
+        "Add Director class with method stubs"
+      ],
+      "files": ["src/programmatic_demo/agents/__init__.py", "src/programmatic_demo/agents/director.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-001",
+      "category": "director",
+      "description": "Create agents/claude_client.py wrapper class",
+      "steps": [
+        "Create src/programmatic_demo/agents/claude_client.py",
+        "Create ClaudeClient class",
+        "Add method stubs: send_message, send_with_image"
+      ],
+      "files": ["src/programmatic_demo/agents/claude_client.py"],
+      "depends_on": ["DIRECTOR-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-002",
+      "category": "director",
+      "description": "Implement API key loading from env/config",
+      "steps": [
+        "Add get_api_key method to ClaudeClient",
+        "Check ANTHROPIC_API_KEY env var first",
+        "Fall back to config file",
+        "Raise error if not found"
+      ],
+      "files": ["src/programmatic_demo/agents/claude_client.py"],
+      "depends_on": ["DIRECTOR-001", "UTIL-003"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-003",
+      "category": "director",
+      "description": "Implement message formatting with system prompt",
+      "steps": [
+        "Implement format_message method",
+        "Accept system prompt and user message",
+        "Return properly formatted messages list"
+      ],
+      "files": ["src/programmatic_demo/agents/claude_client.py"],
+      "depends_on": ["DIRECTOR-001"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-004",
+      "category": "director",
+      "description": "Implement image attachment (base64 screenshot)",
+      "steps": [
+        "Implement attach_image method",
+        "Accept base64 image string",
+        "Format as Claude vision message content"
+      ],
+      "files": ["src/programmatic_demo/agents/claude_client.py"],
+      "depends_on": ["DIRECTOR-003", "SCREEN-004"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-005",
+      "category": "director",
+      "description": "Implement structured response parsing (JSON mode)",
+      "steps": [
+        "Implement parse_json_response method",
+        "Extract JSON from Claude response",
+        "Handle markdown code blocks",
+        "Return parsed dict"
+      ],
+      "files": ["src/programmatic_demo/agents/claude_client.py"],
+      "depends_on": ["DIRECTOR-001"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-006",
+      "category": "director",
+      "description": "Implement observation_to_prompt(observation)",
+      "steps": [
+        "Create observation_to_prompt function in director.py",
+        "Format observation dict as readable text",
+        "Include OCR text, terminal output, window info"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-004", "STATE-002"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-007",
+      "category": "director",
+      "description": "Implement screenshot compression for API",
+      "steps": [
+        "Add compress_screenshot function",
+        "Resize to max 1568px on longest side",
+        "Reduce JPEG quality to 85%",
+        "Return compressed base64"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-006"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-008",
+      "category": "director",
+      "description": "Implement context summarization",
+      "steps": [
+        "Add summarize_context function",
+        "Truncate long OCR text to 2000 chars",
+        "Keep most recent terminal output",
+        "Preserve key information"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-006"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-009",
+      "category": "director",
+      "description": "Create prompts/ directory with template files",
+      "steps": [
+        "Create src/programmatic_demo/prompts/ directory",
+        "Create __init__.py",
+        "Add placeholder .txt files for each prompt type"
+      ],
+      "files": ["src/programmatic_demo/prompts/__init__.py"],
+      "depends_on": ["DIRECTOR-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-010",
+      "category": "director",
+      "description": "Implement scene_planner.txt prompt template",
+      "steps": [
+        "Create scene_planner.txt template",
+        "Include system context for planning scenes",
+        "Define output format (list of steps)",
+        "Add examples of good scene plans"
+      ],
+      "files": ["src/programmatic_demo/prompts/scene_planner.txt"],
+      "depends_on": ["DIRECTOR-009"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-011",
+      "category": "director",
+      "description": "Implement action_decider.txt prompt template",
+      "steps": [
+        "Create action_decider.txt template",
+        "Include observation context variables",
+        "Define available actions and format",
+        "Add decision-making guidelines"
+      ],
+      "files": ["src/programmatic_demo/prompts/action_decider.txt"],
+      "depends_on": ["DIRECTOR-009"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-012",
+      "category": "director",
+      "description": "Implement failure_analyzer.txt prompt template",
+      "steps": [
+        "Create failure_analyzer.txt template",
+        "Include expected vs actual state",
+        "Define retry strategies",
+        "Add recovery suggestion format"
+      ],
+      "files": ["src/programmatic_demo/prompts/failure_analyzer.txt"],
+      "depends_on": ["DIRECTOR-009"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-013",
+      "category": "director",
+      "description": "Implement prompt loader with variable substitution",
+      "steps": [
+        "Create load_prompt function",
+        "Load template from file",
+        "Substitute {variables} with provided values",
+        "Return formatted prompt string"
+      ],
+      "files": ["src/programmatic_demo/prompts/__init__.py"],
+      "depends_on": ["DIRECTOR-009"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-014",
+      "category": "director",
+      "description": "Implement plan_scene(goal, context) -> list[Step]",
+      "steps": [
+        "Add plan_scene method to Director",
+        "Load scene_planner prompt",
+        "Send to Claude with context",
+        "Parse response into Step objects"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-010", "DIRECTOR-013", "SCRIPT-005"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-015",
+      "category": "director",
+      "description": "Implement decide_next_action(observation, goal) -> Step",
+      "steps": [
+        "Add decide_next_action method to Director",
+        "Load action_decider prompt",
+        "Include compressed screenshot",
+        "Parse response into single Step"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-011", "DIRECTOR-013", "DIRECTOR-006"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-016",
+      "category": "director",
+      "description": "Implement detect_success(observation, expected) -> bool",
+      "steps": [
+        "Add detect_success method to Director",
+        "Compare observation against expected state",
+        "Check OCR text for expected content",
+        "Return True if state matches"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-006"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-017",
+      "category": "director",
+      "description": "Implement analyze_failure(observation, step) -> RetryStrategy",
+      "steps": [
+        "Add analyze_failure method to Director",
+        "Load failure_analyzer prompt",
+        "Send observation and failed step",
+        "Parse response into retry strategy"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-012", "DIRECTOR-013"],
+      "passes": false
+    },
+    {
+      "id": "DIRECTOR-018",
+      "category": "director",
+      "description": "Implement suggest_recovery(failure_analysis) -> Step",
+      "steps": [
+        "Add suggest_recovery method to Director",
+        "Based on failure analysis, suggest alternative action",
+        "Return recovery Step or None if unrecoverable"
+      ],
+      "files": ["src/programmatic_demo/agents/director.py"],
+      "depends_on": ["DIRECTOR-017"],
+      "passes": false
+    },
+
+    {
+      "id": "ORCH-SKEL",
+      "category": "orchestrator",
+      "description": "Create orchestrator/__init__.py and orchestrator/runner.py",
+      "steps": [
+        "Create src/programmatic_demo/orchestrator/__init__.py",
+        "Create src/programmatic_demo/orchestrator/runner.py",
+        "Add Runner class with method stubs"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/__init__.py", "src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-001",
+      "category": "orchestrator",
+      "description": "Define RunnerConfig dataclass",
+      "steps": [
+        "Create RunnerConfig dataclass",
+        "Add fields: max_retries, step_timeout, scene_timeout, verify_after_action"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-002",
+      "category": "orchestrator",
+      "description": "Define StepResult dataclass",
+      "steps": [
+        "Create StepResult dataclass",
+        "Add fields: success, observation, error, duration, retries"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-003",
+      "category": "orchestrator",
+      "description": "Define SceneResult dataclass",
+      "steps": [
+        "Create SceneResult dataclass",
+        "Add fields: success, steps_completed, steps_total, error, duration"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-002"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-004",
+      "category": "orchestrator",
+      "description": "Define DemoResult dataclass",
+      "steps": [
+        "Create DemoResult dataclass",
+        "Add fields: success, scenes_completed, scenes_total, video_path, duration"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-003"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-005",
+      "category": "orchestrator",
+      "description": "Create orchestrator/dispatcher.py action dispatcher",
+      "steps": [
+        "Create src/programmatic_demo/orchestrator/dispatcher.py",
+        "Create ActionDispatcher class",
+        "Add dispatch(step) method that routes to appropriate actuator"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-006",
+      "category": "orchestrator",
+      "description": "Implement dispatch_click(target) using Mouse",
+      "steps": [
+        "Add dispatch_click method to ActionDispatcher",
+        "Resolve target to coordinates using NLP resolver",
+        "Call Mouse.click_at with coordinates"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "MOUSE-003", "NLP-004"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-007",
+      "category": "orchestrator",
+      "description": "Implement dispatch_type(text) using Keyboard",
+      "steps": [
+        "Add dispatch_type method to ActionDispatcher",
+        "Call Keyboard.type_text with provided text"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "KEY-001"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-008",
+      "category": "orchestrator",
+      "description": "Implement dispatch_press(key) using Keyboard",
+      "steps": [
+        "Add dispatch_press method to ActionDispatcher",
+        "Call Keyboard.press with key name"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "KEY-002"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-009",
+      "category": "orchestrator",
+      "description": "Implement dispatch_scroll(direction, amount) using Mouse",
+      "steps": [
+        "Add dispatch_scroll method to ActionDispatcher",
+        "Call Mouse.scroll with direction and amount"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "MOUSE-004"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-010",
+      "category": "orchestrator",
+      "description": "Implement dispatch_wait(condition) with polling",
+      "steps": [
+        "Add dispatch_wait method to ActionDispatcher",
+        "Poll Observer.get_observation at intervals",
+        "Check if condition is met",
+        "Return when satisfied or timeout"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "STATE-002"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-011",
+      "category": "orchestrator",
+      "description": "Implement dispatch_navigate(url) using Browser",
+      "steps": [
+        "Add dispatch_navigate method to ActionDispatcher",
+        "Launch browser if not open",
+        "Call Browser.navigate with URL"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "BROWSER-002"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-012",
+      "category": "orchestrator",
+      "description": "Implement dispatch_terminal(command) using Terminal",
+      "steps": [
+        "Add dispatch_terminal method to ActionDispatcher",
+        "Launch terminal if no session",
+        "Call Terminal.exec with command"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/dispatcher.py"],
+      "depends_on": ["ORCH-005", "TERM-003"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-013",
+      "category": "orchestrator",
+      "description": "Implement execute_step(step) -> StepResult",
+      "steps": [
+        "Add execute_step method to Runner",
+        "Dispatch action via ActionDispatcher",
+        "Capture observation after action",
+        "Return StepResult with timing"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-006", "ORCH-007", "ORCH-008", "ORCH-009", "ORCH-010"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-014",
+      "category": "orchestrator",
+      "description": "Implement verify_step(step, observation) -> bool",
+      "steps": [
+        "Add verify_step method to Runner",
+        "Check wait_for condition against observation",
+        "Use Director.detect_success for complex verification"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-013", "STATE-002"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-015",
+      "category": "orchestrator",
+      "description": "Implement execute_scene(scene) -> SceneResult",
+      "steps": [
+        "Add execute_scene method to Runner",
+        "Iterate through scene steps",
+        "Execute and verify each step",
+        "Handle failures based on on_failure strategy"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-013", "ORCH-014"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-016",
+      "category": "orchestrator",
+      "description": "Implement execute_demo(script) -> DemoResult",
+      "steps": [
+        "Add execute_demo method to Runner",
+        "Start recording",
+        "Iterate through script scenes",
+        "Execute each scene",
+        "Stop recording and return result"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-015"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-017",
+      "category": "orchestrator",
+      "description": "Implement retry_step(step, attempts) with backoff",
+      "steps": [
+        "Add retry_step method to Runner",
+        "Implement exponential backoff",
+        "Use Director.analyze_failure for smart retries",
+        "Return after max attempts or success"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-013", "DIRECTOR-017"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-018",
+      "category": "orchestrator",
+      "description": "Implement scene_cleanup() for isolation",
+      "steps": [
+        "Add scene_cleanup method to Runner",
+        "Close any open dialogs",
+        "Reset to known state",
+        "Clear terminal if active"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-015"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-019",
+      "category": "orchestrator",
+      "description": "Implement graceful_interrupt() handler (Ctrl+C)",
+      "steps": [
+        "Add signal handler for SIGINT",
+        "Stop current action gracefully",
+        "Stop recording if active",
+        "Save partial progress"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-016"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-020",
+      "category": "orchestrator",
+      "description": "Implement progress_callback hooks for logging/UI",
+      "steps": [
+        "Add on_step_start, on_step_complete callbacks",
+        "Add on_scene_start, on_scene_complete callbacks",
+        "Call callbacks at appropriate points in execution"
+      ],
+      "files": ["src/programmatic_demo/orchestrator/runner.py"],
+      "depends_on": ["ORCH-016"],
+      "passes": false
+    },
+    {
+      "id": "ORCH-CLI",
+      "category": "orchestrator",
+      "description": "Create CLI pdemo run demo/scene/step commands",
+      "steps": [
+        "Create src/programmatic_demo/cli/run.py",
+        "Add demo command - run full script",
+        "Add scene command - run single scene",
+        "Add step command - run single step",
+        "Add progress output and JSON mode"
+      ],
+      "files": ["src/programmatic_demo/cli/run.py", "src/programmatic_demo/cli/main.py"],
+      "depends_on": ["CLI-001", "ORCH-016"],
+      "passes": false
+    },
+
+    {
+      "id": "EFFECTS-SKEL",
+      "category": "effects",
+      "description": "Create effects/__init__.py and effects/compositor.py",
+      "steps": [
+        "Create src/programmatic_demo/effects/__init__.py",
+        "Create src/programmatic_demo/effects/compositor.py",
+        "Add Compositor class with method stubs"
+      ],
+      "files": ["src/programmatic_demo/effects/__init__.py", "src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-001",
+      "category": "effects",
+      "description": "Define EffectType enum",
+      "steps": [
+        "Create EffectType enum in compositor.py",
+        "Add values: zoom, ripple, highlight, callout, spotlight"
+      ],
+      "files": ["src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["EFFECTS-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-002",
+      "category": "effects",
+      "description": "Define EffectConfig dataclass",
+      "steps": [
+        "Create EffectConfig dataclass",
+        "Add fields: type, params (dict), duration_ms, easing"
+      ],
+      "files": ["src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["EFFECTS-001"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-003",
+      "category": "effects",
+      "description": "Define EffectEvent dataclass",
+      "steps": [
+        "Create EffectEvent dataclass",
+        "Add fields: type, timestamp_ms, position (x, y), config"
+      ],
+      "files": ["src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["EFFECTS-002"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-004",
+      "category": "effects",
+      "description": "Create effects/mouse_tracker.py",
+      "steps": [
+        "Create src/programmatic_demo/effects/mouse_tracker.py",
+        "Create MouseTracker class",
+        "Add method stubs: start, stop, get_position, on_click"
+      ],
+      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
+      "depends_on": ["EFFECTS-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-005",
+      "category": "effects",
+      "description": "Implement MouseTracker.start() - begin position polling",
+      "steps": [
+        "Implement start method",
+        "Start background thread for polling",
+        "Poll pyautogui.position() at 60fps",
+        "Store positions with timestamps"
+      ],
+      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
+      "depends_on": ["EFFECTS-004"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-006",
+      "category": "effects",
+      "description": "Implement MouseTracker.get_position() - current coords",
+      "steps": [
+        "Implement get_position method",
+        "Return current mouse coordinates",
+        "Include timestamp"
+      ],
+      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
+      "depends_on": ["EFFECTS-004"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-007",
+      "category": "effects",
+      "description": "Implement MouseTracker.on_click callback registration",
+      "steps": [
+        "Add on_click callback registration",
+        "Use pynput or similar for click detection",
+        "Call registered callbacks with position and button"
+      ],
+      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
+      "depends_on": ["EFFECTS-004"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-008",
+      "category": "effects",
+      "description": "Implement MouseTracker.get_history() - position timeline",
+      "steps": [
+        "Implement get_history method",
+        "Return list of (timestamp, x, y) tuples",
+        "Support time range filtering"
+      ],
+      "files": ["src/programmatic_demo/effects/mouse_tracker.py"],
+      "depends_on": ["EFFECTS-004"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-009",
+      "category": "effects",
+      "description": "Create effects/click_effect.py",
+      "steps": [
+        "Create src/programmatic_demo/effects/click_effect.py",
+        "Create ClickEffect class",
+        "Add method stubs for ripple generation"
+      ],
+      "files": ["src/programmatic_demo/effects/click_effect.py"],
+      "depends_on": ["EFFECTS-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-010",
+      "category": "effects",
+      "description": "Implement ripple animation parameters",
+      "steps": [
+        "Define RippleConfig dataclass",
+        "Add fields: color, start_radius, end_radius, duration_ms, opacity"
+      ],
+      "files": ["src/programmatic_demo/effects/click_effect.py"],
+      "depends_on": ["EFFECTS-009"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-011",
+      "category": "effects",
+      "description": "Implement ripple overlay generation (PNG sequence)",
+      "steps": [
+        "Add generate_ripple_frames method",
+        "Use PIL to draw expanding circles",
+        "Generate frame sequence for animation",
+        "Return list of PIL Images"
+      ],
+      "files": ["src/programmatic_demo/effects/click_effect.py"],
+      "depends_on": ["EFFECTS-010"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-012",
+      "category": "effects",
+      "description": "Implement click sound effect trigger (optional)",
+      "steps": [
+        "Add play_click_sound method",
+        "Load click.wav from assets",
+        "Play using playsound or similar",
+        "Make optional via config"
+      ],
+      "files": ["src/programmatic_demo/effects/click_effect.py"],
+      "depends_on": ["EFFECTS-009"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-013",
+      "category": "effects",
+      "description": "Create effects/zoom_effect.py",
+      "steps": [
+        "Create src/programmatic_demo/effects/zoom_effect.py",
+        "Create ZoomEffect class",
+        "Add method stubs for zoom calculation"
+      ],
+      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
+      "depends_on": ["EFFECTS-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-014",
+      "category": "effects",
+      "description": "Implement zoom region calculation (centered on mouse)",
+      "steps": [
+        "Add calculate_zoom_region method",
+        "Calculate crop region centered on mouse position",
+        "Account for screen edges",
+        "Return crop coordinates"
+      ],
+      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
+      "depends_on": ["EFFECTS-013", "EFFECTS-006"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-015",
+      "category": "effects",
+      "description": "Implement smooth zoom transition (ease in/out)",
+      "steps": [
+        "Add interpolate_zoom method",
+        "Implement ease-in-out easing function",
+        "Calculate intermediate zoom levels",
+        "Return zoom value for given timestamp"
+      ],
+      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
+      "depends_on": ["EFFECTS-014"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-016",
+      "category": "effects",
+      "description": "Implement zoom level configuration",
+      "steps": [
+        "Define ZoomConfig dataclass",
+        "Add fields: zoom_level (1.5x, 2x), transition_ms, hold_ms",
+        "Add presets: subtle (1.25x), medium (1.5x), dramatic (2x)"
+      ],
+      "files": ["src/programmatic_demo/effects/zoom_effect.py"],
+      "depends_on": ["EFFECTS-014"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-017",
+      "category": "effects",
+      "description": "Create effects/highlight.py",
+      "steps": [
+        "Create src/programmatic_demo/effects/highlight.py",
+        "Create Highlight class",
+        "Add method stubs for highlight generation"
+      ],
+      "files": ["src/programmatic_demo/effects/highlight.py"],
+      "depends_on": ["EFFECTS-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-018",
+      "category": "effects",
+      "description": "Implement highlight box overlay (border around element)",
+      "steps": [
+        "Add generate_highlight_box method",
+        "Draw rounded rectangle border",
+        "Configurable color, thickness, corner radius",
+        "Return overlay image"
+      ],
+      "files": ["src/programmatic_demo/effects/highlight.py"],
+      "depends_on": ["EFFECTS-017"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-019",
+      "category": "effects",
+      "description": "Implement spotlight effect (dim everything except region)",
+      "steps": [
+        "Add generate_spotlight method",
+        "Create semi-transparent overlay",
+        "Cut out spotlight region",
+        "Smooth feathered edges"
+      ],
+      "files": ["src/programmatic_demo/effects/highlight.py"],
+      "depends_on": ["EFFECTS-017"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-020",
+      "category": "effects",
+      "description": "Create effects/callout.py for text annotations",
+      "steps": [
+        "Create src/programmatic_demo/effects/callout.py",
+        "Create Callout class",
+        "Add method stubs for callout generation"
+      ],
+      "files": ["src/programmatic_demo/effects/callout.py"],
+      "depends_on": ["EFFECTS-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-021",
+      "category": "effects",
+      "description": "Implement text callout with arrow pointing to element",
+      "steps": [
+        "Add generate_callout method",
+        "Draw text box with background",
+        "Draw arrow from box to target point",
+        "Configurable position (auto, top, bottom, left, right)"
+      ],
+      "files": ["src/programmatic_demo/effects/callout.py"],
+      "depends_on": ["EFFECTS-020"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-022",
+      "category": "effects",
+      "description": "Implement ffmpeg filter chain builder for all effects",
+      "steps": [
+        "Add build_filter_chain method to Compositor",
+        "Convert effect events to ffmpeg filters",
+        "Chain filters in correct order",
+        "Return filter complex string"
+      ],
+      "files": ["src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["EFFECTS-011", "EFFECTS-015", "EFFECTS-018", "EFFECTS-021"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-023",
+      "category": "effects",
+      "description": "Implement effect event queue with timestamps",
+      "steps": [
+        "Add EventQueue class to compositor",
+        "Store effect events with timestamps",
+        "Support add_event, get_events_in_range methods",
+        "Sort events by timestamp"
+      ],
+      "files": ["src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["EFFECTS-003"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-024",
+      "category": "effects",
+      "description": "Integrate effect renderer with Recorder",
+      "steps": [
+        "Add apply_effects method to Compositor",
+        "Hook into recording pipeline",
+        "Apply effects in post-processing or real-time",
+        "Support both modes via config"
+      ],
+      "files": ["src/programmatic_demo/effects/compositor.py"],
+      "depends_on": ["EFFECTS-022", "EFFECTS-023", "REC-001"],
+      "passes": false
+    },
+    {
+      "id": "EFFECTS-CLI",
+      "category": "effects",
+      "description": "Create CLI pdemo effects enable/config/preview commands",
+      "steps": [
+        "Create src/programmatic_demo/cli/effects.py",
+        "Add enable command - toggle effects on/off",
+        "Add config command - set effect parameters",
+        "Add preview command - test effect on screenshot",
+        "Register in main.py"
+      ],
+      "files": ["src/programmatic_demo/cli/effects.py", "src/programmatic_demo/cli/main.py"],
+      "depends_on": ["CLI-001", "EFFECTS-024"],
+      "passes": false
+    },
+
+    {
+      "id": "POST-SKEL",
+      "category": "postprocess",
+      "description": "Create postprocess/__init__.py and postprocess/editor.py",
+      "steps": [
+        "Create src/programmatic_demo/postprocess/__init__.py",
+        "Create src/programmatic_demo/postprocess/editor.py",
+        "Add VideoEditor class with method stubs"
+      ],
+      "files": ["src/programmatic_demo/postprocess/__init__.py", "src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "POST-001",
+      "category": "postprocess",
+      "description": "Define VideoSegment dataclass",
+      "steps": [
+        "Create VideoSegment dataclass",
+        "Add fields: path, start_time, end_time, effects (list)"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "POST-002",
+      "category": "postprocess",
+      "description": "Define EditProject dataclass",
+      "steps": [
+        "Create EditProject dataclass",
+        "Add fields: segments (list), output_path, resolution, fps"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-001"],
+      "passes": false
+    },
+    {
+      "id": "POST-003",
+      "category": "postprocess",
+      "description": "Implement ffmpeg command builder utility",
+      "steps": [
+        "Create FFmpegBuilder class",
+        "Add methods: input, output, filter, run",
+        "Build command string from method chain",
+        "Execute via subprocess"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "POST-004",
+      "category": "postprocess",
+      "description": "Implement trim(input, start, end, output)",
+      "steps": [
+        "Add trim method to VideoEditor",
+        "Use ffmpeg -ss and -to flags",
+        "Handle timestamp formats (seconds or HH:MM:SS)",
+        "Return output path"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-005",
+      "category": "postprocess",
+      "description": "Implement concat(inputs[], output) with crossfade option",
+      "steps": [
+        "Add concat method to VideoEditor",
+        "Use ffmpeg concat demuxer",
+        "Optional crossfade between clips",
+        "Handle different resolutions"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-006",
+      "category": "postprocess",
+      "description": "Implement speed_adjust(input, factor, output)",
+      "steps": [
+        "Add speed_adjust method to VideoEditor",
+        "Use setpts filter for video",
+        "Use atempo filter for audio",
+        "Support slow-mo (0.5x) and fast-forward (2x)"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-007",
+      "category": "postprocess",
+      "description": "Implement resize(input, width, height, output)",
+      "steps": [
+        "Add resize method to VideoEditor",
+        "Use scale filter",
+        "Maintain aspect ratio option",
+        "Support common presets (720p, 1080p, 4k)"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-008",
+      "category": "postprocess",
+      "description": "Create postprocess/overlays.py",
+      "steps": [
+        "Create src/programmatic_demo/postprocess/overlays.py",
+        "Create Overlays class",
+        "Add method stubs for overlay operations"
+      ],
+      "files": ["src/programmatic_demo/postprocess/overlays.py"],
+      "depends_on": ["POST-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "POST-009",
+      "category": "postprocess",
+      "description": "Implement text_overlay(input, text, position, style)",
+      "steps": [
+        "Add text_overlay method",
+        "Use drawtext filter",
+        "Support font, size, color, background",
+        "Position presets: top, bottom, center"
+      ],
+      "files": ["src/programmatic_demo/postprocess/overlays.py"],
+      "depends_on": ["POST-008", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-010",
+      "category": "postprocess",
+      "description": "Implement image_overlay(input, image, position, opacity)",
+      "steps": [
+        "Add image_overlay method",
+        "Use overlay filter",
+        "Support PNG with transparency",
+        "Configurable position and opacity"
+      ],
+      "files": ["src/programmatic_demo/postprocess/overlays.py"],
+      "depends_on": ["POST-008", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-011",
+      "category": "postprocess",
+      "description": "Implement watermark(input, logo, corner)",
+      "steps": [
+        "Add watermark method (convenience wrapper)",
+        "Position logo in specified corner",
+        "Add padding from edges",
+        "Semi-transparent by default"
+      ],
+      "files": ["src/programmatic_demo/postprocess/overlays.py"],
+      "depends_on": ["POST-010"],
+      "passes": false
+    },
+    {
+      "id": "POST-012",
+      "category": "postprocess",
+      "description": "Implement progress_bar overlay",
+      "steps": [
+        "Add progress_bar method",
+        "Draw horizontal bar at bottom",
+        "Fill based on video progress",
+        "Configurable color and height"
+      ],
+      "files": ["src/programmatic_demo/postprocess/overlays.py"],
+      "depends_on": ["POST-008", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-013",
+      "category": "postprocess",
+      "description": "Create postprocess/transitions.py",
+      "steps": [
+        "Create src/programmatic_demo/postprocess/transitions.py",
+        "Create Transitions class",
+        "Add method stubs for transition effects"
+      ],
+      "files": ["src/programmatic_demo/postprocess/transitions.py"],
+      "depends_on": ["POST-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "POST-014",
+      "category": "postprocess",
+      "description": "Implement fade_in/fade_out transitions",
+      "steps": [
+        "Add fade_in and fade_out methods",
+        "Use fade filter",
+        "Configurable duration",
+        "Support fade to/from black or white"
+      ],
+      "files": ["src/programmatic_demo/postprocess/transitions.py"],
+      "depends_on": ["POST-013", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-015",
+      "category": "postprocess",
+      "description": "Implement crossfade between clips",
+      "steps": [
+        "Add crossfade method",
+        "Use xfade filter",
+        "Configurable duration and offset",
+        "Support various transition types"
+      ],
+      "files": ["src/programmatic_demo/postprocess/transitions.py"],
+      "depends_on": ["POST-013", "POST-005"],
+      "passes": false
+    },
+    {
+      "id": "POST-016",
+      "category": "postprocess",
+      "description": "Implement wipe transition",
+      "steps": [
+        "Add wipe method",
+        "Support directions: left, right, up, down",
+        "Use xfade with wipe transition",
+        "Configurable duration"
+      ],
+      "files": ["src/programmatic_demo/postprocess/transitions.py"],
+      "depends_on": ["POST-013", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-017",
+      "category": "postprocess",
+      "description": "Create postprocess/audio.py",
+      "steps": [
+        "Create src/programmatic_demo/postprocess/audio.py",
+        "Create AudioEditor class",
+        "Add method stubs for audio operations"
+      ],
+      "files": ["src/programmatic_demo/postprocess/audio.py"],
+      "depends_on": ["POST-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "POST-018",
+      "category": "postprocess",
+      "description": "Implement add_background_music(video, audio, volume)",
+      "steps": [
+        "Add add_background_music method",
+        "Mix audio track with video",
+        "Adjustable volume level",
+        "Loop audio if shorter than video"
+      ],
+      "files": ["src/programmatic_demo/postprocess/audio.py"],
+      "depends_on": ["POST-017", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-019",
+      "category": "postprocess",
+      "description": "Implement add_voiceover(video, audio, timestamps)",
+      "steps": [
+        "Add add_voiceover method",
+        "Insert audio at specific timestamps",
+        "Duck background audio during voiceover",
+        "Support multiple voiceover segments"
+      ],
+      "files": ["src/programmatic_demo/postprocess/audio.py"],
+      "depends_on": ["POST-017", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-020",
+      "category": "postprocess",
+      "description": "Implement audio_normalize(video)",
+      "steps": [
+        "Add audio_normalize method",
+        "Use loudnorm filter",
+        "Target -16 LUFS for web",
+        "Optional peak limiting"
+      ],
+      "files": ["src/programmatic_demo/postprocess/audio.py"],
+      "depends_on": ["POST-017", "POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-021",
+      "category": "postprocess",
+      "description": "Implement create_title_slide(text, duration, style)",
+      "steps": [
+        "Add create_title_slide method",
+        "Generate video from image",
+        "Support background color/image",
+        "Configurable text style and animation"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-022",
+      "category": "postprocess",
+      "description": "Implement create_outro_slide(text, duration, style)",
+      "steps": [
+        "Add create_outro_slide method",
+        "Similar to title slide",
+        "Support call-to-action text",
+        "Optional logo placement"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-003"],
+      "passes": false
+    },
+    {
+      "id": "POST-023",
+      "category": "postprocess",
+      "description": "Implement prepend_intro(video, intro_slide)",
+      "steps": [
+        "Add prepend_intro method",
+        "Concat intro with main video",
+        "Optional transition between them",
+        "Convenience wrapper for common pattern"
+      ],
+      "files": ["src/programmatic_demo/postprocess/editor.py"],
+      "depends_on": ["POST-021", "POST-005"],
+      "passes": false
+    },
+    {
+      "id": "POST-CLI",
+      "category": "postprocess",
+      "description": "Create CLI pdemo video trim/concat/overlay/export commands",
+      "steps": [
+        "Create src/programmatic_demo/cli/video.py",
+        "Add trim command - trim video to time range",
+        "Add concat command - join multiple videos",
+        "Add overlay command - add text/image overlay",
+        "Add export command - transcode with presets",
+        "Register in main.py"
+      ],
+      "files": ["src/programmatic_demo/cli/video.py", "src/programmatic_demo/cli/main.py"],
+      "depends_on": ["CLI-001", "POST-004", "POST-005", "POST-009", "POST-018"],
+      "passes": false
+    },
+
+    {
+      "id": "TMPL-SKEL",
+      "category": "templates",
+      "description": "Create templates/__init__.py and template directory structure",
+      "steps": [
+        "Create src/programmatic_demo/templates/__init__.py",
+        "Create src/programmatic_demo/templates/builtin/ directory",
+        "Add placeholder README"
+      ],
+      "files": ["src/programmatic_demo/templates/__init__.py"],
+      "depends_on": ["SETUP-001"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-001",
+      "category": "templates",
+      "description": "Define Template dataclass",
+      "steps": [
+        "Create Template dataclass",
+        "Add fields: name, description, script_path, variables (list)"
+      ],
+      "files": ["src/programmatic_demo/templates/__init__.py"],
+      "depends_on": ["TMPL-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-002",
+      "category": "templates",
+      "description": "Define TemplateVariable dataclass",
+      "steps": [
+        "Create TemplateVariable dataclass",
+        "Add fields: name, type (str/int/bool/path), default, description, required"
+      ],
+      "files": ["src/programmatic_demo/templates/__init__.py"],
+      "depends_on": ["TMPL-001"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-003",
+      "category": "templates",
+      "description": "Create templates/registry.py template registry",
+      "steps": [
+        "Create src/programmatic_demo/templates/registry.py",
+        "Create TemplateRegistry class",
+        "Scan builtin/ directory for templates",
+        "Support custom template directories"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-SKEL"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-004",
+      "category": "templates",
+      "description": "Implement list_templates() -> list[Template]",
+      "steps": [
+        "Add list_templates method to registry",
+        "Return all available templates",
+        "Include builtin and custom templates"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-003"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-005",
+      "category": "templates",
+      "description": "Implement get_template(name) -> Template",
+      "steps": [
+        "Add get_template method to registry",
+        "Look up template by name",
+        "Load and parse template file",
+        "Return Template object"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-003"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-006",
+      "category": "templates",
+      "description": "Implement parse_variables(template) -> list[TemplateVariable]",
+      "steps": [
+        "Add parse_variables function",
+        "Scan template for {{variable}} patterns",
+        "Extract variable metadata from comments",
+        "Return list of TemplateVariable"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-002"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-007",
+      "category": "templates",
+      "description": "Implement substitute_variables(template, values) -> Script",
+      "steps": [
+        "Add substitute_variables function",
+        "Replace {{variable}} with provided values",
+        "Parse resulting YAML/JSON",
+        "Return Script object"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-006", "SCRIPT-007"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-008",
+      "category": "templates",
+      "description": "Implement validate_variable_values(template, values)",
+      "steps": [
+        "Add validate_variable_values function",
+        "Check all required variables provided",
+        "Validate types match",
+        "Return validation errors"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-006"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-009",
+      "category": "templates",
+      "description": "Create cli-tool-demo.yaml template",
+      "steps": [
+        "Create builtin/cli-tool-demo.yaml",
+        "Template for demoing CLI tools",
+        "Variables: tool_name, commands, working_dir",
+        "Scenes: intro, demo commands, outro"
+      ],
+      "files": ["src/programmatic_demo/templates/builtin/cli-tool-demo.yaml"],
+      "depends_on": ["TMPL-001", "SCRIPT-009"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-010",
+      "category": "templates",
+      "description": "Create web-app-walkthrough.yaml template",
+      "steps": [
+        "Create builtin/web-app-walkthrough.yaml",
+        "Template for web app demos",
+        "Variables: app_url, features, login_creds",
+        "Scenes: navigate, login, feature demos"
+      ],
+      "files": ["src/programmatic_demo/templates/builtin/web-app-walkthrough.yaml"],
+      "depends_on": ["TMPL-001", "SCRIPT-009", "BROWSER-CLI"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-011",
+      "category": "templates",
+      "description": "Create code-editor-demo.yaml template",
+      "steps": [
+        "Create builtin/code-editor-demo.yaml",
+        "Template for code editing demos",
+        "Variables: project_path, file_to_edit, changes",
+        "Scenes: open project, edit file, run/test"
+      ],
+      "files": ["src/programmatic_demo/templates/builtin/code-editor-demo.yaml"],
+      "depends_on": ["TMPL-001", "SCRIPT-009"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-012",
+      "category": "templates",
+      "description": "Create api-demo.yaml template (terminal + browser)",
+      "steps": [
+        "Create builtin/api-demo.yaml",
+        "Template for API demonstrations",
+        "Variables: api_base_url, endpoints, auth_token",
+        "Scenes: terminal curl, browser response"
+      ],
+      "files": ["src/programmatic_demo/templates/builtin/api-demo.yaml"],
+      "depends_on": ["TMPL-001", "SCRIPT-009"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-013",
+      "category": "templates",
+      "description": "Implement template instantiation wizard (interactive)",
+      "steps": [
+        "Add instantiate_interactive function",
+        "Prompt for each required variable",
+        "Show descriptions and defaults",
+        "Validate input and generate script"
+      ],
+      "files": ["src/programmatic_demo/templates/registry.py"],
+      "depends_on": ["TMPL-007", "TMPL-008"],
+      "passes": false
+    },
+    {
+      "id": "TMPL-CLI",
+      "category": "templates",
+      "description": "Create CLI pdemo template list/info/use/create commands",
+      "steps": [
+        "Create src/programmatic_demo/cli/template.py",
+        "Add list command - show available templates",
+        "Add info command - show template details and variables",
+        "Add use command - instantiate template",
+        "Add create command - create new template from script",
+        "Register in main.py"
+      ],
+      "files": ["src/programmatic_demo/cli/template.py", "src/programmatic_demo/cli/main.py"],
+      "depends_on": ["CLI-001", "TMPL-004", "TMPL-005", "TMPL-007", "TMPL-013"],
+      "passes": false
+    },
+
+    {
+      "id": "INT-005",
+      "category": "integration",
+      "description": "Test: parse and validate YAML script",
+      "steps": [
+        "Create test script YAML file",
+        "Load with Script.from_yaml()",
+        "Validate with Script.validate()",
+        "Verify no errors returned"
+      ],
+      "files": [],
+      "depends_on": ["SCRIPT-CLI"],
+      "passes": false
+    },
+    {
+      "id": "INT-006",
+      "category": "integration",
+      "description": "Test: NLP action parsing accuracy",
+      "steps": [
+        "Test various natural language commands",
+        "Verify correct ActionIntent returned",
+        "Test edge cases and ambiguous input",
+        "Verify confidence scores"
+      ],
+      "files": [],
+      "depends_on": ["NLP-CLI"],
+      "passes": false
+    },
+    {
+      "id": "INT-007",
+      "category": "integration",
+      "description": "Test: Director scene planning",
+      "steps": [
+        "Provide goal to Director.plan_scene()",
+        "Verify returns valid list of Steps",
+        "Check steps are actionable",
+        "Verify wait conditions make sense"
+      ],
+      "files": [],
+      "depends_on": ["DIRECTOR-014"],
+      "passes": false
+    },
+    {
+      "id": "INT-008",
+      "category": "integration",
+      "description": "Test: full demo execution with recording",
+      "steps": [
+        "Create simple demo script",
+        "Run with pdemo run demo",
+        "Verify all scenes complete",
+        "Verify video file created"
+      ],
+      "files": [],
+      "depends_on": ["ORCH-CLI", "REC-CLI"],
+      "passes": false
+    },
+    {
+      "id": "INT-009",
+      "category": "integration",
+      "description": "Test: click effect rendering",
+      "steps": [
+        "Enable click effects",
+        "Perform click action",
+        "Capture screenshot during effect",
+        "Verify ripple visible in output"
+      ],
+      "files": [],
+      "depends_on": ["EFFECTS-011"],
+      "passes": false
+    },
+    {
+      "id": "INT-010",
+      "category": "integration",
+      "description": "Test: video trim and concat",
+      "steps": [
+        "Record short test video",
+        "Trim to middle section",
+        "Concat two clips",
+        "Verify output duration correct"
+      ],
+      "files": [],
+      "depends_on": ["POST-CLI"],
+      "passes": false
+    },
+    {
+      "id": "INT-011",
+      "category": "integration",
+      "description": "Test: template instantiation",
+      "steps": [
+        "Load cli-tool-demo template",
+        "Provide variable values",
+        "Instantiate to Script",
+        "Verify script is valid"
+      ],
+      "files": [],
+      "depends_on": ["TMPL-CLI"],
+      "passes": false
     }
   ],
   "metadata": {
-    "total_features": 72,
+    "total_features": 213,
     "categories": {
       "setup": 5,
       "utility": 3,
@@ -941,7 +2906,14 @@
       "perception": 12,
       "window": 3,
       "browser": 10,
-      "integration": 4
+      "script": 15,
+      "nlp": 17,
+      "director": 18,
+      "orchestrator": 21,
+      "effects": 26,
+      "postprocess": 24,
+      "templates": 14,
+      "integration": 11
     },
     "parallelization_guide": {
       "description": "Features with same depends_on can run in parallel",
@@ -954,7 +2926,14 @@
         "MOUSE-001, MOUSE-002, MOUSE-004 can run in parallel",
         "SCREEN-001, SCREEN-002, SCREEN-003, SCREEN-004 can run in parallel",
         "OCR-001, OCR-002 can run in parallel",
-        "BROWSER-002 through BROWSER-008 can run in parallel (all depend on BROWSER-001)"
+        "BROWSER-002 through BROWSER-008 can run in parallel (all depend on BROWSER-001)",
+        "SCRIPT-001, SCRIPT-002, SCRIPT-003 can run in parallel (all depend on SCRIPT-SKEL)",
+        "NLP-001, NLP-002, NLP-003 can run in parallel (all depend on NLP-SKEL)",
+        "DIRECTOR-001, DIRECTOR-009 can run in parallel (all depend on DIRECTOR-SKEL)",
+        "ORCH-001, ORCH-002, ORCH-005 can run in parallel (all depend on ORCH-SKEL)",
+        "EFFECTS-001, EFFECTS-004, EFFECTS-009, EFFECTS-013, EFFECTS-017, EFFECTS-020 can run in parallel",
+        "POST-001, POST-003, POST-008, POST-013, POST-017 can run in parallel",
+        "TMPL-001, TMPL-003 can run in parallel (all depend on TMPL-SKEL)"
       ]
     }
   }
