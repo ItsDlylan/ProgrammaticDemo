@@ -127,3 +127,68 @@ def parse_type(text: str) -> ActionIntent | None:
         )
 
     return None
+
+
+# Map common key names to pyautogui key names
+KEY_ALIASES: dict[str, str] = {
+    "enter": "enter",
+    "return": "enter",
+    "tab": "tab",
+    "escape": "escape",
+    "esc": "escape",
+    "space": "space",
+    "spacebar": "space",
+    "backspace": "backspace",
+    "delete": "delete",
+    "del": "delete",
+    "up": "up",
+    "down": "down",
+    "left": "left",
+    "right": "right",
+    "home": "home",
+    "end": "end",
+    "pageup": "pageup",
+    "pagedown": "pagedown",
+    "ctrl": "ctrl",
+    "control": "ctrl",
+    "alt": "alt",
+    "shift": "shift",
+    "cmd": "command",
+    "command": "command",
+    "win": "win",
+    "windows": "win",
+}
+
+
+def parse_key(text: str) -> ActionIntent | None:
+    """Parse a key press action from natural language text.
+
+    Handles phrases like:
+    - "press Enter"
+    - "hit Tab"
+    - "push Escape key"
+    - "press Ctrl+C"
+
+    Args:
+        text: Natural language description of a key press action.
+
+    Returns:
+        ActionIntent with action_type="press" and params containing "key",
+        or None if no key action could be parsed.
+    """
+    pattern = ACTION_PATTERNS["press"]
+    match = pattern.search(text.strip())
+
+    if match:
+        key_text = match.group(1).strip().lower()
+
+        # Map to pyautogui key name
+        key = KEY_ALIASES.get(key_text, key_text)
+
+        return ActionIntent(
+            action_type="press",
+            params={"key": key},
+            confidence=1.0,
+        )
+
+    return None
