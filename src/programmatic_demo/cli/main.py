@@ -6,7 +6,7 @@ from typing import Optional
 import typer
 
 from programmatic_demo import __version__
-from programmatic_demo.cli import recording, terminal, keyboard, mouse, browser, perception, script, action, run, video, effects, template
+from programmatic_demo.cli import recording, terminal, keyboard, mouse, browser, perception, script, action, run, video, effects, template, visual
 
 app = typer.Typer(
     name="pdemo",
@@ -76,6 +76,7 @@ app.add_typer(run.app, name="run")
 app.add_typer(video.app, name="video")
 app.add_typer(effects.app, name="effects")
 app.add_typer(template.app, name="template")
+app.add_typer(visual.app, name="visual")
 
 
 if __name__ == "__main__":

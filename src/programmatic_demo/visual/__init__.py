@@ -65,6 +65,25 @@ from programmatic_demo.visual.waypoint_generator import (
     estimate_pause_duration,
     estimate_scroll_duration,
 )
+from programmatic_demo.visual.smart_recorder import (
+    AsyncSmartDemoRecorder,
+    RecordingConfig,
+    RecordingProgress,
+    RecordingResult,
+    SmartDemoRecorder,
+    WaypointOverride,
+)
+from programmatic_demo.visual.preview_mode import (
+    AsyncWaypointPreviewer,
+    PreviewConfig,
+    PreviewReport,
+    WaypointPreview,
+    WaypointPreviewer,
+    approve_all_waypoints,
+    generate_preview_report,
+    preview_waypoints,
+    preview_waypoints_async,
+)
 
 __all__ = [
     # Enums
@@ -120,4 +139,21 @@ __all__ = [
     "AsyncWaypointGenerator",
     "estimate_scroll_duration",
     "estimate_pause_duration",
+    # Smart recorder
+    "SmartDemoRecorder",
+    "AsyncSmartDemoRecorder",
+    "RecordingConfig",
+    "RecordingProgress",
+    "RecordingResult",
+    "WaypointOverride",
+    # Preview mode
+    "WaypointPreviewer",
+    "AsyncWaypointPreviewer",
+    "PreviewConfig",
+    "PreviewReport",
+    "WaypointPreview",
+    "preview_waypoints",
+    "preview_waypoints_async",
+    "generate_preview_report",
+    "approve_all_waypoints",
 ]
