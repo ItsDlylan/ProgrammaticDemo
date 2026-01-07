@@ -14,6 +14,12 @@ from programmatic_demo.effects.click_effect import (
     create_click_effect,
 )
 from programmatic_demo.effects.compositor import Compositor, Effect, EffectConfig, EffectEvent, EffectType
+from programmatic_demo.effects.highlight import (
+    Highlight,
+    HighlightConfig,
+    HighlightRegion,
+    create_highlight,
+)
 from programmatic_demo.effects.mouse_tracker import MouseEvent, MouseTracker, get_mouse_tracker
 from programmatic_demo.effects.zoom_effect import (
     ZoomEffect,
@@ -30,6 +36,9 @@ __all__ = [
     "EffectConfig",
     "EffectEvent",
     "EffectType",
+    "Highlight",
+    "HighlightConfig",
+    "HighlightRegion",
     "MouseEvent",
     "MouseTracker",
     "RippleFrame",
@@ -37,6 +46,7 @@ __all__ = [
     "ZoomEffectConfig",
     "ZoomFrame",
     "create_click_effect",
+    "create_highlight",
     "create_zoom_effect",
     "get_mouse_tracker",
 ]
