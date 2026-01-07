@@ -10,6 +10,9 @@ This package contains the agent roles that collaborate to create demos:
 from programmatic_demo.agents.claude_client import ClaudeClient
 from programmatic_demo.agents.director import (
     Director,
+    RetryStrategy,
+    ScenePlan,
+    Step,
     compress_screenshot,
     detect_success,
     observation_to_prompt,
@@ -19,6 +22,9 @@ from programmatic_demo.agents.director import (
 __all__ = [
     "ClaudeClient",
     "Director",
+    "RetryStrategy",
+    "ScenePlan",
+    "Step",
     "compress_screenshot",
     "detect_success",
     "observation_to_prompt",

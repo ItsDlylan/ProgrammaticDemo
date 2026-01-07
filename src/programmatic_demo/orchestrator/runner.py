@@ -11,6 +11,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
+from programmatic_demo.agents.director import detect_success
 from programmatic_demo.orchestrator.dispatcher import get_dispatcher
 
 
@@ -148,7 +149,81 @@ class Runner:
         Returns:
             Result dict with success status and execution summary.
         """
-        raise NotImplementedError("run_script not yet implemented")
+        result = self.execute_demo(script)
+        return {
+            "success": result.success,
+            "scenes_completed": result.scenes_completed,
+            "scenes_total": result.scenes_total,
+            "video_path": result.video_path,
+            "duration": result.duration,
+        }
+
+    def execute_demo(self, script: Any) -> DemoResult:
+        """Execute a complete demo script.
+
+        Args:
+            script: Script model or dict containing scenes.
+                   Expected keys: 'scenes' (list), optionally 'name'.
+
+        Returns:
+            DemoResult with detailed execution outcome.
+        """
+        start_time = time.time()
+        self._state.is_running = True
+        self._state.current_scene = 0
+
+        # Extract scenes from script (handle dict or object)
+        if hasattr(script, "scenes"):
+            scenes = script.scenes
+        elif isinstance(script, dict):
+            scenes = script.get("scenes", [])
+        else:
+            scenes = []
+
+        scenes_total = len(scenes)
+        scenes_completed = 0
+
+        for i, scene in enumerate(scenes):
+            if not self._state.is_running:
+                return DemoResult(
+                    success=False,
+                    scenes_completed=scenes_completed,
+                    scenes_total=scenes_total,
+                    duration=time.time() - start_time,
+                )
+
+            self._state.current_scene = i
+            result = self.execute_scene(scene)
+
+            if result.success:
+                scenes_completed += 1
+                # Clean up after scene for isolation
+                self.scene_cleanup()
+            else:
+                return DemoResult(
+                    success=False,
+                    scenes_completed=scenes_completed,
+                    scenes_total=scenes_total,
+                    duration=time.time() - start_time,
+                )
+
+        return DemoResult(
+            success=True,
+            scenes_completed=scenes_completed,
+            scenes_total=scenes_total,
+            duration=time.time() - start_time,
+        )
+
+    def scene_cleanup(self) -> None:
+        """Clean up after a scene for isolation.
+
+        Resets temporary state and ensures clean slate
+        for the next scene execution.
+        """
+        # Reset step counter for next scene
+        self._state.current_step = 0
+        # Brief pause between scenes
+        time.sleep(0.2)
 
     def run_scene(self, scene: Any) -> dict[str, Any]:
         """Execute a single demo scene.
@@ -159,7 +234,75 @@ class Runner:
         Returns:
             Result dict with success status and scene outcome.
         """
-        raise NotImplementedError("run_scene not yet implemented")
+        result = self.execute_scene(scene)
+        return {
+            "success": result.success,
+            "steps_completed": result.steps_completed,
+            "steps_total": result.steps_total,
+            "duration": result.duration,
+            "error": result.error,
+        }
+
+    def execute_scene(self, scene: Any) -> SceneResult:
+        """Execute a single demo scene.
+
+        Args:
+            scene: Scene model or dict containing steps and goal.
+                   Expected keys: 'steps' (list), optionally 'name' and 'goal'.
+
+        Returns:
+            SceneResult with detailed execution outcome.
+        """
+        start_time = time.time()
+        self._state.is_running = True
+
+        # Extract steps from scene (handle dict or object)
+        if hasattr(scene, "steps"):
+            steps = scene.steps
+        elif isinstance(scene, dict):
+            steps = scene.get("steps", [])
+        else:
+            steps = []
+
+        steps_total = len(steps)
+        steps_completed = 0
+
+        for step in steps:
+            if not self._state.is_running:
+                # Runner was stopped
+                return SceneResult(
+                    success=False,
+                    steps_completed=steps_completed,
+                    steps_total=steps_total,
+                    error={"type": "stopped", "message": "Runner was stopped"},
+                    duration=time.time() - start_time,
+                )
+
+            # Convert step to dict if needed
+            step_dict = step.to_dict() if hasattr(step, "to_dict") else step
+
+            result = self.execute_step(step_dict)
+            self._state.current_step = steps_completed
+
+            if result.success:
+                steps_completed += 1
+            else:
+                # Step failed after retries
+                return SceneResult(
+                    success=False,
+                    steps_completed=steps_completed,
+                    steps_total=steps_total,
+                    error=result.error,
+                    duration=time.time() - start_time,
+                )
+
+        return SceneResult(
+            success=True,
+            steps_completed=steps_completed,
+            steps_total=steps_total,
+            error=None,
+            duration=time.time() - start_time,
+        )
 
     def execute_action(self, action: dict[str, Any]) -> dict[str, Any]:
         """Execute a single action.
@@ -171,6 +314,23 @@ class Runner:
             Result dict with success status and action outcome.
         """
         raise NotImplementedError("execute_action not yet implemented")
+
+    def verify_step(self, step: dict[str, Any], observation: dict[str, Any]) -> bool:
+        """Verify if a step's expected state matches the observation.
+
+        Args:
+            step: Step dict containing expected state criteria.
+            observation: Current observation dict.
+
+        Returns:
+            True if observation matches expected state, False otherwise.
+        """
+        # Get expected state from step's wait_for or expected fields
+        expected = step.get("wait_for") or step.get("expected") or {}
+        if not expected:
+            # No verification criteria, assume success
+            return True
+        return detect_success(observation, expected)
 
     def execute_step(self, step: dict[str, Any]) -> StepResult:
         """Execute a single step and return the result.
@@ -237,6 +397,71 @@ class Runner:
             error={"type": "max_retries", "message": "Maximum retries exceeded"},
             duration=duration,
             retries=retries,
+        )
+
+    def retry_step(
+        self,
+        step: dict[str, Any],
+        max_attempts: int = 3,
+        backoff_factor: float = 1.5,
+        initial_delay: float = 0.5,
+    ) -> StepResult:
+        """Execute a step with exponential backoff retry.
+
+        Args:
+            step: Step dict to execute.
+            max_attempts: Maximum number of attempts (default 3).
+            backoff_factor: Multiplier for delay between attempts (default 1.5).
+            initial_delay: Initial delay in seconds (default 0.5).
+
+        Returns:
+            StepResult with outcome after all attempts.
+        """
+        start_time = time.time()
+        delay = initial_delay
+        last_error = None
+
+        dispatcher = get_dispatcher()
+
+        for attempt in range(max_attempts):
+            try:
+                result = dispatcher.dispatch(step)
+
+                # Try to capture observation
+                observation = None
+                try:
+                    observation = self.observe()
+                except NotImplementedError:
+                    pass
+
+                if result.get("success", False):
+                    self._state.total_actions += 1
+                    return StepResult(
+                        success=True,
+                        observation=observation,
+                        error=None,
+                        duration=time.time() - start_time,
+                        retries=attempt,
+                    )
+
+                last_error = result.get("error", {"message": "Unknown failure"})
+
+            except Exception as e:
+                last_error = {"type": "exception", "message": str(e)}
+
+            # Wait before retry with exponential backoff
+            if attempt < max_attempts - 1:
+                time.sleep(delay)
+                delay *= backoff_factor
+
+        # All attempts exhausted
+        self._state.failed_actions += 1
+        return StepResult(
+            success=False,
+            observation=None,
+            error=last_error,
+            duration=time.time() - start_time,
+            retries=max_attempts - 1,
         )
 
     def observe(self) -> dict[str, Any]:

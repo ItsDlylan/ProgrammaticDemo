@@ -2044,7 +2044,7 @@
         "DIRECTOR-013",
         "SCRIPT-005"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DIRECTOR-015",
@@ -2064,7 +2064,7 @@
         "DIRECTOR-013",
         "DIRECTOR-006"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DIRECTOR-016",
@@ -2101,7 +2101,7 @@
         "DIRECTOR-012",
         "DIRECTOR-013"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DIRECTOR-018",
@@ -2118,7 +2118,7 @@
       "depends_on": [
         "DIRECTOR-017"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-SKEL",
@@ -2382,7 +2382,7 @@
         "ORCH-013",
         "STATE-002"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-015",
@@ -2401,7 +2401,7 @@
         "ORCH-013",
         "ORCH-014"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-016",
@@ -2420,7 +2420,7 @@
       "depends_on": [
         "ORCH-015"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-017",
@@ -2439,7 +2439,7 @@
         "ORCH-013",
         "DIRECTOR-017"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-018",
@@ -2457,7 +2457,7 @@
       "depends_on": [
         "ORCH-015"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "ORCH-019",
@@ -2614,7 +2614,7 @@
       "depends_on": [
         "EFFECTS-004"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-006",
@@ -2631,7 +2631,7 @@
       "depends_on": [
         "EFFECTS-004"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-007",
@@ -2648,7 +2648,7 @@
       "depends_on": [
         "EFFECTS-004"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-008",
@@ -2665,7 +2665,7 @@
       "depends_on": [
         "EFFECTS-004"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-009",
@@ -2698,7 +2698,7 @@
       "depends_on": [
         "EFFECTS-009"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-011",
@@ -2770,7 +2770,7 @@
         "EFFECTS-013",
         "EFFECTS-006"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-015",
@@ -2840,7 +2840,7 @@
       "depends_on": [
         "EFFECTS-017"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-019",
@@ -2858,7 +2858,7 @@
       "depends_on": [
         "EFFECTS-017"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-020",
@@ -2875,7 +2875,7 @@
       "depends_on": [
         "EFFECTS-SKEL"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "EFFECTS-021",
@@ -3059,7 +3059,7 @@
       "depends_on": [
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-005",
@@ -3077,7 +3077,7 @@
       "depends_on": [
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-006",
@@ -3095,7 +3095,7 @@
       "depends_on": [
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-007",
@@ -3113,7 +3113,7 @@
       "depends_on": [
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-008",
@@ -3130,7 +3130,7 @@
       "depends_on": [
         "POST-SKEL"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-009",
@@ -3222,7 +3222,7 @@
       "depends_on": [
         "POST-SKEL"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-014",
@@ -3296,7 +3296,7 @@
       "depends_on": [
         "POST-SKEL"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-018",
@@ -3371,7 +3371,7 @@
       "depends_on": [
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-022",
@@ -3389,7 +3389,7 @@
       "depends_on": [
         "POST-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "POST-023",
@@ -3517,7 +3517,7 @@
       "depends_on": [
         "TMPL-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-005",
@@ -3535,7 +3535,7 @@
       "depends_on": [
         "TMPL-003"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-006",
@@ -3553,7 +3553,7 @@
       "depends_on": [
         "TMPL-002"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-007",

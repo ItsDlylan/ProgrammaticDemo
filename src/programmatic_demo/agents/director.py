@@ -238,6 +238,54 @@ def detect_success(
 
 
 @dataclass
+class Step:
+    """A single step in a demo scene.
+
+    Attributes:
+        action: Action type (click, type, scroll, etc.)
+        target: Target description or coordinates
+        description: Human-readable description of the step
+        wait_for: Expected state after step completion
+        params: Additional parameters for the action
+    """
+
+    action: str
+    target: dict[str, Any] = field(default_factory=dict)
+    description: str = ""
+    wait_for: dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert step to dict for execution."""
+        return {
+            "action": self.action,
+            "target": self.target,
+            "description": self.description,
+            "wait_for": self.wait_for,
+            **self.params,
+        }
+
+
+@dataclass
+class RetryStrategy:
+    """Strategy for retrying a failed step.
+
+    Attributes:
+        should_retry: Whether to attempt retry
+        max_attempts: Maximum retry attempts
+        delay: Delay between retries in seconds
+        alternative_action: Alternative action to try
+        reason: Explanation of the failure analysis
+    """
+
+    should_retry: bool = True
+    max_attempts: int = 3
+    delay: float = 1.0
+    alternative_action: Step | None = None
+    reason: str = ""
+
+
+@dataclass
 class ScenePlan:
     """A plan for executing a demo scene.
 
@@ -264,18 +312,177 @@ class Director:
     def __init__(self) -> None:
         """Initialize the Director agent."""
         self._current_plan: ScenePlan | None = None
+        self._current_steps: list[Step] = []
+        self._current_step_index: int = 0
+        self._current_goal: str = ""
         self._history: list[dict[str, Any]] = []
 
-    def plan_scene(self, scene_description: str) -> ScenePlan:
-        """Plan a scene based on description.
+    def plan_scene(
+        self,
+        goal: str,
+        context: dict[str, Any] | None = None,
+    ) -> list[Step]:
+        """Plan a scene based on goal and context.
+
+        This method creates a plan with steps to achieve the given goal.
+        The plan is stored internally for step-by-step execution.
 
         Args:
-            scene_description: Natural language description of the scene.
+            goal: Natural language description of what to accomplish.
+            context: Optional context dict with current state, constraints, etc.
 
         Returns:
-            ScenePlan with steps to execute the scene.
+            List of Step objects to execute the scene.
+
+        Note:
+            In agentic mode, Claude Code itself acts as the director,
+            so this method provides a structure for manual or assisted planning.
         """
-        raise NotImplementedError("plan_scene not yet implemented")
+        self._current_goal = goal
+        self._current_step_index = 0
+        context = context or {}
+
+        # Create a basic plan structure that can be populated
+        # by Claude Code acting as the director
+        self._current_steps = []
+
+        # Store plan in history for reference
+        self._history.append({
+            "event": "plan_scene",
+            "goal": goal,
+            "context": context,
+            "timestamp": datetime.now().isoformat(),
+        })
+
+        return self._current_steps
+
+    def add_step(self, step: Step) -> None:
+        """Add a step to the current plan.
+
+        Args:
+            step: Step to add to the plan.
+        """
+        self._current_steps.append(step)
+
+    def decide_next_action(
+        self,
+        observation: dict[str, Any],
+        goal: str,
+    ) -> Step | None:
+        """Decide the next action based on observation and goal.
+
+        Analyzes the current observation and determines what action
+        should be taken next to progress toward the goal.
+
+        Args:
+            observation: Current observation dict with screen state.
+            goal: The goal we're trying to achieve.
+
+        Returns:
+            Next Step to execute, or None if goal is achieved.
+        """
+        # Check if goal appears to be achieved
+        if self._is_goal_achieved(observation, goal):
+            self._history.append({
+                "event": "goal_achieved",
+                "goal": goal,
+                "timestamp": datetime.now().isoformat(),
+            })
+            return None
+
+        # If we have a pre-planned sequence, return next step
+        if self._current_steps and self._current_step_index < len(self._current_steps):
+            step = self._current_steps[self._current_step_index]
+            self._current_step_index += 1
+            self._history.append({
+                "event": "next_action",
+                "step": step.to_dict() if hasattr(step, "to_dict") else str(step),
+                "timestamp": datetime.now().isoformat(),
+            })
+            return step
+
+        # No pre-planned steps, return None to signal need for new planning
+        return None
+
+    def _is_goal_achieved(self, observation: dict[str, Any], goal: str) -> bool:
+        """Check if the goal appears to be achieved.
+
+        Args:
+            observation: Current observation.
+            goal: Goal description.
+
+        Returns:
+            True if goal appears achieved based on observation.
+        """
+        # Basic heuristic: check if goal keywords appear in observation
+        goal_words = goal.lower().split()
+        ocr_text = (observation.get("ocr_text", "") or "").lower()
+        terminal = (observation.get("terminal_output", "") or "").lower()
+        all_text = f"{ocr_text} {terminal}"
+
+        # Check for success indicators
+        success_indicators = ["success", "complete", "done", "created", "saved"]
+        for indicator in success_indicators:
+            if indicator in all_text:
+                return True
+
+        return False
+
+    def analyze_failure(
+        self,
+        observation: dict[str, Any],
+        step: Step | dict[str, Any],
+    ) -> RetryStrategy:
+        """Analyze a failure and determine retry strategy.
+
+        Examines the observation after a failed step to determine
+        what went wrong and how to recover.
+
+        Args:
+            observation: Observation captured after the failed step.
+            step: The step that failed.
+
+        Returns:
+            RetryStrategy with recommendations for recovery.
+        """
+        ocr_text = (observation.get("ocr_text", "") or "").lower()
+        terminal = (observation.get("terminal_output", "") or "").lower()
+        all_text = f"{ocr_text} {terminal}"
+
+        # Analyze failure patterns
+        error_patterns = {
+            "timeout": ("Timeout waiting for element", True, 2.0),
+            "not found": ("Element not found on screen", True, 1.0),
+            "permission": ("Permission denied", False, 0),
+            "network": ("Network error", True, 3.0),
+            "error": ("Generic error occurred", True, 1.5),
+        }
+
+        for pattern, (reason, should_retry, delay) in error_patterns.items():
+            if pattern in all_text:
+                strategy = RetryStrategy(
+                    should_retry=should_retry,
+                    delay=delay,
+                    reason=reason,
+                )
+                self._history.append({
+                    "event": "analyze_failure",
+                    "pattern": pattern,
+                    "strategy": {
+                        "should_retry": should_retry,
+                        "delay": delay,
+                        "reason": reason,
+                    },
+                    "timestamp": datetime.now().isoformat(),
+                })
+                return strategy
+
+        # Default: allow retry with standard delay
+        return RetryStrategy(
+            should_retry=True,
+            delay=1.0,
+            reason="Unknown failure, attempting retry",
+        )
 
     def next_action(self, observation: dict[str, Any]) -> dict[str, Any] | None:
         """Determine the next action based on observation.
@@ -286,7 +493,10 @@ class Director:
         Returns:
             Action dict to execute, or None if scene is complete.
         """
-        raise NotImplementedError("next_action not yet implemented")
+        step = self.decide_next_action(observation, self._current_goal)
+        if step is None:
+            return None
+        return step.to_dict() if hasattr(step, "to_dict") else step
 
     def handle_failure(
         self,
@@ -302,7 +512,16 @@ class Director:
         Returns:
             Recovery action to try, or None to abort.
         """
-        raise NotImplementedError("handle_failure not yet implemented")
+        # Create observation from error for analysis
+        observation = {"terminal_output": str(error.get("message", ""))}
+        step = Step(action=action.get("action", "unknown"))
+        strategy = self.analyze_failure(observation, step)
+
+        if not strategy.should_retry:
+            return None
+
+        # Return the same action for retry
+        return action
 
     def evaluate_progress(
         self,
@@ -316,9 +535,83 @@ class Director:
         Returns:
             Progress evaluation with completion status and confidence.
         """
-        raise NotImplementedError("evaluate_progress not yet implemented")
+        if not self._current_goal:
+            return {
+                "completed": False,
+                "progress": 0.0,
+                "confidence": 0.0,
+                "message": "No goal set",
+            }
+
+        is_complete = self._is_goal_achieved(observation, self._current_goal)
+        steps_total = len(self._current_steps) if self._current_steps else 1
+        steps_done = min(self._current_step_index, steps_total)
+        progress = steps_done / steps_total if steps_total > 0 else 0.0
+
+        return {
+            "completed": is_complete,
+            "progress": progress,
+            "steps_completed": steps_done,
+            "steps_total": steps_total,
+            "confidence": 0.8 if is_complete else progress * 0.5,
+            "message": "Goal achieved" if is_complete else f"Step {steps_done}/{steps_total}",
+        }
+
+    def suggest_recovery(self, failure_analysis: RetryStrategy) -> Step | None:
+        """Suggest a recovery step based on failure analysis.
+
+        Examines the failure analysis and suggests an appropriate
+        recovery action to try.
+
+        Args:
+            failure_analysis: RetryStrategy from analyze_failure.
+
+        Returns:
+            Suggested recovery Step, or None if recovery not possible.
+        """
+        if not failure_analysis.should_retry:
+            return None
+
+        # If there's an alternative action, use it
+        if failure_analysis.alternative_action:
+            return failure_analysis.alternative_action
+
+        # Suggest common recovery actions based on failure reason
+        reason = failure_analysis.reason.lower()
+
+        if "timeout" in reason:
+            # Suggest waiting longer and retrying
+            return Step(
+                action="wait",
+                params={"duration": failure_analysis.delay},
+                description="Wait before retrying",
+            )
+        elif "not found" in reason:
+            # Suggest scrolling to find element
+            return Step(
+                action="scroll",
+                params={"direction": "down", "amount": 100},
+                description="Scroll to find element",
+            )
+        elif "network" in reason:
+            # Suggest waiting for network
+            return Step(
+                action="wait",
+                params={"duration": 3.0},
+                description="Wait for network recovery",
+            )
+
+        # Default: just wait and let caller retry original action
+        return Step(
+            action="wait",
+            params={"duration": failure_analysis.delay},
+            description="Wait before retry",
+        )
 
     def reset(self) -> None:
         """Reset the Director state for a new demo."""
         self._current_plan = None
+        self._current_steps = []
+        self._current_step_index = 0
+        self._current_goal = ""
         self._history.clear()

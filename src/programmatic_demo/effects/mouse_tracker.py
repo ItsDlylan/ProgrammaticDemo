@@ -168,6 +168,36 @@ class MouseTracker:
             events = [e for e in events if e.timestamp <= end_time]
         return [(e.x, e.y) for e in events]
 
+    def get_history(
+        self,
+        start_time: float | None = None,
+        end_time: float | None = None,
+    ) -> list[dict[str, Any]]:
+        """Get the mouse position timeline with timestamps.
+
+        Args:
+            start_time: Optional start time filter.
+            end_time: Optional end time filter.
+
+        Returns:
+            List of dicts with x, y, timestamp, and event_type.
+        """
+        events = self._events
+        if start_time is not None:
+            events = [e for e in events if e.timestamp >= start_time]
+        if end_time is not None:
+            events = [e for e in events if e.timestamp <= end_time]
+        return [
+            {
+                "x": e.x,
+                "y": e.y,
+                "timestamp": e.timestamp,
+                "event_type": e.event_type,
+                "button": e.button if e.event_type == "click" else None,
+            }
+            for e in events
+        ]
+
     def clear(self) -> None:
         """Clear all recorded events."""
         self._events.clear()

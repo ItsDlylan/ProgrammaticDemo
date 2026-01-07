@@ -7,6 +7,14 @@ This package provides visual effects that can be applied to demos:
 - Transitions between scenes
 """
 
+from programmatic_demo.effects.callout import (
+    Callout,
+    CalloutConfig,
+    CalloutEffect,
+    CalloutPosition,
+    create_callout,
+    create_tooltip,
+)
 from programmatic_demo.effects.click_effect import (
     ClickEffect,
     ClickEffectConfig,
@@ -29,6 +37,10 @@ from programmatic_demo.effects.zoom_effect import (
 )
 
 __all__ = [
+    "Callout",
+    "CalloutConfig",
+    "CalloutEffect",
+    "CalloutPosition",
     "ClickEffect",
     "ClickEffectConfig",
     "Compositor",
@@ -45,8 +57,10 @@ __all__ = [
     "ZoomEffect",
     "ZoomEffectConfig",
     "ZoomFrame",
+    "create_callout",
     "create_click_effect",
     "create_highlight",
+    "create_tooltip",
     "create_zoom_effect",
     "get_mouse_tracker",
 ]

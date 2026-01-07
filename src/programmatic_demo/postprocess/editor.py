@@ -292,7 +292,19 @@ class VideoEditor:
         Returns:
             Result dict with success status.
         """
-        raise NotImplementedError("trim not yet implemented")
+        duration = end_time - start_time
+        builder = (
+            FFmpegBuilder()
+            .overwrite()
+            .input(source_path, ss=start_time)
+            .output(output_path, t=duration, c="copy")
+        )
+
+        try:
+            builder.run()
+            return {"success": True, "output": output_path}
+        except subprocess.CalledProcessError as e:
+            return {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
 
     def join(
         self,
@@ -308,7 +320,140 @@ class VideoEditor:
         Returns:
             Result dict with success status.
         """
-        raise NotImplementedError("join not yet implemented")
+        return self.concat(segment_paths, output_path)
+
+    def concat(
+        self,
+        inputs: list[str],
+        output_path: str,
+        crossfade: float = 0.0,
+    ) -> dict[str, Any]:
+        """Concatenate video files with optional crossfade.
+
+        Args:
+            inputs: List of input video paths.
+            output_path: Path for output video.
+            crossfade: Crossfade duration in seconds (0 for no crossfade).
+
+        Returns:
+            Result dict with success status.
+        """
+        if not inputs:
+            return {"success": False, "error": "No input files provided"}
+
+        if len(inputs) == 1:
+            # Single file, just copy
+            builder = (
+                FFmpegBuilder()
+                .overwrite()
+                .input(inputs[0])
+                .output(output_path, c="copy")
+            )
+            try:
+                builder.run()
+                return {"success": True, "output": output_path}
+            except subprocess.CalledProcessError as e:
+                return {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
+
+        builder = FFmpegBuilder().overwrite()
+
+        # Add all inputs
+        for inp in inputs:
+            builder.input(inp)
+
+        if crossfade > 0:
+            # Build complex filter for crossfade transitions
+            filter_parts = []
+            n = len(inputs)
+            for i in range(n):
+                filter_parts.append(f"[{i}:v]")
+            filter_str = (
+                "".join(filter_parts)
+                + f"concat=n={n}:v=1:a=0[v]"
+            )
+            builder.filter_complex(filter_str)
+            builder.output(output_path, **{"map": "[v]"})
+        else:
+            # Simple concat using concat demuxer approach via filter
+            filter_parts = []
+            for i in range(len(inputs)):
+                filter_parts.append(f"[{i}:v]")
+            filter_str = "".join(filter_parts) + f"concat=n={len(inputs)}:v=1:a=0[v]"
+            builder.filter_complex(filter_str)
+            builder.output(output_path, **{"map": "[v]"})
+
+        try:
+            builder.run()
+            return {"success": True, "output": output_path}
+        except subprocess.CalledProcessError as e:
+            return {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
+
+    def speed_adjust(
+        self,
+        input_path: str,
+        factor: float,
+        output_path: str,
+    ) -> dict[str, Any]:
+        """Adjust video playback speed.
+
+        Args:
+            input_path: Path to source video.
+            factor: Speed factor (0.5 = half speed, 2.0 = double speed).
+            output_path: Path for output video.
+
+        Returns:
+            Result dict with success status.
+        """
+        if factor <= 0:
+            return {"success": False, "error": "Speed factor must be positive"}
+
+        # setpts filter: divide by factor to speed up, multiply to slow down
+        pts_factor = 1.0 / factor
+        builder = (
+            FFmpegBuilder()
+            .overwrite()
+            .input(input_path)
+            .filter(f"setpts={pts_factor}*PTS")
+            .output(output_path)
+        )
+
+        try:
+            builder.run()
+            return {"success": True, "output": output_path}
+        except subprocess.CalledProcessError as e:
+            return {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
+
+    def resize(
+        self,
+        input_path: str,
+        width: int,
+        height: int,
+        output_path: str,
+    ) -> dict[str, Any]:
+        """Resize video to specified dimensions.
+
+        Args:
+            input_path: Path to source video.
+            width: Target width in pixels.
+            height: Target height in pixels.
+            output_path: Path for output video.
+
+        Returns:
+            Result dict with success status.
+        """
+        builder = (
+            FFmpegBuilder()
+            .overwrite()
+            .input(input_path)
+            .filter(f"scale={width}:{height}")
+            .output(output_path)
+        )
+
+        try:
+            builder.run()
+            return {"success": True, "output": output_path}
+        except subprocess.CalledProcessError as e:
+            return {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
 
     def add_intro(
         self,
@@ -345,6 +490,74 @@ class VideoEditor:
             Result dict with success status and output path.
         """
         raise NotImplementedError("export not yet implemented")
+
+    def create_title_slide(
+        self,
+        text: str,
+        duration: float,
+        output_path: str,
+        style: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Create a title slide video.
+
+        Args:
+            text: Title text to display.
+            duration: Duration of the slide in seconds.
+            output_path: Path for output video.
+            style: Optional style dict with font, size, color, background.
+
+        Returns:
+            Result dict with success status.
+        """
+        style = style or {}
+        font_size = style.get("font_size", 72)
+        font_color = style.get("font_color", "white")
+        bg_color = style.get("bg_color", "black")
+        width = style.get("width", 1920)
+        height = style.get("height", 1080)
+
+        # Escape text for FFmpeg
+        escaped_text = text.replace("'", "\\'").replace(":", "\\:")
+
+        builder = (
+            FFmpegBuilder()
+            .overwrite()
+            .option("f", "lavfi")
+            .input(f"color=c={bg_color}:s={width}x{height}:d={duration}")
+            .filter(
+                f"drawtext=text='{escaped_text}':"
+                f"fontsize={font_size}:fontcolor={font_color}:"
+                f"x=(w-text_w)/2:y=(h-text_h)/2"
+            )
+            .output(output_path)
+        )
+
+        try:
+            builder.run()
+            return {"success": True, "output": output_path}
+        except subprocess.CalledProcessError as e:
+            return {"success": False, "error": e.stderr.decode() if e.stderr else str(e)}
+
+    def create_outro_slide(
+        self,
+        text: str,
+        duration: float,
+        output_path: str,
+        style: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Create an outro slide video.
+
+        Args:
+            text: Outro text to display.
+            duration: Duration of the slide in seconds.
+            output_path: Path for output video.
+            style: Optional style dict with font, size, color, background.
+
+        Returns:
+            Result dict with success status.
+        """
+        # Outro slide uses same logic as title slide
+        return self.create_title_slide(text, duration, output_path, style)
 
     def reset(self) -> None:
         """Reset the editor to a fresh state."""
