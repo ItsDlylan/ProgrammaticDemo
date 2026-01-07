@@ -54,6 +54,17 @@ from programmatic_demo.visual.section_detector import (
     SectionDetector,
     detect_section_type,
 )
+from programmatic_demo.visual.auto_scroll import (
+    AsyncAutoScroller,
+    AutoScroller,
+    ScrollResult,
+)
+from programmatic_demo.visual.waypoint_generator import (
+    AsyncWaypointGenerator,
+    WaypointGenerator,
+    estimate_pause_duration,
+    estimate_scroll_duration,
+)
 
 __all__ = [
     # Enums
@@ -100,4 +111,13 @@ __all__ = [
     "SectionDetector",
     "AsyncSectionDetector",
     "detect_section_type",
+    # Auto-scroll correction
+    "AutoScroller",
+    "AsyncAutoScroller",
+    "ScrollResult",
+    # Waypoint generation
+    "WaypointGenerator",
+    "AsyncWaypointGenerator",
+    "estimate_scroll_duration",
+    "estimate_pause_duration",
 ]

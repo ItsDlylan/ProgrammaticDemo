@@ -3953,7 +3953,7 @@
         "VISUAL-003",
         "BROWSER-001"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VISUAL-006",
@@ -3996,7 +3996,7 @@
         "VISUAL-002",
         "VISUAL-006"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "VISUAL-008",
