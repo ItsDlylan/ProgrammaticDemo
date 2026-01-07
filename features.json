@@ -1312,7 +1312,7 @@
       ],
       "files": ["src/programmatic_demo/nlp/parser.py"],
       "depends_on": ["NLP-008", "NLP-009", "NLP-010", "NLP-011", "NLP-012", "NLP-013"],
-      "passes": false
+      "passes": true
     },
     {
       "id": "NLP-015",

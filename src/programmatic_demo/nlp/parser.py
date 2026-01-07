@@ -182,6 +182,10 @@ def parse_key(text: str) -> ActionIntent | None:
     if match:
         key_text = match.group(1).strip().lower()
 
+        # Skip if this looks like a button click (contains "button")
+        if "button" in key_text:
+            return None
+
         # Map to pyautogui key name
         key = KEY_ALIASES.get(key_text, key_text)
 
@@ -324,3 +328,40 @@ def parse_navigate(text: str) -> ActionIntent | None:
         )
 
     return None
+
+
+def parse_action(text: str) -> ActionIntent | None:
+    """Parse natural language text into an ActionIntent.
+
+    Tries each action parser in order and returns the first successful match.
+    If multiple parsers could match, returns the one with highest confidence.
+
+    Args:
+        text: Natural language description of an action.
+
+    Returns:
+        ActionIntent with the parsed action, or None if no parser matched.
+    """
+    # List of parsers to try in order of specificity
+    # parse_key comes before parse_click because "press Enter" should be a key press,
+    # not a click (the click pattern also matches "press X")
+    parsers = [
+        parse_key,
+        parse_click,
+        parse_type,
+        parse_wait,
+        parse_scroll,
+        parse_navigate,
+    ]
+
+    best_result: ActionIntent | None = None
+
+    for parser in parsers:
+        result = parser(text)
+        if result is not None:
+            # Return first match (parsers are ordered by specificity)
+            # Could be extended to compare confidence scores
+            if best_result is None or result.confidence > best_result.confidence:
+                best_result = result
+
+    return best_result
